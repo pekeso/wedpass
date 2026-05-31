@@ -2,16 +2,17 @@
 
 ## Current Phase
 
-Phase 02 — Design System and shadcn/ui
+Phase 03 — Layout Components and Shell
 
 ## Completed Phases
 
 - Phase 00 — Repository Review and Planning (2026-05-31)
 - Phase 01 — Project Setup and Tooling (2026-05-31)
+- Phase 02 — Design System and shadcn/ui (2026-05-31)
 
 ## In Progress
 
-Phase 02 — Design System and shadcn/ui (not started).
+None.
 
 ## Blocked Items
 
@@ -27,6 +28,12 @@ None.
 - Three docs referenced in the original prompt are missing (`event_operations.md`, `staff_training_guide.md`, `beta_wedding_checklist.md`). Phase files reference the docs that do exist.
 - `create-next-app` was not used (cannot run in a non-empty directory); project was initialized manually with identical configuration.
 - `.gitattributes` added to normalize line endings to LF on Windows.
+- Tailwind v4 used (not v3) because shadcn@4.9.0 requires v4 CSS features (`@theme inline`, `@custom-variant`).
+- WedPass design tokens defined in `@theme` block in `globals.css` (Tailwind v4 CSS-first approach).
+- `tailwind.config.ts` kept as reference documentation but not processed by v4 (not referenced via `@config`).
+- shadcn "base-nova" style used (default for shadcn@4.9.0), which uses Base UI primitives instead of Radix UI.
+- `sonner` used instead of `toast` (toast component not available in base-nova registry).
+- `form` component created manually (not in base-nova registry); wraps react-hook-form with shadcn Label.
 
 ## Test Results
 
@@ -43,7 +50,7 @@ None.
 
 ## Next Phase
 
-Phase 02 — Design System and shadcn/ui
+Phase 03 — Layout Components and Shell
 
 ## Last Updated
 
@@ -115,6 +122,34 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Tests Run:** npm run lint, npx tsc --noEmit, npm run build, npm run dev
 - **Test Results:** All pass. Build: 23 routes compiled. Lint: zero errors. tsc: zero errors. Dev: started on port 3001.
 - **Manual QA:** All 23 routes present in build output. TypeScript strict mode confirmed in tsconfig.json.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** chore: initialize wedpass project shell
+- **Git Commit Hash:** d68b5d6
+
+---
+
+### Phase 02 — Design System and shadcn/ui
+- **Completed:** 2026-05-31
+- **Files Created:**
+  - tailwind.config.ts (reference for WedPass tokens; not processed by v4 without @config)
+  - postcss.config.mjs (uses @tailwindcss/postcss for v4)
+  - components.json (shadcn config, style: base-nova)
+  - src/lib/utils.ts (cn helper)
+  - src/components/ui/ — 19 components: alert, badge, button, card, checkbox, dialog, dropdown-menu, form, input, label, progress, select, separator, sheet, skeleton, sonner, table, tabs, textarea
+- **Files Modified:**
+  - src/app/globals.css (Tailwind v4 import, @theme inline for shadcn vars, @theme for WedPass tokens, shadcn CSS variables)
+  - src/app/layout.tsx (Inter + Playfair Display via next/font/google)
+  - src/app/(public)/page.tsx (uses Tailwind tokens + shadcn Button for visual verification)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npm run build
+- **Test Results:** lint — PASS (zero errors). build — PASS (23 routes compiled).
+- **Manual QA:** Build confirms Tailwind classes compile. WedPass tokens (navy, champagne, ivory, blush, terracotta, success, warning, danger, sync, offline) defined. shadcn components in src/components/ui/. Fonts configured via next/font.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Tailwind version note:** Tailwind v4 used (shadcn@4.9.0 requires v4 CSS features). Tokens defined in `@theme` in globals.css.
+- **shadcn style note:** base-nova style (uses Base UI, not Radix UI). sonner used instead of toast. form created manually.
+- **Git Commit Message:** chore: configure tailwind shadcn and design tokens
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** chore: initialize wedpass project shell
