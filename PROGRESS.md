@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 14B — Check-In Confirmation UI
 Phase 15 — Check-In Sync Endpoint
 
 ## Completed Phases
 
+- Phase 14B — Check-In Confirmation UI (2026-06-01)
 - Phase 00 — Repository Review and Planning (2026-05-31)
 - Phase 01 — Project Setup and Tooling (2026-05-31)
 - Phase 02 — Design System and shadcn/ui (2026-05-31)
@@ -81,6 +81,28 @@ Phase 10 — Event Mode Preparation
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: implement staff local checkin transaction
+
+---
+
+### Phase 14B — Staff Check-In UI
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/hooks/use-recent-checkins.ts (reads last N checkinQueue items sorted by createdAt desc, polls every 2s)
+  - src/hooks/use-sync-status.ts (pendingCount + lastSyncedAt + isOnline + syncState, polls every 3s)
+  - src/components/staff/scan-action-card.tsx (Scan QR h-16 + Search Guest h-14 action buttons)
+  - src/components/staff/guest-checkin-card.tsx (guest name/phone/allowedGuests, check-in CTA h-16 green, already-checked-in warning)
+  - src/components/staff/recent-checkins-list.tsx (maps queue items, resolves guest names from IndexedDB)
+- **Files Modified:**
+  - src/app/staff/[weddingId]/checkin/page.tsx (SyncStatusBar + ScanActionCard + RecentCheckinsList + offline banner)
+  - src/app/staff/[weddingId]/checkin/[guestId]/page.tsx (loads guest from IndexedDB, calls checkInGuestLocally, shows success/already-checked-in result screen)
+  - src/app/staff/[weddingId]/sync/page.tsx (pendingCount + lastSyncedAt + Sync Now disabled button)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** Full offline check-in flow: download snapshot → go offline → search guest → confirmation screen shows guest name, phone, allowedGuests → tap Check In → success screen shows checkmark, guest name, check-in time, Next Guest button → pending count in SyncStatusBar increments → page refresh preserves data. Already-checked-in guest shows warning state with original check-in time. SyncStatusBar shows real pendingCount via useSyncStatus polling. RecentCheckinsList resolves guest names from IndexedDB per item.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add staff checkin ui
 
 ---
 
