@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum UserRole {
+  ORGANIZER
+}
+
+enum WeddingStatus {
+  DRAFT
+  ACTIVE
+  EVENT_MODE
+  COMPLETED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaStatus {
+  UPLOADED
+  APPROVED
+  HIDDEN
+  DELETED
+}
+
+enum CheckinSyncStatus {
+  ACCEPTED
+  DUPLICATE
+  REJECTED
+}
+
+enum StaffDeviceStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum UploadSource {
+  GUEST
+  ORGANIZER
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  passwordHash String
+  fullName    String
+  role        UserRole  @default(ORGANIZER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  weddings    Wedding[]
+
+  @@map("users")
+}
+
+model Wedding {
+  id             String        @id @default(uuid())
+  organizerId    String
+  organizer      User          @relation(fields: [organizerId], references: [id])
+  name           String
+  coupleNames    String?
+  eventDate      DateTime?
+  location       String?
+  country        String?
+  slug           String        @unique
+  coverImageUrl  String?
+  status         WeddingStatus @default(DRAFT)
+  galleryEnabled Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  completedAt    DateTime?
+
+  guests       Guest[]
+  snapshots    WeddingSnapshot[]
+  staffDevices StaffDevice[]
+  checkIns     CheckIn[]
+  mediaUploads MediaUpload[]
+  syncLogs     SyncLog[]
+  feedback     BetaFeedback[]
+
+  @@index([organizerId])
+  @@index([status])
+  @@map("weddings")
+}
+
+model Guest {
+  id                    String    @id @default(uuid())
+  weddingId             String
+  wedding               Wedding   @relation(fields: [weddingId], references: [id])
+  fullName              String
+  phoneNumber           String?
+  email                 String?
+  numberOfAllowedGuests Int       @default(1)
+  qrToken               String    @unique
+  isCheckedIn           Boolean   @default(false)
+  checkedInAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+
+  snapshotGuests SnapshotGuest[]
+  checkIns       CheckIn[]
+  mediaUploads   MediaUpload[]
+
+  @@index([weddingId])
+  @@index([phoneNumber])
+  @@index([fullName])
+  @@index([weddingId, isCheckedIn])
+  @@map("guests")
+}
+
+model WeddingSnapshot {
+  id              String    @id @default(uuid())
+  weddingId       String
+  wedding         Wedding   @relation(fields: [weddingId], references: [id])
+  version         Int
+  isActive        Boolean   @default(false)
+  guestCount      Int
+  createdByUserId String?
+  createdAt       DateTime  @default(now())
+
+  snapshotGuests SnapshotGuest[]
+  checkIns       CheckIn[]
+  syncLogs       SyncLog[]
+
+  @@unique([weddingId, version])
+  @@index([weddingId])
+  @@index([weddingId, isActive])
+  @@map("wedding_snapshots")
+}
+
+model SnapshotGuest {
+  id                    String          @id @default(uuid())
+  snapshotId            String
+  snapshot              WeddingSnapshot @relation(fields: [snapshotId], references: [id])
+  weddingId             String
+  guestId               String
+  guest                 Guest           @relation(fields: [guestId], references: [id])
+  fullName              String
+  phoneNumber           String?
+  email                 String?
+  numberOfAllowedGuests Int             @default(1)
+  qrToken               String
+  createdAt             DateTime        @default(now())
+
+  @@unique([snapshotId, guestId])
+  @@index([snapshotId])
+  @@index([weddingId])
+  @@index([guestId])
+  @@index([qrToken])
+  @@map("snapshot_guests")
+}
+
+model StaffDevice {
+  id              String            @id @default(uuid())
+  weddingId       String
+  wedding         Wedding           @relation(fields: [weddingId], references: [id])
+  label           String?
+  deviceTokenHash String?
+  status          StaffDeviceStatus @default(ACTIVE)
+  lastSeenAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  revokedAt       DateTime?
+
+  checkIns CheckIn[]
+  syncLogs SyncLog[]
+
+  @@index([weddingId])
+  @@index([weddingId, status])
+  @@map("staff_devices")
+}
+
+model CheckIn {
+  id            String            @id @default(uuid())
+  weddingId     String
+  wedding       Wedding           @relation(fields: [weddingId], references: [id])
+  guestId       String
+  guest         Guest             @relation(fields: [guestId], references: [id])
+  snapshotId    String
+  snapshot      WeddingSnapshot   @relation(fields: [snapshotId], references: [id])
+  staffDeviceId String?
+  staffDevice   StaffDevice?      @relation(fields: [staffDeviceId], references: [id])
+  checkedInAt   DateTime
+  createdAt     DateTime          @default(now())
+  sourceQueueId String?
+  isDuplicate   Boolean           @default(false)
+  duplicateOfId String?
+  syncStatus    CheckinSyncStatus @default(ACCEPTED)
+
+  @@index([weddingId])
+  @@index([guestId])
+  @@index([snapshotId])
+  @@index([staffDeviceId])
+  @@index([checkedInAt])
+  @@unique([staffDeviceId, sourceQueueId])
+  @@map("check_ins")
+}
+
+model MediaUpload {
+  id                String       @id @default(uuid())
+  weddingId         String
+  wedding           Wedding      @relation(fields: [weddingId], references: [id])
+  uploadedByGuestId String?
+  uploadedByGuest   Guest?       @relation(fields: [uploadedByGuestId], references: [id])
+  uploadedByName    String?
+  mediaType         MediaType
+  uploadSource      UploadSource @default(GUEST)
+  fileKey           String       @unique
+  fileUrl           String?
+  thumbnailKey      String?
+  thumbnailUrl      String?
+  fileSizeBytes     BigInt
+  durationSeconds   Int?
+  mimeType          String
+  originalFileName  String?
+  status            MediaStatus  @default(UPLOADED)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  hiddenAt          DateTime?
+  deletedAt         DateTime?
+
+  @@index([weddingId])
+  @@index([weddingId, mediaType])
+  @@index([weddingId, status])
+  @@index([createdAt])
+  @@map("media_uploads")
+}
+
+model SyncLog {
+  id              String           @id @default(uuid())
+  weddingId       String
+  wedding         Wedding          @relation(fields: [weddingId], references: [id])
+  staffDeviceId   String?
+  staffDevice     StaffDevice?     @relation(fields: [staffDeviceId], references: [id])
+  snapshotId      String?
+  snapshot        WeddingSnapshot? @relation(fields: [snapshotId], references: [id])
+  payloadCount    Int
+  acceptedCount   Int              @default(0)
+  duplicateCount  Int              @default(0)
+  rejectedCount   Int              @default(0)
+  errorCount      Int              @default(0)
+  syncStartedAt   DateTime
+  syncCompletedAt DateTime?
+  createdAt       DateTime         @default(now())
+
+  @@index([weddingId])
+  @@index([staffDeviceId])
+  @@index([createdAt])
+  @@map("sync_logs")
+}
+
+model BetaFeedback {
+  id              String    @id @default(uuid())
+  weddingId       String?
+  wedding         Wedding?  @relation(fields: [weddingId], references: [id])
+  userId          String?
+  rating          Int?
+  workedWell      String?
+  confusing       String?
+  offlineFeedback String?
+  mediaFeedback   String?
+  generalComment  String?
+  createdAt       DateTime  @default(now())
+
+  @@index([weddingId])
+  @@index([userId])
+  @@map("beta_feedback")
+}

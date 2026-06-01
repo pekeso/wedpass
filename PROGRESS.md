@@ -2,13 +2,14 @@
 
 ## Current Phase
 
-Phase 04 — Database Schema and Prisma
+Phase 05 — Authentication
 
 ## Completed Phases
 
 - Phase 00 — Repository Review and Planning (2026-05-31)
 - Phase 01 — Project Setup and Tooling (2026-05-31)
 - Phase 02 — Design System and shadcn/ui (2026-05-31)
+- Phase 04 — Database Schema and Prisma (2026-06-01)
 
 ## In Progress
 
@@ -50,7 +51,7 @@ None.
 
 ## Next Phase
 
-Phase 04 — Database Schema and Prisma
+Phase 05 — Authentication
 
 ## Last Updated
 
@@ -189,3 +190,27 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Blocked Items:** None.
 - **Git Commit Message:** chore: initialize wedpass project shell
 - **Git Commit Hash:** d68b5d6
+
+---
+
+### Phase 04 — Database Schema and Prisma
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - prisma/schema.prisma (10 models, 7 enums, all indexes)
+  - prisma/migrations/20260601135139_init/migration.sql
+  - prisma/migrations/20260601135305_add_checkin_partial_index/migration.sql
+  - prisma/seed.ts (1 organizer, 1 wedding, 10 guests)
+  - prisma.config.ts (datasource URL, migrations path, seed command)
+  - src/lib/db/prisma.ts (PrismaClient singleton with PrismaPg adapter)
+- **Files Modified:**
+  - package.json (added prisma, @prisma/client, @prisma/adapter-pg, pg, bcrypt, dotenv, tsx, ts-node)
+  - eslint.config.mjs (ignore src/generated/**)
+  - PROGRESS.md
+- **Tests Run:** npx prisma migrate dev, npx prisma db seed, npx tsc --noEmit, npm run lint
+- **Test Results:** All pass. Migration: 2 migrations applied. Seed: 1 user, 1 wedding, 10 guests created. tsc: zero errors. lint: zero errors.
+- **Manual QA:** All 10 models in schema.prisma. All 7 enums defined. Partial unique index on check_ins(guestId) WHERE isDuplicate=false applied. Prisma client singleton is the only Prisma import path. src/generated/prisma gitignored.
+- **Prisma version note:** Prisma 7.8.0. Requires driver adapter (PrismaPg) — no longer accepts bare URL in PrismaClient constructor. Generated client outputs to src/generated/prisma/. Column names are camelCase in DB (no @map on individual fields).
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add prisma database foundation
+- **Git Commit Hash:** TBD
