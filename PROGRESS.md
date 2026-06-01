@@ -2,7 +2,8 @@
 
 ## Current Phase
 
-Phase 11 — Event Mode Preparation
+Phase 13A — Local Guest Search
+Phase 18 — Media Upload Signed URL Flow
 
 ## Completed Phases
 
@@ -16,6 +17,8 @@ Phase 11 — Event Mode Preparation
 - Phase 08 — CSV Import and QR Generation (2026-06-01)
 - Phase 09 — Offline IndexedDB Foundation (2026-06-01)
 - Phase 10 — Staff Device Access Foundation (2026-06-01)
+- Phase 11 — Event Mode and Snapshot Creation (2026-06-01)
+- Phase 12 — Offline Pack Download (2026-06-01)
 
 ## In Progress
 
@@ -62,6 +65,48 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-01
+
+---
+
+### Phase 12 — Offline Pack Download
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/app/api/v1/staff/weddings/[weddingId]/snapshot/route.ts (GET, staff token auth)
+  - src/lib/offline/checkins/snapshot-download.ts (downloadAndSaveSnapshot — atomic Dexie transaction)
+  - src/hooks/use-offline-pack-status.ts (reads IndexedDB metadata, returns isReady/guestCount/lastDownloadedAt/snapshotId)
+  - src/components/staff/offline-pack-status-card.tsx (status card: not-prepared / downloading / ready / failed)
+  - src/app/staff/[weddingId]/download/page.tsx (full offline pack download UI)
+- **Files Modified:**
+  - src/modules/weddings/snapshot.repository.ts (added findActiveSnapshotWithGuests)
+  - src/modules/weddings/event-mode.service.ts (added EventModeSnapshotNotFoundError + getSnapshotForStaffDownload — fetches wedding + snapshot + guests + updates lastSeenAt)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Snapshot endpoint validates staff token via requireStaffAuth (ACTIVE device only). Response includes wedding info, snapshot metadata, guests array, and staffDeviceId. IndexedDB transaction atomically clears old guests for the wedding and bulk-adds new ones before saving metadata. Metadata stored: deviceId, weddingId, snapshotId, snapshotVersion, staffDeviceId, lastSnapshotDownloadedAt, guestCount. Hook reads IndexedDB on mount and on refetch. Download page shows all 4 states (not-prepared, downloading, ready, failed). Start Check-In button appears after ready state.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add offline pack download
+
+---
+
+### Phase 11 — Event Mode and Snapshot Creation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/modules/weddings/snapshot.repository.ts (findActiveSnapshot, findLatestSnapshotVersion, createSnapshotWithGuests — atomic Prisma transaction)
+  - src/modules/weddings/event-mode.service.ts (getReadinessChecks, enableEventMode, getActiveSnapshotForOrganizer + error classes)
+  - src/app/api/v1/weddings/[weddingId]/event-mode/readiness/route.ts (GET)
+  - src/app/api/v1/weddings/[weddingId]/event-mode/enable/route.ts (POST — requires confirmGuestListLock: true)
+  - src/app/api/v1/weddings/[weddingId]/snapshot/active/route.ts (GET)
+  - src/lib/api/event-mode-client.ts (getEventModeReadiness, enableEventMode, getActiveSnapshot)
+- **Files Modified:**
+  - src/app/dashboard/wedding/[weddingId]/event-mode/page.tsx (readiness checklist, enable flow, success state with snapshot summary)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Snapshot creation is atomic (Prisma transaction) — all guests copied, wedding status set to EVENT_MODE in one transaction. Readiness checks verified: wedding_details, guest_list, qr_codes, staff_access. Guest add/edit/delete already enforced by EventModeLockedError in guests.service.ts. Event Mode page shows per-item pass/fail badges. Enable button disabled until all checks pass. Confirmation dialog guards the enable action. Success state shows snapshot version, guest count, and next-steps guidance.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add event mode and snapshot creation
 
 ---
 
