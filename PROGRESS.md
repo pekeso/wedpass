@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 05 — Authentication
+Phase 06 — Wedding Creation
 
 ## Completed Phases
 
@@ -10,6 +10,7 @@ Phase 05 — Authentication
 - Phase 01 — Project Setup and Tooling (2026-05-31)
 - Phase 02 — Design System and shadcn/ui (2026-05-31)
 - Phase 04 — Database Schema and Prisma (2026-06-01)
+- Phase 05 — Auth Foundation (2026-06-01)
 
 ## In Progress
 
@@ -51,7 +52,7 @@ None.
 
 ## Next Phase
 
-Phase 05 — Authentication
+Phase 06 — Wedding Creation
 
 ## Last Updated
 
@@ -213,4 +214,39 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: add prisma database foundation
+- **Git Commit Hash:** TBD
+
+---
+
+### Phase 05 — Auth Foundation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/lib/auth/password.ts (bcrypt hash and compare, cost factor 12)
+  - src/lib/auth/jwt.ts (signToken and verifyToken using JWT_SECRET + JWT_EXPIRES_IN)
+  - src/lib/auth/require-auth.ts (auth guard: reads Bearer token, verifies JWT, throws UnauthorizedError)
+  - src/modules/auth/auth.schemas.ts (registerSchema, loginSchema, inferred types)
+  - src/modules/auth/auth.types.ts (CreateUserData interface)
+  - src/modules/auth/auth.dto.ts (UserDTO, AuthResponseDTO, MeResponseDTO)
+  - src/modules/auth/auth.repository.ts (findUserByEmail, createUser, findUserById, updateLastLogin)
+  - src/modules/auth/auth.service.ts (registerOrganizer, loginOrganizer, getCurrentUser + error classes)
+  - src/app/api/v1/auth/register/route.ts (POST)
+  - src/app/api/v1/auth/login/route.ts (POST)
+  - src/app/api/v1/auth/logout/route.ts (POST)
+  - src/app/api/v1/auth/me/route.ts (GET, protected)
+  - src/stores/auth-store.ts (Zustand persist store with hydration tracking)
+  - src/lib/api/auth-client.ts (fetch wrappers for auth endpoints)
+  - src/components/layout/auth-guard.tsx (client-side redirect guard for dashboard)
+- **Files Modified:**
+  - src/app/(public)/login/page.tsx (React Hook Form + Zod, redirects to /dashboard)
+  - src/app/(public)/register/page.tsx (React Hook Form + Zod, redirects to /dashboard)
+  - src/app/dashboard/layout.tsx (wrapped in AuthGuard)
+  - package.json (added jsonwebtoken, zustand, @types/jsonwebtoken)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit, npm run build
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors). build — PASS (27 routes compiled, all 4 auth API routes present).
+- **Manual QA:** Auth API routes visible in build output. Login and register pages render. Dashboard layout protected by AuthGuard. Passwords hashed with bcrypt cost factor 12. JWT signed with HS256 using JWT_SECRET env var. Safe login error message — does not hint which field is wrong.
+- **Security notes:** Passwords never stored plaintext. JWT_SECRET required at runtime or error thrown. Login error is generic "Invalid email or password" regardless of which field is wrong. No Prisma calls in route handlers.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement organizer authentication
 - **Git Commit Hash:** TBD
