@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 06 — Wedding Creation
+Phase 07 — Guest Management
 
 ## Completed Phases
 
@@ -11,6 +11,7 @@ Phase 06 — Wedding Creation
 - Phase 02 — Design System and shadcn/ui (2026-05-31)
 - Phase 04 — Database Schema and Prisma (2026-06-01)
 - Phase 05 — Auth Foundation (2026-06-01)
+- Phase 06 — Wedding CRUD Foundation (2026-06-01)
 
 ## In Progress
 
@@ -52,7 +53,7 @@ None.
 
 ## Next Phase
 
-Phase 06 — Wedding Creation
+Phase 07 — Guest Management
 
 ## Last Updated
 
@@ -214,6 +215,36 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: add prisma database foundation
+- **Git Commit Hash:** TBD
+
+---
+
+### Phase 06 — Wedding CRUD Foundation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/modules/weddings/weddings.schemas.ts
+  - src/modules/weddings/weddings.types.ts
+  - src/modules/weddings/weddings.dto.ts
+  - src/modules/weddings/weddings.repository.ts
+  - src/modules/weddings/weddings.service.ts
+  - src/lib/utils/slug.ts
+  - src/lib/api/weddings-client.ts
+  - src/app/api/v1/weddings/route.ts (GET list, POST create)
+  - src/app/api/v1/weddings/[weddingId]/route.ts (GET, PATCH)
+  - src/components/shared/query-provider.tsx (TanStack Query QueryClientProvider)
+  - src/app/dashboard/page.tsx (wedding list page)
+- **Files Modified:**
+  - src/app/dashboard/wedding/new/page.tsx (create wedding form)
+  - src/app/dashboard/wedding/[weddingId]/page.tsx (wedding overview with stat placeholders + nav)
+  - src/app/layout.tsx (wrapped with QueryProvider)
+  - package.json (added @tanstack/react-query)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit, npm run build
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors). build — PASS (30 routes).
+- **Manual QA:** All 4 wedding API routes visible in build output. Dashboard list, create form, and overview pages compile. Service/repository separation enforced. Ownership checked on every request. Slug auto-generated with hex suffix for uniqueness. Completed weddings blocked from editing. Cross-organizer access returns 403.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add wedding crud foundation
 - **Git Commit Hash:** TBD
 
 ---
