@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 07 — Guest Management
+Phase 08 — CSV Guest Import
 
 ## Completed Phases
 
@@ -53,7 +53,7 @@ None.
 
 ## Next Phase
 
-Phase 07 — Guest Management
+Phase 08 — CSV Guest Import
 
 ## Last Updated
 
@@ -245,6 +245,36 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: add wedding crud foundation
+- **Git Commit Hash:** TBD
+
+---
+
+### Phase 07 — Guest Management
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/lib/utils/qr-token.ts (generateQrToken using two crypto.randomUUID())
+  - src/modules/guests/guests.schemas.ts (createGuestSchema, updateGuestSchema, listGuestsQuerySchema)
+  - src/modules/guests/guests.types.ts (CreateGuestData, GuestFilters)
+  - src/modules/guests/guests.dto.ts (GuestDTO, GuestListItemDTO, GuestResponseDTO, ListGuestsResponseDTO)
+  - src/modules/guests/guests.repository.ts (createGuest, findGuestsByWedding, findGuestByWeddingAndId, updateGuest, softDeleteGuest, countGuestsByWedding)
+  - src/modules/guests/guests.service.ts (addGuest, listGuests, updateGuest, deleteGuest + error classes incl. EventModeLockedError)
+  - src/app/api/v1/weddings/[weddingId]/guests/route.ts (GET list with search+pagination, POST create)
+  - src/app/api/v1/weddings/[weddingId]/guests/[guestId]/route.ts (PATCH update, DELETE soft-delete)
+  - src/app/api/v1/weddings/[weddingId]/stats/route.ts (GET basic stats: totalGuests, checkedInGuests, totalMediaUploads)
+  - src/lib/api/guests-client.ts (listGuests, createGuest, updateGuest, deleteGuest)
+  - src/components/guests/guest-form.tsx (React Hook Form + Zod)
+  - src/components/guests/guest-table.tsx (shadcn Table, desktop view)
+  - src/components/guests/guest-card.tsx (mobile card view)
+- **Files Modified:**
+  - src/app/dashboard/wedding/[weddingId]/guests/page.tsx (full guest management UI)
+  - src/app/dashboard/wedding/[weddingId]/page.tsx (real guest count via stats query)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** All guest API routes created. Event Mode lock enforced (EVENT_MODE / COMPLETED weddings reject edits). Soft delete uses deletedAt. All repository queries scoped by weddingId. QR tokens generated server-side (64 hex chars). Wedding overview shows live guest count.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement guest management
 - **Git Commit Hash:** TBD
 
 ---

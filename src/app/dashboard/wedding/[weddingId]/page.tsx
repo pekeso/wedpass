@@ -13,7 +13,24 @@ import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
 import { useAuthStore } from "@/stores/auth-store"
 import { getWedding } from "@/lib/api/weddings-client"
+import type { ApiResponse } from "@/types/api"
 import type { WeddingStatus } from "@/generated/prisma/enums"
+
+interface WeddingStats {
+  totalGuests: number
+  checkedInGuests: number
+  totalMediaUploads: number
+}
+
+async function getWeddingStats(
+  weddingId: string,
+  accessToken: string
+): Promise<ApiResponse<WeddingStats>> {
+  const res = await fetch(`/api/v1/weddings/${weddingId}/stats`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return res.json()
+}
 
 function weddingStatusBadge(status: WeddingStatus) {
   switch (status) {
@@ -52,6 +69,17 @@ export default function WeddingOverviewPage({
       if (!accessToken) throw new Error("Not authenticated")
       const res = await getWedding(weddingId, accessToken)
       if (!res.success) throw new Error(res.error.message)
+      return res.data
+    },
+    enabled: !!accessToken,
+  })
+
+  const { data: statsData } = useQuery({
+    queryKey: ["wedding-stats", weddingId],
+    queryFn: async () => {
+      if (!accessToken) throw new Error("Not authenticated")
+      const res = await getWeddingStats(weddingId, accessToken)
+      if (!res.success) return null
       return res.data
     },
     enabled: !!accessToken,
@@ -101,9 +129,9 @@ export default function WeddingOverviewPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard title="Total Guests" value={0} icon={<Users className="size-4" />} />
-        <StatCard title="Checked In" value={0} variant="success" icon={<CheckSquare className="size-4" />} />
-        <StatCard title="Media Uploads" value={0} icon={<Camera className="size-4" />} />
+        <StatCard title="Total Guests" value={statsData?.totalGuests ?? 0} icon={<Users className="size-4" />} />
+        <StatCard title="Checked In" value={statsData?.checkedInGuests ?? 0} variant="success" icon={<CheckSquare className="size-4" />} />
+        <StatCard title="Media Uploads" value={statsData?.totalMediaUploads ?? 0} icon={<Camera className="size-4" />} />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
