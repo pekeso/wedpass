@@ -39,3 +39,25 @@ export interface ListGuestsResponseDTO {
 export interface DeleteGuestResponseDTO {
   deleted: boolean
 }
+
+export interface QrDataItemDTO {
+  guestId: string
+  fullName: string
+  qrToken: string
+  qrPayload: string
+}
+
+export interface AllQrDataResponseDTO {
+  items: QrDataItemDTO[]
+}
+
+export interface ImportGuestError {
+  row: number
+  message: string
+}
+
+export interface ImportGuestsResponseDTO {
+  importedCount: number
+  failedCount: number
+  errors: ImportGuestError[]
+}

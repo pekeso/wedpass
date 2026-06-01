@@ -79,3 +79,19 @@ export async function countGuestsByWedding(weddingId: string) {
     where: { weddingId, deletedAt: null },
   })
 }
+
+export async function getPhoneNumbersByWedding(weddingId: string): Promise<string[]> {
+  const guests = await prisma.guest.findMany({
+    where: { weddingId, deletedAt: null, phoneNumber: { not: null } },
+    select: { phoneNumber: true },
+  })
+  return guests.map((g) => g.phoneNumber as string)
+}
+
+export async function findAllGuestsForQr(weddingId: string) {
+  return prisma.guest.findMany({
+    where: { weddingId, deletedAt: null },
+    orderBy: { fullName: "asc" },
+    select: { id: true, fullName: true, qrToken: true },
+  })
+}

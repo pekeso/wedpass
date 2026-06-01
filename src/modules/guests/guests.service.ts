@@ -6,8 +6,11 @@ import {
   findGuestByPhoneAndWedding,
   updateGuest as repoUpdateGuest,
   softDeleteGuest as repoSoftDeleteGuest,
+  getPhoneNumbersByWedding,
+  findAllGuestsForQr,
 } from "./guests.repository"
 import { findWeddingById } from "@/modules/weddings/weddings.repository"
+import { createGuestSchema } from "./guests.schemas"
 import type { CreateGuestInput, UpdateGuestInput, ListGuestsQuery } from "./guests.schemas"
 import type {
   GuestDTO,
@@ -15,6 +18,10 @@ import type {
   GuestResponseDTO,
   ListGuestsResponseDTO,
   DeleteGuestResponseDTO,
+  QrDataItemDTO,
+  AllQrDataResponseDTO,
+  ImportGuestsResponseDTO,
+  ImportGuestError,
 } from "./guests.dto"
 
 export class GuestNotFoundError extends Error {
@@ -194,4 +201,95 @@ export async function deleteGuest(
 
   await repoSoftDeleteGuest(weddingId, guestId)
   return { deleted: true }
+}
+
+export async function importGuests(
+  weddingId: string,
+  organizerId: string,
+  rows: unknown[]
+): Promise<ImportGuestsResponseDTO> {
+  await ensureWeddingEditable(weddingId, organizerId)
+
+  const existingPhones = await getPhoneNumbersByWedding(weddingId)
+  const seenPhones = new Set<string>(existingPhones)
+
+  let importedCount = 0
+  let failedCount = 0
+  const errors: ImportGuestError[] = []
+
+  for (let i = 0; i < rows.length; i++) {
+    const rowNumber = i + 2 // 1-indexed with +1 for header row
+    const validation = createGuestSchema.safeParse(rows[i])
+
+    if (!validation.success) {
+      failedCount++
+      errors.push({
+        row: rowNumber,
+        message: validation.error.issues[0]?.message ?? "Invalid row data",
+      })
+      continue
+    }
+
+    const input = validation.data
+
+    if (input.phoneNumber && seenPhones.has(input.phoneNumber)) {
+      failedCount++
+      errors.push({ row: rowNumber, message: "Duplicate phone number" })
+      continue
+    }
+
+    const qrToken = generateQrToken()
+    await repoCreateGuest({
+      weddingId,
+      fullName: input.fullName,
+      phoneNumber: input.phoneNumber,
+      email: input.email,
+      numberOfAllowedGuests: input.numberOfAllowedGuests ?? 1,
+      qrToken,
+    })
+
+    if (input.phoneNumber) seenPhones.add(input.phoneNumber)
+    importedCount++
+  }
+
+  return { importedCount, failedCount, errors }
+}
+
+export async function getGuestQrData(
+  weddingId: string,
+  guestId: string,
+  organizerId: string
+): Promise<QrDataItemDTO> {
+  const wedding = await findWeddingById(weddingId)
+  if (!wedding) throw new WeddingNotFoundError()
+  if (wedding.organizerId !== organizerId) throw new GuestForbiddenError()
+
+  const guest = await findGuestByWeddingAndId(weddingId, guestId)
+  if (!guest) throw new GuestNotFoundError()
+
+  return {
+    guestId: guest.id,
+    fullName: guest.fullName,
+    qrToken: guest.qrToken,
+    qrPayload: `wedpass://checkin/${guest.qrToken}`,
+  }
+}
+
+export async function getAllGuestQrData(
+  weddingId: string,
+  organizerId: string
+): Promise<AllQrDataResponseDTO> {
+  const wedding = await findWeddingById(weddingId)
+  if (!wedding) throw new WeddingNotFoundError()
+  if (wedding.organizerId !== organizerId) throw new GuestForbiddenError()
+
+  const guests = await findAllGuestsForQr(weddingId)
+  return {
+    items: guests.map((g) => ({
+      guestId: g.id,
+      fullName: g.fullName,
+      qrToken: g.qrToken,
+      qrPayload: `wedpass://checkin/${g.qrToken}`,
+    })),
+  }
 }

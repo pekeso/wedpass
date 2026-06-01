@@ -2,7 +2,7 @@
 
 import { use, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Users, Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, Plus, Search, ChevronLeft, ChevronRight, Upload } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { GuestTable } from "@/components/guests/guest-table"
 import { GuestCard } from "@/components/guests/guest-card"
 import { GuestForm } from "@/components/guests/guest-form"
+import { CsvImportDialog } from "@/components/guests/csv-import-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -45,6 +46,7 @@ export default function GuestsPage({
   const [page, setPage] = useState(1)
 
   const [addOpen, setAddOpen] = useState(false)
+  const [csvImportOpen, setCsvImportOpen] = useState(false)
   const [editGuest, setEditGuest] = useState<GuestListItemDTO | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<GuestListItemDTO | null>(null)
 
@@ -129,10 +131,16 @@ export default function GuestsPage({
         title="Guests"
         description={pagination ? `${pagination.total} total` : undefined}
         primaryAction={
-          <Button onClick={() => setAddOpen(true)}>
-            <Plus className="mr-2 size-4" />
-            Add Guest
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setCsvImportOpen(true)}>
+              <Upload className="mr-2 size-4" />
+              Import CSV
+            </Button>
+            <Button onClick={() => setAddOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Add Guest
+            </Button>
+          </div>
         }
       />
 
@@ -258,6 +266,17 @@ export default function GuestsPage({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* CSV import dialog */}
+      <CsvImportDialog
+        weddingId={weddingId}
+        open={csvImportOpen}
+        onOpenChange={setCsvImportOpen}
+        onImported={() => {
+          void queryClient.invalidateQueries({ queryKey: ["guests", weddingId] })
+          void queryClient.invalidateQueries({ queryKey: ["wedding", weddingId] })
+        }}
+      />
 
       {/* Delete confirm dialog */}
       <ConfirmDialog

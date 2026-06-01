@@ -3,6 +3,9 @@ import type {
   GuestResponseDTO,
   ListGuestsResponseDTO,
   DeleteGuestResponseDTO,
+  ImportGuestsResponseDTO,
+  QrDataItemDTO,
+  AllQrDataResponseDTO,
 } from "@/modules/guests/guests.dto"
 import type { CreateGuestInput, UpdateGuestInput } from "@/modules/guests/guests.schemas"
 
@@ -74,6 +77,43 @@ export async function deleteGuest(
 ): Promise<ApiResponse<DeleteGuestResponseDTO>> {
   const res = await fetch(`${guestsBase(weddingId)}/${guestId}`, {
     method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return res.json()
+}
+
+export async function importGuests(
+  weddingId: string,
+  guests: unknown[],
+  accessToken: string
+): Promise<ApiResponse<ImportGuestsResponseDTO>> {
+  const res = await fetch(`${guestsBase(weddingId)}/import`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ guests }),
+  })
+  return res.json()
+}
+
+export async function getGuestQr(
+  weddingId: string,
+  guestId: string,
+  accessToken: string
+): Promise<ApiResponse<QrDataItemDTO>> {
+  const res = await fetch(`${guestsBase(weddingId)}/${guestId}/qr`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return res.json()
+}
+
+export async function getAllQrCodes(
+  weddingId: string,
+  accessToken: string
+): Promise<ApiResponse<AllQrDataResponseDTO>> {
+  const res = await fetch(`/api/v1/weddings/${weddingId}/qr-codes`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
   return res.json()

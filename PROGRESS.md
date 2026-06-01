@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 08 — CSV Guest Import
+Phase 09 — Event Mode Foundation
 
 ## Completed Phases
 
@@ -12,6 +12,8 @@ Phase 08 — CSV Guest Import
 - Phase 04 — Database Schema and Prisma (2026-06-01)
 - Phase 05 — Auth Foundation (2026-06-01)
 - Phase 06 — Wedding CRUD Foundation (2026-06-01)
+- Phase 07 — Guest Management (2026-06-01)
+- Phase 08 — CSV Import and QR Generation (2026-06-01)
 
 ## In Progress
 
@@ -53,7 +55,7 @@ None.
 
 ## Next Phase
 
-Phase 08 — CSV Guest Import
+Phase 09 — Event Mode Foundation
 
 ## Last Updated
 
@@ -246,6 +248,32 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: add wedding crud foundation
 - **Git Commit Hash:** TBD
+
+---
+
+### Phase 08 — CSV Import and QR Generation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/app/api/v1/weddings/[weddingId]/guests/import/route.ts
+  - src/app/api/v1/weddings/[weddingId]/guests/[guestId]/qr/route.ts
+  - src/app/api/v1/weddings/[weddingId]/qr-codes/route.ts
+  - src/components/guests/csv-import-dialog.tsx
+  - src/components/guests/guest-qr-code.tsx
+- **Files Modified:**
+  - src/app/dashboard/wedding/[weddingId]/qr-codes/page.tsx (implemented)
+  - src/app/dashboard/wedding/[weddingId]/guests/page.tsx (Import CSV button wired)
+  - src/modules/guests/guests.dto.ts (QrDataItemDTO, AllQrDataResponseDTO, ImportGuestsResponseDTO)
+  - src/modules/guests/guests.repository.ts (getPhoneNumbersByWedding, findAllGuestsForQr)
+  - src/modules/guests/guests.service.ts (importGuests, getGuestQrData, getAllGuestQrData)
+  - src/lib/api/guests-client.ts (importGuests, getGuestQr, getAllQrCodes)
+  - PROGRESS.md
+- **Dependencies Added:** papaparse, qrcode.react, @types/papaparse
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS. tsc — PASS (zero errors).
+- **Manual QA:** All API routes present in build. CSV dialog parses papaparse output and maps column names case-insensitively. QR codes rendered via QRCodeCanvas with canvas-to-PNG download. Event Mode lock enforced on import. Duplicate phone detection uses existing DB phones + in-batch dedup. Row errors reported by 1-indexed row number.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add csv import and qr generation
 
 ---
 
