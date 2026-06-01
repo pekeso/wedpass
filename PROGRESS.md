@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 10 — Event Mode Preparation
+Phase 11 — Event Mode Preparation
 
 ## Completed Phases
 
@@ -15,6 +15,7 @@ Phase 10 — Event Mode Preparation
 - Phase 07 — Guest Management (2026-06-01)
 - Phase 08 — CSV Import and QR Generation (2026-06-01)
 - Phase 09 — Offline IndexedDB Foundation (2026-06-01)
+- Phase 10 — Staff Device Access Foundation (2026-06-01)
 
 ## In Progress
 
@@ -61,6 +62,34 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-01
+
+---
+
+### Phase 10 — Staff Device Access Foundation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/lib/auth/staff-jwt.ts (signStaffToken, verifyStaffToken using STAFF_JWT_SECRET)
+  - src/lib/auth/require-staff-auth.ts (staff auth guard — verifies JWT + checks ACTIVE device)
+  - src/modules/staff/staff.schemas.ts
+  - src/modules/staff/staff.types.ts
+  - src/modules/staff/staff.dto.ts
+  - src/modules/staff/staff.repository.ts (createStaffDevice, findStaffDevicesByWedding, findStaffDeviceById, revokeStaffDevice, updateLastSeen)
+  - src/modules/staff/staff.service.ts (createStaffDevice, listStaffDevices, revokeStaffDevice + error classes)
+  - src/app/api/v1/weddings/[weddingId]/staff/devices/route.ts (GET list, POST create — organizer only)
+  - src/app/api/v1/weddings/[weddingId]/staff/devices/[deviceId]/revoke/route.ts (POST — organizer only)
+  - src/app/api/v1/staff/weddings/[weddingId]/verify/route.ts (POST — staff token verify)
+  - src/lib/api/staff-client.ts
+- **Files Modified:**
+  - src/app/dashboard/wedding/[weddingId]/staff/page.tsx (full staff management UI)
+  - src/app/staff/[weddingId]/login/page.tsx (staff login with token verify + localStorage)
+  - .env.example (added STAFF_JWT_SECRET)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Staff JWT uses STAFF_JWT_SECRET with scope: "staff" claim. Auth guard validates device ACTIVE in DB. Staff routes reject organizer tokens (different secret). Organizer routes reject staff tokens (scope guard). Revocation marks device REVOKED + sets revokedAt. Token shown once via QR code + copy button. Staff login validates token server-side before storing.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add staff device access foundation
 
 ---
 
