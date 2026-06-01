@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -19,6 +21,7 @@
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dexie": "^4.4.3",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.17.0",
@@ -50,12 +53,16 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
+    "@vitest/ui": "^4.1.8",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.2.6",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "prettier": "^3.3.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.8"
   }
 }

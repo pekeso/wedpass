@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 09 — Event Mode Foundation
+Phase 10 — Event Mode Preparation
 
 ## Completed Phases
 
@@ -14,6 +14,7 @@ Phase 09 — Event Mode Foundation
 - Phase 06 — Wedding CRUD Foundation (2026-06-01)
 - Phase 07 — Guest Management (2026-06-01)
 - Phase 08 — CSV Import and QR Generation (2026-06-01)
+- Phase 09 — Offline IndexedDB Foundation (2026-06-01)
 
 ## In Progress
 
@@ -55,7 +56,7 @@ None.
 
 ## Next Phase
 
-Phase 09 — Event Mode Foundation
+Phase 10 — Event Mode Preparation
 
 ## Last Updated
 
@@ -304,6 +305,30 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: implement guest management
 - **Git Commit Hash:** TBD
+
+---
+
+### Phase 09 — Offline IndexedDB Foundation
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/lib/offline/db.ts (WedPassOfflineDB Dexie class, offlineDb singleton)
+  - src/lib/offline/metadata.ts (getMetadata, setMetadata, clearMetadata, getOrCreateDeviceId)
+  - src/lib/offline/guests/guest-local-repository.ts (findGuestByQrToken, findGuestById, searchGuests, bulkSaveGuests, clearGuestsByWedding, updateGuestCheckedIn)
+  - src/lib/offline/guests/guest-search.ts (case-insensitive prefix search on fullName and phoneNumber, max 20 results)
+  - src/hooks/use-network-status.ts (useNetworkStatus hook, listens to window online/offline events)
+  - vitest.config.ts
+  - src/tests/setup.ts (fake-indexeddb/auto setup)
+  - src/tests/offline/offline.test.ts (13 unit tests)
+- **Files Modified:**
+  - src/types/shared.ts (added LocalGuest, LocalCheckinQueueItem, LocalMetadata, LocalMediaUpload interfaces)
+  - package.json (added test and test:watch scripts; dexie, vitest, @vitest/ui, jsdom, fake-indexeddb devDeps)
+  - PROGRESS.md
+- **Tests Run:** npm run test, npx tsc --noEmit
+- **Test Results:** 13 tests pass (3 metadata, 2 device ID, 6 search, 2 clearGuestsByWedding). tsc — zero errors.
+- **Manual QA:** Dexie imports confirmed browser-only (no SSR imports). offlineDb singleton not imported from server modules. All interfaces match database_schema.md Sections 19–22.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add offline indexeddb foundation
 
 ---
 
