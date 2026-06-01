@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 03 — Layout Components and Shell
+Phase 04 — Database Schema and Prisma
 
 ## Completed Phases
 
@@ -50,11 +50,11 @@ None.
 
 ## Next Phase
 
-Phase 03 — Layout Components and Shell
+Phase 04 — Database Schema and Prisma
 
 ## Last Updated
 
-2026-05-31
+2026-06-01
 
 ---
 
@@ -126,6 +126,41 @@ Use this section to record completed phases. Add a new entry after each phase is
 - **Blocked Items:** None.
 - **Git Commit Message:** chore: initialize wedpass project shell
 - **Git Commit Hash:** d68b5d6
+
+---
+
+### Phase 03 — Base Layouts and Shared Components
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/components/layout/public-layout.tsx
+  - src/components/layout/dashboard-layout.tsx
+  - src/components/layout/staff-layout.tsx
+  - src/components/layout/guest-layout.tsx
+  - src/components/layout/app-sidebar.tsx
+  - src/components/layout/app-header.tsx
+  - src/components/shared/status-badge.tsx
+  - src/components/shared/stat-card.tsx
+  - src/components/shared/page-header.tsx
+  - src/components/shared/section-card.tsx
+  - src/components/shared/empty-state.tsx
+  - src/components/shared/loading-state.tsx
+  - src/components/shared/error-state.tsx
+  - src/components/shared/confirm-dialog.tsx
+  - src/components/staff/sync-status-bar.tsx
+  - src/components/staff/offline-warning-banner.tsx
+  - src/app/(public)/layout.tsx
+  - src/app/staff/[weddingId]/layout.tsx
+  - src/app/w/[slug]/layout.tsx
+- **Files Modified:**
+  - src/app/dashboard/layout.tsx (wired to DashboardLayout)
+  - PROGRESS.md
+- **Tests Run:** npm run build, npm run lint
+- **Test Results:** build — PASS (23 routes). lint — PASS (zero errors).
+- **Manual QA:** Layouts wired into all four route groups. All components strongly typed. No hardcoded hex values.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add shared layout and base components
+- **Git Commit Hash:** TBD
 
 ---
 

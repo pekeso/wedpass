@@ -1142,6 +1142,16 @@ If a feature is not listed in V1, do not implement it without explicit approval.
 
 ---
 
+## Package Management Rules
+
+- Always install the latest stable version of any npm package unless a specific version is required to resolve a documented compatibility conflict.
+- Use `@latest` when installing packages via `npx` (e.g. `npx create-next-app@latest`).
+- Do not pin to a specific semver range (e.g. `^18.0.0`) unless a known conflict with a newer version exists and you document why inline.
+- When a peer-dependency conflict arises, investigate the cause first. Prefer resolving the conflict over using `--legacy-peer-deps` or `--force`.
+- If a conflict cannot be resolved without downgrading, note the constraint as a comment in `package.json` or in the relevant phase doc.
+
+---
+
 ## Claude Code Operating Instructions
 
 When implementing features:
@@ -1158,6 +1168,7 @@ When implementing features:
 10. Keep UI components reusable and presentational where possible.
 11. Do not invent new product scope.
 12. Ask for clarification if a requested feature conflicts with V1 scope.
+13. Use the latest stable version of any npm package unless a conflict requires otherwise (see Package Management Rules).
 
 ---
 
