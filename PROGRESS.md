@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 13A — Local Guest Search
-Phase 18 — Media Upload Signed URL Flow
+Phase 14B — Check-In Confirmation UI
+Phase 15 — Check-In Sync Endpoint
 
 ## Completed Phases
 
@@ -65,6 +65,57 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-01
+
+---
+
+### Phase 14A — Staff Local Check-In Transaction
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/lib/offline/checkins/checkin-local-service.ts (checkInGuestLocally — atomic Dexie transaction: guest update + checkinQueue add)
+  - src/lib/offline/checkins/checkin-local-service.test.ts (10 unit tests)
+- **Files Modified:**
+  - PROGRESS.md
+- **Tests Run:** npx vitest run, npx tsc --noEmit, npm run lint
+- **Test Results:** 23 tests pass (10 new + 13 existing). tsc — zero errors. lint — zero errors.
+- **Manual QA:** checkInGuestLocally reads snapshotId, snapshotVersion, deviceId from metadata store. Guest update and checkinQueue.add execute inside a single Dexie "rw" transaction — if add throws, guest update rolls back. Returns guest_not_found, already_checked_in (with original checkedInAt), or checked_in_locally (with stable queueId). No server calls made.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement staff local checkin transaction
+
+---
+
+### Phase 13B — Staff QR Scanner
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/components/staff/scanner-frame.tsx (camera viewfinder container with corner overlay frame, mobile-optimized full-width)
+  - src/app/staff/[weddingId]/scan/page.tsx (Html5Qrcode scanner, token extraction, IndexedDB lookup, 2-second cooldown, camera denial state, manual search fallback)
+- **Files Modified:**
+  - PROGRESS.md
+- **Dependencies Added:** html5-qrcode
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** QR payload format `wedpass://checkin/<qrToken>` parsed with startsWith check. Token looked up via findGuestByQrToken (IndexedDB only — no API calls). Guest found → scanner stopped → navigate to /staff/[weddingId]/checkin/[guestId]. Guest not found → error banner shown. Non-wedpass QR codes rejected before IndexedDB lookup. 2-second cooldown via lastScanTimeRef prevents double-scanning. Camera permission denial detected from DOMException.name or error string → CameraOff state shown. isMounted + hasStarted flags guard async state updates and cleanup. Manual search button always visible at bottom. SyncStatusBar shown at top.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add staff qr scanner
+
+---
+
+### Phase 13A — Staff Local Guest Search
+- **Completed:** 2026-06-01
+- **Files Created:**
+  - src/hooks/use-local-guest-search.ts (debounced 150ms wrapper around searchGuests, returns query/setQuery/results/isSearching)
+  - src/components/staff/manual-search-results.tsx (GuestSearchResultItem + ManualSearchResults, empty state, checked-in badge)
+  - src/app/staff/[weddingId]/search/page.tsx (auto-focused input, SyncStatusBar, OfflineWarningBanner, navigates to checkin/[guestId])
+  - src/app/staff/[weddingId]/checkin/[guestId]/page.tsx (placeholder for Phase 14A)
+- **Files Modified:**
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Search reads only from IndexedDB (searchGuests in guest-search.ts). No API calls in search flow. Pending checkin count read from checkinQueue where synced=false. SyncStatusBar shows offline/idle state from useNetworkStatus. OfflineWarningBanner shown when offline. Auto-focus on mount via useRef. Results include checked-in badge. h-14 minimum touch target on result items.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement staff local guest search
 
 ---
 
