@@ -7,7 +7,8 @@ const betaSignupSchema = z.object({
   country: z.string().min(2),
   weddingDate: z.string().optional(),
   estimatedGuests: z.coerce.number().int().min(1).optional(),
-  preferredLanguage: z.enum(["English", "French"]).optional(),
+  role: z.enum(["Couple", "Planner", "Family organizer", "Other"]).optional(),
+  preferredLanguage: z.enum(["English", "French", "Both"]).optional(),
 })
 
 export async function POST(req: Request) {
