@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 42
+Phase 30
 
 ## Completed Phases
 
+- Phase 42 — My Weddings Cards Polish (2026-06-02)
 - Phase 41 — Dashboard Header Sign-Out and User Context (2026-06-02)
 - Phase 40 — Public Layout and Auth Pages Polish (2026-06-02)
 - Phase 39 — System Utility Pages (2026-06-02)
@@ -54,7 +55,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 41 complete)
+2026-06-02 (Phase 42 complete — design gap phases 37–42 all done; returning to main roadmap at Phase 30)
 
 ---
 
