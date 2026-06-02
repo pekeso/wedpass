@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 24
+Phase 25
 
 ## Completed Phases
 
+- Phase 24 — Organizer Media Moderation (2026-06-02)
 - Phase 23 — Guest Gallery (2026-06-02)
 - Phase 22 — Media Upload Signed URL Flow (2026-06-02)
 - Phase 21 — Guest Public Wedding Page (2026-06-02)
@@ -73,6 +74,32 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 24 — Organizer Media Moderation
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/app/api/v1/weddings/[weddingId]/media/route.ts (GET — organizer, all statuses, filterable by mediaType/status/page/pageSize)
+  - src/app/api/v1/weddings/[weddingId]/media/[mediaId]/route.ts (GET download URL, DELETE soft-delete)
+  - src/app/api/v1/weddings/[weddingId]/media/[mediaId]/hide/route.ts (POST — set HIDDEN)
+  - src/app/api/v1/weddings/[weddingId]/media/[mediaId]/show/route.ts (POST — restore to UPLOADED)
+  - src/components/media/organizer-media-card.tsx (thumbnail with status badge, Hide/Show/Delete/Download actions, ConfirmDialog on delete)
+  - src/app/dashboard/wedding/[weddingId]/gallery/page.tsx (filter tabs All/Photos/Videos/Hidden, TanStack Query, mutations with cache invalidation)
+  - src/lib/api/media-client.ts (listOrganizerMedia, hideOrganizerMedia, showOrganizerMedia, deleteOrganizerMedia, getMediaDownloadUrl)
+- **Files Modified:**
+  - src/modules/media/media.repository.ts (added findGalleryMediaByWedding, findMediaByWeddingAndId, hideMedia, showMedia, deleteMedia)
+  - src/modules/media/media.service.ts (added MediaNotFoundError, MediaForbiddenError, getOrganizerGalleryMedia, hideMediaItem, showMediaItem, deleteMediaItem, getMediaDownloadUrl)
+  - src/modules/media/media.dto.ts (added OrganizerMediaItemDTO, OrganizerMediaListResponseDTO, MediaModerationResponseDTO, MediaDownloadUrlResponseDTO)
+  - src/modules/media/media.schemas.ts (added organizerGalleryQuerySchema, OrganizerGalleryQuery type)
+  - src/lib/storage/r2-client.ts (added getReadSignedUrl using GetObjectCommand, 300s expiry)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** GET media returns all statuses for organizer (UPLOADED, APPROVED, HIDDEN, DELETED). Filter tabs work: All shows everything, Photos filters IMAGE, Videos filters VIDEO, Hidden filters status=HIDDEN. Hide sets status=HIDDEN + hiddenAt. Show (un-hide) resets to UPLOADED + clears hiddenAt. Delete sets status=DELETED + deletedAt (soft delete — no physical removal). Download generates signed R2 read URL (300s expiry) and opens in new tab. Cross-wedding access: organizerId check enforced in service via requireWeddingOwnership — 403 returned for other organizer's wedding. Guest gallery (/w/[slug]/gallery) unaffected — still filters to UPLOADED/APPROVED only via findPublicGalleryMedia. Delete requires ConfirmDialog confirmation in UI before mutation fires.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add organizer media moderation
 
 ---
 

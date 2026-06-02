@@ -1,10 +1,31 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { r2Client } from "@/lib/storage/r2-client"
+import { r2Client, getReadSignedUrl } from "@/lib/storage/r2-client"
 import { findWeddingById, findWeddingBySlug } from "@/modules/weddings/weddings.repository"
-import { createMediaUpload, findPublicGalleryMedia } from "./media.repository"
-import type { RequestUploadUrlInput, ConfirmUploadInput, PublicGalleryQuery } from "./media.schemas"
-import type { UploadUrlResponseDTO, ConfirmUploadResponseDTO, PublicGalleryResponseDTO } from "./media.dto"
+import {
+  createMediaUpload,
+  findPublicGalleryMedia,
+  findGalleryMediaByWedding,
+  findMediaByWeddingAndId,
+  hideMedia,
+  showMedia,
+  deleteMedia,
+} from "./media.repository"
+import type {
+  RequestUploadUrlInput,
+  ConfirmUploadInput,
+  PublicGalleryQuery,
+  OrganizerGalleryQuery,
+} from "./media.schemas"
+import type {
+  UploadUrlResponseDTO,
+  ConfirmUploadResponseDTO,
+  PublicGalleryResponseDTO,
+  OrganizerMediaListResponseDTO,
+  OrganizerMediaItemDTO,
+  MediaModerationResponseDTO,
+  MediaDownloadUrlResponseDTO,
+} from "./media.dto"
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024
@@ -121,6 +142,22 @@ export async function confirmUpload(
   }
 }
 
+export class MediaNotFoundError extends Error {
+  readonly code = "NOT_FOUND"
+  constructor() {
+    super("Media not found")
+    this.name = "MediaNotFoundError"
+  }
+}
+
+export class MediaForbiddenError extends Error {
+  readonly code = "FORBIDDEN"
+  constructor() {
+    super("Access denied")
+    this.name = "MediaForbiddenError"
+  }
+}
+
 export class GalleryDisabledError extends Error {
   readonly code = "GALLERY_DISABLED"
   constructor() {
@@ -173,4 +210,94 @@ export async function getPublicGalleryMedia(
       },
     },
   }
+}
+
+async function requireWeddingOwnership(weddingId: string, organizerId: string) {
+  const wedding = await findWeddingById(weddingId)
+  if (!wedding) throw new MediaWeddingNotFoundError()
+  if (wedding.organizerId !== organizerId) throw new MediaForbiddenError()
+}
+
+export async function getOrganizerGalleryMedia(
+  weddingId: string,
+  organizerId: string,
+  query: OrganizerGalleryQuery
+): Promise<OrganizerMediaListResponseDTO> {
+  await requireWeddingOwnership(weddingId, organizerId)
+
+  const { items, total } = await findGalleryMediaByWedding(weddingId, {
+    mediaType: query.mediaType,
+    status: query.status as import("@/generated/prisma/enums").MediaStatus | undefined,
+    page: query.page,
+    pageSize: query.pageSize,
+  })
+
+  return {
+    items: items.map(
+      (item): OrganizerMediaItemDTO => ({
+        id: item.id,
+        mediaType: item.mediaType,
+        status: item.status as OrganizerMediaItemDTO["status"],
+        fileUrl: buildFileUrl(item.fileKey, item.fileUrl),
+        thumbnailUrl: item.thumbnailUrl
+          ? item.thumbnailUrl
+          : item.thumbnailKey
+            ? buildFileUrl(item.thumbnailKey, null)
+            : null,
+        uploadedByName: item.uploadedByName,
+        createdAt: item.createdAt.toISOString(),
+        hiddenAt: item.hiddenAt?.toISOString() ?? null,
+        deletedAt: item.deletedAt?.toISOString() ?? null,
+      })
+    ),
+    pagination: { page: query.page, pageSize: query.pageSize, total },
+  }
+}
+
+export async function hideMediaItem(
+  weddingId: string,
+  mediaId: string,
+  organizerId: string
+): Promise<MediaModerationResponseDTO> {
+  await requireWeddingOwnership(weddingId, organizerId)
+  const media = await findMediaByWeddingAndId(weddingId, mediaId)
+  if (!media) throw new MediaNotFoundError()
+  await hideMedia(weddingId, mediaId)
+  return { mediaId, status: "HIDDEN" }
+}
+
+export async function showMediaItem(
+  weddingId: string,
+  mediaId: string,
+  organizerId: string
+): Promise<MediaModerationResponseDTO> {
+  await requireWeddingOwnership(weddingId, organizerId)
+  const media = await findMediaByWeddingAndId(weddingId, mediaId)
+  if (!media) throw new MediaNotFoundError()
+  await showMedia(weddingId, mediaId)
+  return { mediaId, status: "UPLOADED" }
+}
+
+export async function deleteMediaItem(
+  weddingId: string,
+  mediaId: string,
+  organizerId: string
+): Promise<MediaModerationResponseDTO> {
+  await requireWeddingOwnership(weddingId, organizerId)
+  const media = await findMediaByWeddingAndId(weddingId, mediaId)
+  if (!media) throw new MediaNotFoundError()
+  await deleteMedia(weddingId, mediaId)
+  return { mediaId, status: "DELETED" }
+}
+
+export async function getMediaDownloadUrl(
+  weddingId: string,
+  mediaId: string,
+  organizerId: string
+): Promise<MediaDownloadUrlResponseDTO> {
+  await requireWeddingOwnership(weddingId, organizerId)
+  const media = await findMediaByWeddingAndId(weddingId, mediaId)
+  if (!media) throw new MediaNotFoundError()
+  const downloadUrl = await getReadSignedUrl(media.fileKey)
+  return { downloadUrl, expiresInSeconds: 300 }
 }

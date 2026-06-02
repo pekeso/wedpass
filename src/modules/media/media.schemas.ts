@@ -19,6 +19,15 @@ export const confirmUploadSchema = z.object({
   uploadedByName: z.string().optional(),
 })
 
+export const organizerGalleryQuerySchema = z.object({
+  mediaType: z.enum(["IMAGE", "VIDEO"]).optional(),
+  status: z.enum(["UPLOADED", "APPROVED", "HIDDEN", "DELETED"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(30),
+})
+
+export type OrganizerGalleryQuery = z.infer<typeof organizerGalleryQuerySchema>
+
 export const publicGalleryQuerySchema = z.object({
   mediaType: z.enum(["IMAGE", "VIDEO"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
