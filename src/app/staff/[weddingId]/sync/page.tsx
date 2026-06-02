@@ -8,6 +8,7 @@ import { SyncStatusBar } from "@/components/staff/sync-status-bar"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { getMetadata, clearLocalEventData } from "@/lib/offline/metadata"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 function formatDateTime(isoString: string): string {
   return new Date(isoString).toLocaleString([], {
@@ -32,6 +33,7 @@ export default function StaffSyncPage({
   const [showClearDialog, setShowClearDialog] = useState(false)
   const [clearError, setClearError] = useState<string | null>(null)
   const [isClearing, setIsClearing] = useState(false)
+  const { t } = useTranslations()
 
   useEffect(() => {
     getMetadata("snapshotMismatch")
@@ -57,9 +59,7 @@ export default function StaffSyncPage({
 
   function handleClearRequest() {
     if (pendingCount > 0) {
-      setClearError(
-        `Cannot clear: ${pendingCount} unsynced check-in${pendingCount === 1 ? "" : "s"} remain. Sync first.`
-      )
+      setClearError(t("sync.cannotClear", { count: pendingCount }))
       return
     }
     setClearError(null)
@@ -86,30 +86,27 @@ export default function StaffSyncPage({
           >
             <ArrowLeft className="size-5" />
           </Button>
-          <h1 className="text-xl font-bold text-foreground">Sync Status</h1>
+          <h1 className="text-xl font-bold text-foreground">{t("sync.title")}</h1>
         </div>
 
         {hasSnapshotMismatch && (
           <div className="flex items-start gap-3 rounded-2xl border border-warning bg-warning-light p-4 text-sm text-warning">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            <p>
-              This device is using an outdated event snapshot. Please refresh
-              the offline pack before continuing.
-            </p>
+            <p>{t("sync.snapshotMismatch")}</p>
           </div>
         )}
 
         {allSynced && lastSyncedAt && !isSyncing && (
           <div className="flex items-center gap-3 rounded-2xl border border-success bg-success-light/40 p-4 text-sm text-success">
             <CheckCircle2 className="size-5 shrink-0" />
-            <p className="font-medium">All check-ins are synced.</p>
+            <p className="font-medium">{t("sync.allSynced")}</p>
           </div>
         )}
 
         <div className="rounded-2xl border bg-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
-              Pending check-ins
+              {t("sync.pendingCheckins")}
             </span>
             <span
               className={`text-2xl font-bold ${pendingCount > 0 ? "text-warning" : "text-success"}`}
@@ -122,21 +119,21 @@ export default function StaffSyncPage({
 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
-              Last synced
+              {t("sync.lastSynced")}
             </span>
             <span className="text-sm font-medium text-foreground">
-              {lastSyncedAt ? formatDateTime(lastSyncedAt) : "Never"}
+              {lastSyncedAt ? formatDateTime(lastSyncedAt) : t("sync.never")}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
-              Connection
+              {t("sync.connection")}
             </span>
             <span
               className={`text-sm font-semibold ${isOnline ? "text-success" : "text-offline"}`}
             >
-              {isOnline ? "Online" : "Offline"}
+              {isOnline ? t("sync.online") : t("sync.offline")}
             </span>
           </div>
         </div>
@@ -147,31 +144,28 @@ export default function StaffSyncPage({
           className="h-14 w-full gap-3 rounded-2xl text-base font-semibold"
         >
           <RefreshCw className={`size-5 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Syncing..." : "Sync Now"}
+          {isSyncing ? t("sync.syncing") : t("sync.syncNow")}
         </Button>
 
         {!isOnline && (
           <p className="text-center text-xs text-muted-foreground">
-            Offline mode active. Check-ins are safely saved on this device and
-            will sync when internet returns.
+            {t("sync.offlineModeActive")}
           </p>
         )}
 
         {syncState === "failed" && !hasSnapshotMismatch && (
           <p className="text-center text-xs text-danger">
-            Sync failed. Your check-ins are still saved on this device. We will
-            retry automatically.
+            {t("sync.syncFailed")}
           </p>
         )}
 
         <div className="rounded-2xl border border-danger/30 bg-danger-light/20 p-5 space-y-4">
           <div>
             <h2 className="text-sm font-semibold text-foreground">
-              Clear Local Event Data
+              {t("sync.clearLocalData")}
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Only clear after all check-ins have synced. This removes the
-              offline guest list and check-in history from this device.
+              {t("sync.clearLocalDataDesc")}
             </p>
           </div>
 
@@ -189,7 +183,7 @@ export default function StaffSyncPage({
             className="h-12 w-full gap-2 rounded-xl border-danger/40 text-danger hover:bg-danger/10 hover:text-danger"
           >
             <Trash2 className="size-4" />
-            {isClearing ? "Clearing..." : "Clear Local Data"}
+            {isClearing ? t("sync.clearing") : t("sync.clearButton")}
           </Button>
         </div>
       </div>
@@ -198,10 +192,10 @@ export default function StaffSyncPage({
         open={showClearDialog}
         onOpenChange={setShowClearDialog}
         variant="danger"
-        title="Clear local event data?"
-        description="This will remove the offline guest list and all synced check-in records from this device. This cannot be undone. Only continue if all check-ins have been synced."
-        confirmLabel="Yes, clear data"
-        cancelLabel="Keep data"
+        title={t("sync.clearDialogTitle")}
+        description={t("sync.clearDialogDesc")}
+        confirmLabel={t("sync.yesClearData")}
+        cancelLabel={t("sync.keepData")}
         onConfirm={handleClearData}
       />
     </div>

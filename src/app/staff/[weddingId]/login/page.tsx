@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { verifyStaffToken } from "@/lib/api/staff-client"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 const STAFF_TOKEN_KEY = (weddingId: string) => `wedpass-staff-token-${weddingId}`
 
@@ -21,12 +22,13 @@ export default function StaffLoginPage({
   const [token, setToken] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const { t } = useTranslations()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = token.trim()
     if (!trimmed) {
-      setError("Please enter a staff access token.")
+      setError(t("login.tokenRequired"))
       return
     }
 
@@ -38,7 +40,7 @@ export default function StaffLoginPage({
       localStorage.setItem(STAFF_TOKEN_KEY(weddingId), trimmed)
       router.push(`/staff/${weddingId}/download`)
     } catch {
-      setError("Invalid or expired staff token. Please check and try again.")
+      setError(t("login.tokenInvalid"))
     } finally {
       setIsLoading(false)
     }
@@ -51,19 +53,19 @@ export default function StaffLoginPage({
           <div className="flex size-12 items-center justify-center rounded-full bg-navy text-white">
             <Smartphone className="size-6" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Staff Access</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{t("login.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Enter the staff access token provided by the wedding organizer.
+            {t("login.description")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="staff-token">Staff Access Token</Label>
+            <Label htmlFor="staff-token">{t("login.tokenLabel")}</Label>
             <Input
               id="staff-token"
               type="text"
-              placeholder="Paste your staff token here"
+              placeholder={t("login.tokenPlaceholder")}
               value={token}
               onChange={(e) => setToken(e.target.value)}
               autoComplete="off"
@@ -79,12 +81,12 @@ export default function StaffLoginPage({
           )}
 
           <Button type="submit" className="h-14 w-full text-base" disabled={isLoading}>
-            {isLoading ? "Verifying..." : "Access Event Mode"}
+            {isLoading ? t("login.verifying") : t("login.button")}
           </Button>
         </form>
 
         <p className="text-center text-xs text-muted-foreground">
-          This device will temporarily store guest check-in data for this wedding.
+          {t("login.deviceNote")}
         </p>
       </div>
     </div>

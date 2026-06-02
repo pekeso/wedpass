@@ -12,6 +12,7 @@ import { ManualSearchResults } from "@/components/staff/manual-search-results"
 import { useLocalGuestSearch } from "@/hooks/use-local-guest-search"
 import { useNetworkStatus } from "@/hooks/use-network-status"
 import { offlineDb } from "@/lib/offline/db"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { LocalGuest } from "@/types/shared"
 
 export default function StaffSearchPage({
@@ -23,6 +24,7 @@ export default function StaffSearchPage({
   const router = useRouter()
   const { isOnline } = useNetworkStatus()
   const { query, setQuery, results, isSearching } = useLocalGuestSearch(weddingId)
+  const { t } = useTranslations()
   const inputRef = useRef<HTMLInputElement>(null)
   const [pendingCount, setPendingCount] = useState(0)
 
@@ -67,7 +69,7 @@ export default function StaffSearchPage({
           >
             <ArrowLeft className="size-5" />
           </Button>
-          <h1 className="text-xl font-bold text-foreground">Find Guest</h1>
+          <h1 className="text-xl font-bold text-foreground">{t("search.title")}</h1>
         </div>
 
         <div className="relative">
@@ -75,7 +77,7 @@ export default function StaffSearchPage({
           <Input
             ref={inputRef}
             type="search"
-            placeholder="Name or phone number..."
+            placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-12 pl-9 text-base"

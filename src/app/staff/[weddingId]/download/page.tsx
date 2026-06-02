@@ -18,6 +18,7 @@ import {
 import { StaffHelpMessages } from "@/components/staff/staff-help-messages"
 import { useOfflinePackStatus } from "@/hooks/use-offline-pack-status"
 import { downloadAndSaveSnapshot } from "@/lib/offline/checkins/snapshot-download"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 function formatDownloadedAt(iso: string): string {
   const date = new Date(iso)
@@ -67,6 +68,7 @@ export default function StaffDownloadPage({
 
   const [isDownloading, setIsDownloading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { t } = useTranslations()
 
   function getCardState(): PackDownloadState {
     if (isDownloading) return "downloading"
@@ -97,16 +99,16 @@ export default function StaffDownloadPage({
     <div className="flex min-h-screen flex-col bg-background">
       <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full space-y-6">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">Offline Pack</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("download.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Prepare this device for event-day check-in.
+            {t("download.prepareDevice")}
           </p>
         </div>
 
         {!isReady && (
           <div className="rounded-xl border border-warning bg-warning-light px-4 py-3">
             <p className="text-sm font-medium text-warning">
-              Download this offline pack before guests arrive.
+              {t("download.downloadBefore")}
             </p>
           </div>
         )}
@@ -125,40 +127,40 @@ export default function StaffDownloadPage({
         {isReady && !status.isLoading && (
           <>
             <div className="rounded-xl border border-success bg-success-light px-5 py-4">
-              <p className="text-lg font-bold text-success">Ready for Event Day</p>
+              <p className="text-lg font-bold text-success">{t("download.readyForEventDay")}</p>
               <p className="text-sm text-success/80 mt-0.5">
-                This device is prepared for offline check-in.
+                {t("download.devicePrepared")}
               </p>
             </div>
 
             <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
               <ChecklistItem
-                label="Offline pack downloaded"
+                label={t("download.offlinePackDownloaded")}
                 value={null}
                 isReady={true}
               />
               <ChecklistItem
-                label="Guests loaded"
+                label={t("download.guestsLoaded")}
                 value={
                   status.guestCount > 0
-                    ? `${status.guestCount} guests`
-                    : "0 guests"
+                    ? t("download.guestCount", { count: status.guestCount })
+                    : t("download.zeroGuests")
                 }
                 isReady={status.guestCount > 0}
               />
               <ChecklistItem
-                label="Last downloaded"
+                label={t("download.lastDownloaded")}
                 value={
                   status.lastDownloadedAt
                     ? formatDownloadedAt(status.lastDownloadedAt)
-                    : "Unknown"
+                    : t("download.unknown")
                 }
                 isReady={!!status.lastDownloadedAt}
               />
               <ChecklistItem
-                label="Snapshot version"
+                label={t("download.snapshotVersion")}
                 value={
-                  status.snapshotVersion != null ? `v${status.snapshotVersion}` : "Unknown"
+                  status.snapshotVersion != null ? `v${status.snapshotVersion}` : t("download.unknown")
                 }
                 isReady={status.snapshotVersion != null}
               />
@@ -172,7 +174,7 @@ export default function StaffDownloadPage({
               className="h-14 w-full text-base gap-2"
               onClick={() => router.push(`/staff/${weddingId}/checkin`)}
             >
-              Start Check-In
+              {t("download.startCheckin")}
               <ArrowRight className="size-5" />
             </Button>
             <Button
@@ -182,7 +184,7 @@ export default function StaffDownloadPage({
               disabled={isDownloading}
             >
               <RefreshCw className="size-4" />
-              Re-download Pack
+              {t("download.redownloadPack")}
             </Button>
           </div>
         ) : (
@@ -194,17 +196,17 @@ export default function StaffDownloadPage({
             {isDownloading ? (
               <>
                 <RefreshCw className="size-5 animate-spin" />
-                Downloading...
+                {t("download.downloading")}
               </>
             ) : cardState === "failed" ? (
               <>
                 <RefreshCw className="size-5" />
-                Retry Download
+                {t("download.retryDownload")}
               </>
             ) : (
               <>
                 <Download className="size-5" />
-                Download Offline Pack
+                {t("download.downloadOfflinePack")}
               </>
             )}
           </Button>
@@ -215,14 +217,13 @@ export default function StaffDownloadPage({
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto"
         >
           <HelpCircle className="size-4 shrink-0" />
-          View full staff help guide
+          {t("download.viewHelpGuide")}
         </button>
 
         <StaffHelpMessages />
 
         <p className="text-xs text-center text-muted-foreground">
-          Guest data is stored on this device only. Keep this tab open during
-          the event.
+          {t("download.guestDataNote")}
         </p>
       </div>
     </div>

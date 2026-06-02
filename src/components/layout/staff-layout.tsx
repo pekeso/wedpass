@@ -1,4 +1,4 @@
-import { SyncStatusBar } from "@/components/staff/sync-status-bar"
+import { LanguageToggle } from "@/components/shared/language-toggle"
 
 interface StaffLayoutProps {
   children: React.ReactNode
@@ -6,9 +6,11 @@ interface StaffLayoutProps {
 
 export function StaffLayout({ children }: StaffLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <SyncStatusBar isOnline={true} pendingCount={0} syncState="idle" />
-      <main className="flex-1">{children}</main>
+    <div className="relative">
+      <div className="absolute right-4 top-14 z-50">
+        <LanguageToggle />
+      </div>
+      {children}
     </div>
   )
 }

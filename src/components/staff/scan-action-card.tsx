@@ -1,5 +1,8 @@
+"use client"
+
 import { QrCode, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 interface ScanActionCardProps {
   onScanQr: () => void
@@ -7,6 +10,8 @@ interface ScanActionCardProps {
 }
 
 export function ScanActionCard({ onScanQr, onSearchGuest }: ScanActionCardProps) {
+  const { t } = useTranslations()
+
   return (
     <div className="space-y-3">
       <Button
@@ -14,7 +19,7 @@ export function ScanActionCard({ onScanQr, onSearchGuest }: ScanActionCardProps)
         className="h-16 w-full gap-3 rounded-2xl text-lg font-semibold"
       >
         <QrCode className="size-6" />
-        Scan QR Code
+        {t("scan.title")}
       </Button>
       <Button
         variant="outline"
@@ -22,7 +27,7 @@ export function ScanActionCard({ onScanQr, onSearchGuest }: ScanActionCardProps)
         className="h-14 w-full gap-3 rounded-2xl text-base font-medium"
       >
         <Search className="size-5" />
-        Search Guest
+        {t("search.title")}
       </Button>
     </div>
   )

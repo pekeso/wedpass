@@ -1,5 +1,8 @@
+"use client"
+
 import { AlertTriangle, CheckCircle, Phone, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { LocalGuest } from "@/types/shared"
 
 interface GuestCheckinCardProps {
@@ -20,11 +23,13 @@ export function GuestCheckinCard({
   onCheckIn,
   isLoading,
 }: GuestCheckinCardProps) {
+  const { t } = useTranslations()
+
   return (
     <div className="rounded-2xl border bg-card p-6 shadow-sm">
       <div className="mb-6 space-y-1">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Guest
+          {t("guestCard.label")}
         </p>
         <h2 className="text-3xl font-bold leading-tight text-foreground">
           {guest.fullName}
@@ -42,8 +47,8 @@ export function GuestCheckinCard({
           <Users className="size-4 shrink-0" />
           <span>
             {guest.allowedGuests === 1
-              ? "1 guest"
-              : `${guest.allowedGuests} guests allowed`}
+              ? t("guestCard.singleGuest")
+              : t("guestCard.guestCount", { count: guest.allowedGuests })}
           </span>
         </div>
       </div>
@@ -53,10 +58,10 @@ export function GuestCheckinCard({
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
             <div>
-              <p className="font-semibold text-warning">Already checked in</p>
+              <p className="font-semibold text-warning">{t("guestCard.alreadyCheckedIn")}</p>
               {guest.checkedInAt && (
                 <p className="mt-0.5 text-sm text-warning/80">
-                  Checked in at {formatTime(guest.checkedInAt)}
+                  {t("guestCard.checkedInAt", { time: formatTime(guest.checkedInAt) })}
                 </p>
               )}
             </div>
@@ -69,7 +74,7 @@ export function GuestCheckinCard({
           className="h-16 w-full gap-3 rounded-2xl bg-success text-lg font-semibold text-white hover:bg-success/90 disabled:opacity-60"
         >
           <CheckCircle className="size-6" />
-          {isLoading ? "Checking in..." : "Check In Guest"}
+          {isLoading ? t("guestCard.checkingIn") : t("guestCard.checkInGuest")}
         </Button>
       )}
     </div>

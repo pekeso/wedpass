@@ -4,6 +4,7 @@ import { use } from "react"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, CheckCircle, Wifi, WifiOff, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 type SectionProps = {
   title: string
@@ -68,6 +69,7 @@ export default function StaffHelpPage({
   params: Promise<{ weddingId: string }>
 }) {
   const { weddingId } = use(params)
+  const { t } = useTranslations()
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -81,22 +83,22 @@ export default function StaffHelpPage({
             <ArrowLeft className="size-5 text-foreground" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Staff Help Guide</h1>
-            <p className="text-sm text-muted-foreground">Emergency procedures and troubleshooting</p>
+            <h1 className="text-2xl font-bold text-foreground">{t("help.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("help.description")}</p>
           </div>
         </div>
 
         {/* Quick reminder card */}
         <div className="rounded-xl border border-border bg-card px-5 py-4 space-y-2">
-          <p className="font-semibold text-foreground">The golden rule</p>
+          <p className="font-semibold text-foreground">{t("help.goldenRule")}</p>
           <div className="space-y-1">
             {[
-              "Scan or search the guest.",
-              "Confirm the name.",
-              "Tap Check In.",
-              "Move to the next guest.",
-              "If offline, continue — check-ins are saved.",
-              "Before leaving, make sure pending sync is 0.",
+              t("help.goldenStep1"),
+              t("help.goldenStep2"),
+              t("help.goldenStep3"),
+              t("help.goldenStep4"),
+              t("help.goldenStep5"),
+              t("help.goldenStep6"),
             ].map((rule, i) => (
               <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <ArrowRight className="size-4 text-success shrink-0 mt-0.5" />
@@ -107,67 +109,67 @@ export default function StaffHelpPage({
         </div>
 
         {/* Emergency scenarios */}
-        <Section title="If something goes wrong">
+        <Section title={t("help.ifSomethingWrong")}>
           <ScenarioCard
             icon={<Wifi className="size-5 text-danger" />}
-            title="QR scan does not work"
-            subtitle="Camera issues, blurry code, bad lighting"
+            title={t("help.qrDoesntWork")}
+            subtitle={t("help.qrIssues")}
             steps={[
-              "Tap Search Guest instead.",
-              "Type the guest's name or phone number.",
-              "Select the correct guest from the list.",
-              "Tap Check In Guest.",
+              t("help.qrFix1"),
+              t("help.qrFix2"),
+              t("help.qrFix3"),
+              t("help.qrFix4"),
             ]}
           />
 
           <ScenarioCard
             icon={<WifiOff className="size-5 text-offline" />}
-            title="Internet goes offline"
-            subtitle='You will see an orange "Offline" bar at the top'
+            title={t("help.internetOff")}
+            subtitle={t("help.internetOff1")}
             steps={[
-              "Do not stop. Keep checking in guests.",
-              "Check-ins are saved safely on this device.",
-              "When internet returns, sync happens automatically.",
-              "Tap Sync Now on the Sync screen to force a sync.",
+              t("help.internetOff2"),
+              t("help.internetOff3"),
+              t("help.internetOff4"),
+              t("help.internetOff5"),
             ]}
           />
 
           <ScenarioCard
             icon={<CheckCircle className="size-5 text-muted-foreground" />}
-            title="Guest is not in the list"
-            subtitle="Not found after searching by name"
+            title={t("help.guestNotInList")}
+            subtitle={t("help.notFoundSearch")}
             steps={[
-              "Try a shorter name or different spelling.",
-              "Search by phone number if available.",
-              "If still not found, send guest to the organizer desk.",
-              "Do not block the entrance — keep the line moving.",
+              t("help.notFoundFix1"),
+              t("help.notFoundFix2"),
+              t("help.notFoundFix3"),
+              t("help.notFoundFix4"),
             ]}
           />
 
           <ScenarioCard
             icon={<Smartphone className="size-5 text-warning" />}
-            title="Device crashes or battery dies"
-            subtitle="You can recover using another device"
+            title={t("help.deviceCrash")}
+            subtitle={t("help.deviceCrashRecovery")}
             steps={[
-              "Ask the organizer for another phone or tablet.",
-              "Log in using the same staff access token.",
-              "Download the offline pack on the new device.",
-              "Continue checking in guests normally.",
-              "Retrieve the original device later — it still has check-ins that need syncing.",
+              t("help.deviceCrashFix1"),
+              t("help.deviceCrashFix2"),
+              t("help.deviceCrashFix3"),
+              t("help.deviceCrashFix4"),
+              t("help.deviceCrashFix5"),
             ]}
           />
         </Section>
 
         {/* Important rules */}
-        <Section title="Very important rules">
+        <Section title={t("help.importantRules")}>
           <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-            <p className="text-sm font-semibold text-foreground">Do:</p>
+            <p className="text-sm font-semibold text-foreground">{t("help.doLabel")}</p>
             {[
-              "Keep the entrance moving.",
-              "Use manual search if QR fails.",
-              "Continue if offline mode is active.",
-              "Check Sync Status before leaving.",
-              "Ask the organizer for exception cases.",
+              t("help.do1"),
+              t("help.do2"),
+              t("help.do3"),
+              t("help.do4"),
+              t("help.do5"),
             ].map((rule, i) => (
               <div key={i} className="flex items-start gap-2 text-sm text-foreground">
                 <CheckCircle className="size-4 text-success shrink-0 mt-0.5" />
@@ -177,14 +179,14 @@ export default function StaffHelpPage({
           </div>
 
           <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-            <p className="text-sm font-semibold text-foreground">Do not:</p>
+            <p className="text-sm font-semibold text-foreground">{t("help.dontLabel")}</p>
             {[
-              "Clear browser data.",
-              "Use private browsing mode.",
-              "Leave with pending sync count above 0.",
-              "Create new guests during Event Mode.",
-              "Panic when internet goes offline.",
-              "Spend too long on one problematic guest.",
+              t("help.dont1"),
+              t("help.dont2"),
+              t("help.dont3"),
+              t("help.dont4"),
+              t("help.dont5"),
+              t("help.dont6"),
             ].map((rule, i) => (
               <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <span className="text-danger font-bold shrink-0">✕</span>
@@ -195,92 +197,19 @@ export default function StaffHelpPage({
         </Section>
 
         {/* Before leaving */}
-        <Section title="Before you leave the wedding">
+        <Section title={t("help.beforeLeave")}>
           <div className="rounded-xl border border-border bg-card p-4 space-y-3">
             <StepList
               steps={[
-                "Open the Sync screen.",
-                "Tap Sync Now and wait for it to complete.",
-                "Confirm that pending sync count is 0.",
-                "If it is not 0, do not close the app — inform the organizer.",
-                "Once at 0, you may leave.",
+                t("help.beforeLeave1"),
+                t("help.beforeLeave2"),
+                t("help.beforeLeave3"),
+                t("help.beforeLeave4"),
+                t("help.beforeLeave5"),
               ]}
             />
           </div>
         </Section>
-
-        {/* French section */}
-        <div className="border-t border-border pt-6 space-y-6">
-          <h2 className="text-xl font-bold text-foreground">Version Française</h2>
-
-          <div className="rounded-xl border border-border bg-card px-5 py-4 space-y-2">
-            <p className="font-semibold text-foreground">La règle d&apos;or</p>
-            <div className="space-y-1">
-              {[
-                "Scanner ou rechercher l'invité.",
-                "Confirmer le nom.",
-                "Appuyer sur Enregistrer l'arrivée.",
-                "Passer à l'invité suivant.",
-                "Si hors ligne, continuer — les présences sont sauvegardées.",
-                "Avant de partir, vérifiez que les éléments en attente sont à 0.",
-              ].map((rule, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <ArrowRight className="size-4 text-success shrink-0 mt-0.5" />
-                  <span>{rule}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-            <p className="font-semibold text-foreground">Si le scan QR ne fonctionne pas</p>
-            <StepList
-              steps={[
-                "Appuyez sur Rechercher un invité.",
-                "Tapez le nom ou le numéro de téléphone.",
-                "Sélectionnez le bon invité.",
-                "Appuyez sur Enregistrer l'arrivée.",
-              ]}
-            />
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-            <p className="font-semibold text-foreground">Si Internet ne fonctionne plus</p>
-            <StepList
-              steps={[
-                "Ne vous arrêtez pas. Continuez à enregistrer les invités.",
-                "Les présences sont sauvegardées sur cet appareil.",
-                "La synchronisation se fait automatiquement quand Internet revient.",
-                "Appuyez sur Synchroniser maintenant pour forcer la synchronisation.",
-              ]}
-            />
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-            <p className="font-semibold text-foreground">Si l&apos;invité n&apos;est pas trouvé</p>
-            <StepList
-              steps={[
-                "Essayez un nom plus court ou une autre orthographe.",
-                "Recherchez par numéro de téléphone.",
-                "Si toujours introuvable, envoyez l'invité au bureau de l'organisateur.",
-                "Ne bloquez pas l'entrée — gardez la file fluide.",
-              ]}
-            />
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-            <p className="font-semibold text-foreground">Si l&apos;appareil tombe en panne</p>
-            <StepList
-              steps={[
-                "Demandez un autre téléphone ou appareil à l'organisateur.",
-                "Connectez-vous avec le même token d'accès.",
-                "Téléchargez le pack hors ligne sur le nouvel appareil.",
-                "Continuez à enregistrer les invités normalement.",
-                "Récupérez l'appareil d'origine plus tard pour synchroniser ses présences.",
-              ]}
-            />
-          </div>
-        </div>
 
         {/* Navigation footer */}
         <div className="flex gap-3 pt-2">
@@ -290,11 +219,11 @@ export default function StaffHelpPage({
             onClick={() => history.back()}
           >
             <ArrowLeft className="size-4" />
-            Back
+            {t("help.back")}
           </Button>
           <Link href={`/staff/${weddingId}/checkin`} className="flex-1">
             <Button className="h-12 w-full gap-2">
-              Go to Check-In
+              {t("help.goToCheckin")}
               <ArrowRight className="size-4" />
             </Button>
           </Link>

@@ -11,6 +11,7 @@ import { ScannerFrame } from "@/components/staff/scanner-frame"
 import { findGuestByQrToken } from "@/lib/offline/guests/guest-local-repository"
 import { useNetworkStatus } from "@/hooks/use-network-status"
 import { offlineDb } from "@/lib/offline/db"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 const SCANNER_ID = "wedpass-qr-scanner"
 const SCAN_COOLDOWN_MS = 2000
@@ -34,6 +35,7 @@ export default function StaffScanPage({
   const { isOnline } = useNetworkStatus()
   const [status, setStatus] = useState<ScanStatus>("initializing")
   const [pendingCount, setPendingCount] = useState(0)
+  const { t } = useTranslations()
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const lastScanTimeRef = useRef<number>(0)
   const isNavigatingRef = useRef(false)
@@ -160,17 +162,16 @@ export default function StaffScanPage({
           >
             <ArrowLeft className="size-5" />
           </Button>
-          <h1 className="text-xl font-bold text-foreground">Scan QR Code</h1>
+          <h1 className="text-xl font-bold text-foreground">{t("scan.title")}</h1>
         </div>
 
         {status === "permission-denied" ? (
           <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
             <CameraOff className="size-12 text-muted-foreground" />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">Camera access denied</p>
+              <p className="font-semibold text-foreground">{t("scan.cameraAccessDenied")}</p>
               <p className="text-sm text-muted-foreground">
-                Allow camera access in your browser settings, then refresh this
-                page.
+                {t("scan.cameraAccessDeniedDesc")}
               </p>
             </div>
           </div>
@@ -186,18 +187,18 @@ export default function StaffScanPage({
             </div>
 
             <p className="text-center text-sm text-muted-foreground">
-              Point the camera at a guest&apos;s QR code
+              {t("scan.hint")}
             </p>
 
             {status === "not-found" && (
               <div className="rounded-xl border border-danger/30 bg-danger-light px-4 py-3 text-sm text-danger">
-                QR code not recognized. Please use manual search.
+                {t("scan.qrNotRecognized")}
               </div>
             )}
 
             {status === "error" && (
               <div className="rounded-xl border border-danger/30 bg-danger-light px-4 py-3 text-sm text-danger">
-                Camera unavailable. Please use manual search.
+                {t("scan.cameraUnavailable")}
               </div>
             )}
           </>
@@ -209,7 +210,7 @@ export default function StaffScanPage({
           className="h-14 w-full gap-2 text-base"
         >
           <Search className="size-4" />
-          Search guest manually
+          {t("scan.searchManually")}
         </Button>
       </div>
     </div>

@@ -1,5 +1,8 @@
+"use client"
+
 import { CheckCircle, AlertCircle, Download, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 export type PackDownloadState = "not-prepared" | "downloading" | "ready" | "failed"
 
@@ -28,19 +31,23 @@ export function OfflinePackStatusCard({
   lastDownloadedAt,
   errorMessage,
 }: OfflinePackStatusCardProps) {
+  const { t } = useTranslations()
+
   if (state === "ready") {
     return (
       <div className="rounded-xl border border-success bg-success-light p-5 space-y-1">
         <div className="flex items-center gap-2">
           <CheckCircle className="size-5 text-success shrink-0" />
-          <p className="font-semibold text-success">Offline Pack Ready</p>
+          <p className="font-semibold text-success">{t("offlinePack.ready")}</p>
         </div>
         {guestCount !== undefined && (
-          <p className="text-sm text-success pl-7">{guestCount} guests loaded</p>
+          <p className="text-sm text-success pl-7">
+            {t("offlinePack.guestCount", { count: guestCount })}
+          </p>
         )}
         {lastDownloadedAt && (
           <p className="text-xs text-success/70 pl-7">
-            Last downloaded: {formatDownloadedAt(lastDownloadedAt)}
+            {t("offlinePack.lastDownloaded", { time: formatDownloadedAt(lastDownloadedAt) })}
           </p>
         )}
       </div>
@@ -52,11 +59,9 @@ export function OfflinePackStatusCard({
       <div className="rounded-xl border border-sync bg-sync-light p-5 space-y-1">
         <div className="flex items-center gap-2">
           <Loader2 className="size-5 text-sync shrink-0 animate-spin" />
-          <p className="font-semibold text-sync">Downloading offline pack...</p>
+          <p className="font-semibold text-sync">{t("offlinePack.downloading")}</p>
         </div>
-        <p className="text-sm text-sync pl-7">
-          Saving guest list to this device. Do not close this tab.
-        </p>
+        <p className="text-sm text-sync pl-7">{t("offlinePack.savingGuestList")}</p>
       </div>
     )
   }
@@ -66,14 +71,12 @@ export function OfflinePackStatusCard({
       <div className="rounded-xl border border-danger bg-danger-light p-5 space-y-1">
         <div className="flex items-center gap-2">
           <AlertCircle className="size-5 text-danger shrink-0" />
-          <p className="font-semibold text-danger">Download failed</p>
+          <p className="font-semibold text-danger">{t("offlinePack.downloadFailed")}</p>
         </div>
         {errorMessage && (
           <p className="text-sm text-danger pl-7">{errorMessage}</p>
         )}
-        <p className="text-sm text-danger/80 pl-7">
-          Check your connection and try again.
-        </p>
+        <p className="text-sm text-danger/80 pl-7">{t("offlinePack.downloadFailedDesc")}</p>
       </div>
     )
   }
@@ -82,11 +85,9 @@ export function OfflinePackStatusCard({
     <div className="rounded-xl border border-border bg-muted p-5 space-y-1">
       <div className="flex items-center gap-2">
         <Download className={cn("size-5 text-muted-foreground shrink-0")} />
-        <p className="font-semibold text-foreground">Not prepared</p>
+        <p className="font-semibold text-foreground">{t("offlinePack.notPrepared")}</p>
       </div>
-      <p className="text-sm text-muted-foreground pl-7">
-        This device has no offline guest data yet.
-      </p>
+      <p className="text-sm text-muted-foreground pl-7">{t("offlinePack.noOfflineData")}</p>
     </div>
   )
 }

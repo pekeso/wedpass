@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 26
+Phase 27
 
 ## Completed Phases
 
+- Phase 26 — Bilingual English/French Foundation (2026-06-02)
 - Phase 25 — Gallery Privacy Settings (2026-06-02)
 - Phase 24 — Organizer Media Moderation (2026-06-02)
 - Phase 23 — Guest Gallery (2026-06-02)
@@ -38,6 +39,10 @@ None.
 
 None.
 
+## Last Updated
+
+2026-06-02
+
 ## Important Decisions
 
 - Implementation is split into separate phase prompt files under `/phases/`.
@@ -47,6 +52,7 @@ None.
 - Phase 14 split into 14A (Local Check-In Transaction) and 14B (Check-In UI) for focused sessions.
 - Three docs referenced in the original prompt are missing (`event_operations.md`, `staff_training_guide.md`, `beta_wedding_checklist.md`). Phase files reference the docs that do exist.
 - `create-next-app` was not used (cannot run in a non-empty directory); project was initialized manually with identical configuration.
+- Phase 26: Chose custom lightweight i18n hook (Option B) over next-intl — no extra dependency, flat dot-notation string keys, localStorage persistence, lazy initializer avoids effect-triggered setState.
 - `.gitattributes` added to normalize line endings to LF on Windows.
 - Tailwind v4 used (not v3) because shadcn@4.9.0 requires v4 CSS features (`@theme inline`, `@custom-variant`).
 - WedPass design tokens defined in `@theme` block in `globals.css` (Tailwind v4 CSS-first approach).

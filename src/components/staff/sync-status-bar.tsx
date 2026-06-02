@@ -1,5 +1,8 @@
+"use client"
+
 import { AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 export type SyncState = "idle" | "syncing" | "failed" | "offline"
 
@@ -32,33 +35,31 @@ const stateConfig: Record<
   },
 }
 
-function getStatusText(
-  isOnline: boolean,
-  pendingCount: number,
-  syncState: SyncState
-): string {
-  if (!isOnline) {
-    return pendingCount > 0
-      ? `Offline · ${pendingCount} pending`
-      : "Offline · No pending"
-  }
-  if (syncState === "syncing") {
-    return pendingCount > 0
-      ? `Syncing · ${pendingCount} pending`
-      : "Syncing..."
-  }
-  if (syncState === "failed") return "Sync failed · Retrying"
-  return "Online · All synced"
-}
-
 export function SyncStatusBar({
   isOnline,
   pendingCount,
   lastSyncedAt,
   syncState,
 }: SyncStatusBarProps) {
+  const { t } = useTranslations()
   const config = stateConfig[syncState]
-  const statusText = getStatusText(isOnline, pendingCount, syncState)
+
+  let statusText: string
+  if (!isOnline) {
+    statusText =
+      pendingCount > 0
+        ? t("syncBar.offlineWithCount", { count: pendingCount })
+        : t("syncBar.offlineNone")
+  } else if (syncState === "syncing") {
+    statusText =
+      pendingCount > 0
+        ? t("syncBar.syncingWithCount", { count: pendingCount })
+        : t("syncBar.syncing")
+  } else if (syncState === "failed") {
+    statusText = t("syncBar.failed")
+  } else {
+    statusText = t("syncBar.allSynced")
+  }
 
   return (
     <div
@@ -72,7 +73,7 @@ export function SyncStatusBar({
         <span>{statusText}</span>
       </div>
       {lastSyncedAt && syncState === "idle" && (
-        <span className="opacity-70">Synced {lastSyncedAt}</span>
+        <span className="opacity-70">{t("syncBar.syncedAt", { time: lastSyncedAt })}</span>
       )}
     </div>
   )

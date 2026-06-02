@@ -1,3 +1,5 @@
+import { LanguageToggle } from "@/components/shared/language-toggle"
+
 interface GuestLayoutProps {
   children: React.ReactNode
 }
@@ -5,7 +7,10 @@ interface GuestLayoutProps {
 export function GuestLayout({ children }: GuestLayoutProps) {
   return (
     <div className="min-h-screen bg-ivory">
-      <main className="mx-auto max-w-2xl px-4 py-8">{children}</main>
+      <div className="flex justify-end px-4 pt-4">
+        <LanguageToggle />
+      </div>
+      <main className="mx-auto max-w-2xl px-4 pb-8">{children}</main>
     </div>
   )
 }

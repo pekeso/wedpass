@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { ImageIcon, VideoIcon, LayoutGrid, Camera } from "lucide-react"
 import { MediaGrid } from "./media-grid"
 import { MediaLightbox } from "./media-lightbox"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { PublicGalleryMediaItemDTO, PublicGalleryResponseDTO } from "@/modules/media/media.dto"
 
 type MediaTypeFilter = "ALL" | "IMAGE" | "VIDEO"
@@ -34,15 +35,16 @@ interface GalleryViewProps {
   coupleNames: string | null
 }
 
-const FILTER_TABS: { label: string; value: MediaTypeFilter; icon: React.ReactNode }[] = [
-  { label: "All", value: "ALL", icon: <LayoutGrid className="h-4 w-4" aria-hidden="true" /> },
-  { label: "Photos", value: "IMAGE", icon: <ImageIcon className="h-4 w-4" aria-hidden="true" /> },
-  { label: "Videos", value: "VIDEO", icon: <VideoIcon className="h-4 w-4" aria-hidden="true" /> },
-]
-
 export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewProps) {
   const [filter, setFilter] = useState<MediaTypeFilter>("ALL")
   const [selectedItem, setSelectedItem] = useState<PublicGalleryMediaItemDTO | null>(null)
+  const { t } = useTranslations()
+
+  const filterTabs: { label: string; value: MediaTypeFilter; icon: React.ReactNode }[] = [
+    { label: t("gallery.all"), value: "ALL", icon: <LayoutGrid className="h-4 w-4" aria-hidden="true" /> },
+    { label: t("gallery.photos"), value: "IMAGE", icon: <ImageIcon className="h-4 w-4" aria-hidden="true" /> },
+    { label: t("gallery.videos"), value: "VIDEO", icon: <VideoIcon className="h-4 w-4" aria-hidden="true" /> },
+  ]
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["gallery", slug, filter],
@@ -65,10 +67,8 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-navy/5">
           <ImageIcon className="h-7 w-7 text-navy/30" aria-hidden="true" />
         </div>
-        <p className="text-base font-medium text-navy/70">Gallery not available</p>
-        <p className="mt-1 text-sm text-navy/40">
-          The gallery for this wedding is not currently enabled.
-        </p>
+        <p className="text-base font-medium text-navy/70">{t("gallery.notAvailable")}</p>
+        <p className="mt-1 text-sm text-navy/40">{t("gallery.notAvailableDesc")}</p>
       </div>
     )
   }
@@ -77,7 +77,7 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
     <div>
       {/* Filter tabs */}
       <div className="mb-5 flex gap-2">
-        {FILTER_TABS.map((tab) => (
+        {filterTabs.map((tab) => (
           <button
             key={tab.value}
             type="button"
@@ -101,11 +101,11 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-champagne/10">
             <Camera className="h-7 w-7 text-champagne" aria-hidden="true" />
           </div>
-          <p className="text-base font-medium text-navy/70">No photos yet</p>
+          <p className="text-base font-medium text-navy/70">{t("gallery.noPhotos")}</p>
           <p className="mt-1 text-sm text-navy/40">
             {coupleNames
-              ? `Be the first to share a moment from ${coupleNames}'s wedding.`
-              : "Be the first to share a moment from the wedding."}
+              ? t("gallery.beFistWithName", { coupleNames })
+              : t("gallery.beFirst")}
           </p>
         </div>
       ) : (
@@ -120,7 +120,7 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
                 disabled={isFetchingNextPage}
                 className="rounded-xl border border-navy/20 bg-white px-6 py-3 text-sm font-medium text-navy shadow-card transition-colors hover:bg-ivory disabled:opacity-50"
               >
-                {isFetchingNextPage ? "Loading…" : "Load More"}
+                {isFetchingNextPage ? t("gallery.loading") : t("gallery.loadMore")}
               </button>
             </div>
           )}

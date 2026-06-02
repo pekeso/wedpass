@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import type { Metadata } from "next"
-import { Camera } from "lucide-react"
 import { getPublicWedding } from "@/modules/weddings/weddings.service"
 import { WeddingNotFoundError } from "@/modules/weddings/weddings.service"
 import { GalleryView } from "@/components/media/gallery-view"
+import { GalleryPageHeader } from "@/components/guest/gallery-page-header"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -38,22 +37,7 @@ export default async function GuestGalleryPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-ivory">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        {/* Header */}
-        <div className="mb-6 text-center">
-          <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">{displayName}</h1>
-          <p className="mt-1 text-sm text-navy/50">Wedding Gallery</p>
-        </div>
-
-        {/* Upload CTA */}
-        <div className="mb-8 flex justify-center">
-          <Link
-            href={`/w/${slug}/upload`}
-            className="flex items-center gap-2 rounded-xl bg-champagne px-5 py-3 text-sm font-semibold text-white shadow-card transition-opacity hover:opacity-90 active:opacity-80"
-          >
-            <Camera className="h-4 w-4" aria-hidden="true" />
-            Add Your Photos
-          </Link>
-        </div>
+        <GalleryPageHeader displayName={displayName} slug={slug} />
 
         {/* Gallery */}
         <GalleryView

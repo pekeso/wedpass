@@ -10,6 +10,7 @@ import { findGuestById } from "@/lib/offline/guests/guest-local-repository"
 import { checkInGuestLocally } from "@/lib/offline/checkins/checkin-local-service"
 import type { CheckInLocalResult } from "@/lib/offline/checkins/checkin-local-service"
 import { useSyncStatus } from "@/hooks/use-sync-status"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { LocalGuest } from "@/types/shared"
 
 type PageView = "loading" | "not-found" | "confirmation" | "result"
@@ -30,6 +31,7 @@ export default function StaffCheckinGuestPage({
   const router = useRouter()
   const { isOnline, pendingCount, lastSyncedAt, syncState } =
     useSyncStatus(weddingId)
+  const { t } = useTranslations()
 
   const [guest, setGuest] = useState<LocalGuest | null>(null)
   const [view, setView] = useState<PageView>("loading")
@@ -94,7 +96,7 @@ export default function StaffCheckinGuestPage({
               <ArrowLeft className="size-5" />
             </Button>
             <h1 className="text-xl font-bold text-foreground">
-              Guest Check-In
+              {t("checkin.guestCheckinTitle")}
             </h1>
           </div>
         )}
@@ -110,10 +112,9 @@ export default function StaffCheckinGuestPage({
           <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
             <AlertTriangle className="size-12 text-muted-foreground" />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">Guest not found</p>
+              <p className="font-semibold text-foreground">{t("checkin.guestNotFound")}</p>
               <p className="text-sm text-muted-foreground">
-                This guest was not found in the offline pack. Try downloading a
-                fresh offline pack.
+                {t("checkin.guestNotFoundDesc")}
               </p>
             </div>
             <Button
@@ -121,7 +122,7 @@ export default function StaffCheckinGuestPage({
               onClick={() => router.push(`/staff/${weddingId}/checkin`)}
               className="h-12 w-full"
             >
-              Back to Check-In
+              {t("checkin.backToCheckin")}
             </Button>
           </div>
         )}
@@ -138,7 +139,7 @@ export default function StaffCheckinGuestPage({
               onClick={() => router.back()}
               className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
             >
-              Wrong guest? Go back
+              {t("checkin.wrongGuest")}
             </button>
           </div>
         )}
@@ -155,7 +156,7 @@ export default function StaffCheckinGuestPage({
                     {guest?.fullName}
                   </p>
                   <p className="text-base font-semibold text-success">
-                    Checked in successfully
+                    {t("checkin.checkedInSuccessfully")}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     at {formatTime(result.checkedInAt)}
@@ -167,7 +168,7 @@ export default function StaffCheckinGuestPage({
                   }
                   className="h-14 w-full rounded-2xl text-base font-semibold"
                 >
-                  Next Guest
+                  {t("checkin.nextGuest")}
                 </Button>
               </>
             ) : result.status === "already_checked_in" ? (
@@ -180,10 +181,10 @@ export default function StaffCheckinGuestPage({
                     {guest?.fullName}
                   </p>
                   <p className="text-base font-semibold text-warning">
-                    Already checked in
+                    {t("checkin.alreadyCheckedIn")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Originally checked in at {formatTime(result.checkedInAt)}
+                    {t("checkin.originallyCheckedIn", { time: formatTime(result.checkedInAt) })}
                   </p>
                 </div>
                 <Button
@@ -192,7 +193,7 @@ export default function StaffCheckinGuestPage({
                   }
                   className="h-14 w-full rounded-2xl text-base font-semibold"
                 >
-                  Next Guest
+                  {t("checkin.nextGuest")}
                 </Button>
               </>
             ) : null}

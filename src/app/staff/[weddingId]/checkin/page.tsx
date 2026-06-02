@@ -10,6 +10,7 @@ import { ScanActionCard } from "@/components/staff/scan-action-card"
 import { RecentCheckinsList } from "@/components/staff/recent-checkins-list"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { useRecentCheckins } from "@/hooks/use-recent-checkins"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 export default function StaffCheckinPage({
   params,
@@ -21,6 +22,7 @@ export default function StaffCheckinPage({
   const { isOnline, pendingCount, lastSyncedAt, syncState } =
     useSyncStatus(weddingId)
   const recentCheckins = useRecentCheckins(weddingId)
+  const { t } = useTranslations()
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -34,7 +36,7 @@ export default function StaffCheckinPage({
       {!isOnline && <OfflineWarningBanner />}
 
       <div className="mx-auto w-full max-w-lg flex-1 space-y-6 px-4 py-6">
-        <h1 className="text-2xl font-bold text-foreground">Check-In</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("checkin.title")}</h1>
 
         <ScanActionCard
           onScanQr={() => router.push(`/staff/${weddingId}/scan`)}
@@ -48,7 +50,7 @@ export default function StaffCheckinPage({
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto w-fit"
         >
           <HelpCircle className="size-4 shrink-0" />
-          Help &amp; emergency procedures
+          {t("checkin.helpLink")}
         </Link>
       </div>
     </div>

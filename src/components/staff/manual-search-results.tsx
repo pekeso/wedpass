@@ -2,6 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { LocalGuest } from "@/types/shared"
 
 interface GuestSearchResultItemProps {
@@ -10,6 +11,8 @@ interface GuestSearchResultItemProps {
 }
 
 function GuestSearchResultItem({ guest, onSelect }: GuestSearchResultItemProps) {
+  const { t } = useTranslations()
+
   return (
     <button
       type="button"
@@ -29,11 +32,11 @@ function GuestSearchResultItem({ guest, onSelect }: GuestSearchResultItemProps) 
       {guest.checkedIn ? (
         <Badge className="shrink-0 gap-1 bg-success-light text-success border-success hover:bg-success-light">
           <CheckCircle2 className="size-3" />
-          Checked In
+          {t("search.checkedIn")}
         </Badge>
       ) : (
         <Badge variant="outline" className="shrink-0 text-muted-foreground">
-          Not In
+          {t("search.notIn")}
         </Badge>
       )}
     </button>
@@ -51,14 +54,16 @@ export function ManualSearchResults({
   results,
   onSelect,
 }: ManualSearchResultsProps) {
+  const { t } = useTranslations()
+
   if (results.length === 0 && query.trim()) {
     return (
       <div className="py-12 text-center">
         <p className="text-base font-semibold text-foreground">
-          No guests found
+          {t("search.noGuestsFound")}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          No results for &ldquo;{query}&rdquo;
+          {t("search.noResultsFor", { query })}
         </p>
       </div>
     )

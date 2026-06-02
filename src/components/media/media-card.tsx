@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { Play } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/use-translations"
 import type { PublicGalleryMediaItemDTO } from "@/modules/media/media.dto"
 
 interface MediaCardProps {
@@ -10,12 +11,14 @@ interface MediaCardProps {
 }
 
 export function MediaCard({ item, onSelect }: MediaCardProps) {
+  const { t } = useTranslations()
+
   return (
     <button
       type="button"
       onClick={() => onSelect(item)}
       className="group relative aspect-square w-full overflow-hidden rounded-lg bg-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne"
-      aria-label={item.mediaType === "VIDEO" ? "Play video" : "View photo"}
+      aria-label={item.mediaType === "VIDEO" ? t("gallery.playVideo") : t("gallery.viewPhoto")}
     >
       <Image
         src={item.thumbnailUrl ?? item.fileUrl}
