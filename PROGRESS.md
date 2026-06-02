@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 19 and Phase 20
+Phase 20
 
 ## Completed Phases
 
+- Phase 19 — Staff Device Readiness UI (2026-06-02)
 - Phase 18 — Event Readiness Command Center (2026-06-02)
 - Phase 17 — Multi-Device Conflict Handling Tests (2026-06-02)
 - Phase 16 — Check-In Sync Backend (2026-06-02)
@@ -68,6 +69,25 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 19 — Staff Device Readiness UI
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/components/staff/staff-help-messages.tsx (accordion-style help panel, 4 scenarios EN)
+  - src/app/staff/[weddingId]/help/page.tsx (full bilingual EN/FR static help guide, works offline)
+- **Files Modified:**
+  - src/hooks/use-offline-pack-status.ts (added snapshotVersion to PackStatusData)
+  - src/app/staff/[weddingId]/download/page.tsx (readiness checklist, "Ready for Event Day" banner, help link, StaffHelpMessages)
+  - src/app/staff/[weddingId]/checkin/page.tsx (added help link at bottom)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** Download page shows 4-item readiness checklist (offline pack, guest count, last downloaded, snapshot version) when ready state is active. "Ready for Event Day" green banner visible when all items pass. Help messages accordion opens/closes individual items. Help page is static content — no API calls, works fully offline. Back/navigation links connect download → help → check-in. Help page bilingual (EN + FR). snapshotVersion now exposed from useOfflinePackStatus hook.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add staff device readiness ui
 
 ---
 

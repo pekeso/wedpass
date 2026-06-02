@@ -2,6 +2,8 @@
 
 import { use } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { HelpCircle } from "lucide-react"
 import { SyncStatusBar } from "@/components/staff/sync-status-bar"
 import { OfflineWarningBanner } from "@/components/staff/offline-warning-banner"
 import { ScanActionCard } from "@/components/staff/scan-action-card"
@@ -40,6 +42,14 @@ export default function StaffCheckinPage({
         />
 
         <RecentCheckinsList checkins={recentCheckins} />
+
+        <Link
+          href={`/staff/${weddingId}/help`}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto w-fit"
+        >
+          <HelpCircle className="size-4 shrink-0" />
+          Help &amp; emergency procedures
+        </Link>
       </div>
     </div>
   )
