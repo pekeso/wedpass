@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 30
+Phase 38
 
 ## Completed Phases
 
+- Phase 37 — Marketing Landing Page (2026-06-02)
 - Phase 36 — Staff Mode Visual Polish (2026-06-02)
 - Phase 35 — Branded Button Variants (2026-06-02)
 - Phase 34 — Organizer Dashboard Rich Layout (2026-06-02)
@@ -49,7 +50,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 36 complete)
+2026-06-02 (Phase 37 complete)
 
 ---
 
