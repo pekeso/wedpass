@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 40
+Phase 41
 
 ## Completed Phases
 
+- Phase 40 — Public Layout and Auth Pages Polish (2026-06-02)
 - Phase 39 — System Utility Pages (2026-06-02)
 - Phase 38 — Beta Signup Page (2026-06-02)
 - Phase 37 — Marketing Landing Page (2026-06-02)
@@ -52,7 +53,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 39 complete)
+2026-06-02 (Phase 40 complete)
 
 ---
 

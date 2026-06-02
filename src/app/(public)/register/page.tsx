@@ -45,8 +45,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center bg-ivory px-4 py-12">
       <Card className="w-full max-w-md">
+        <div className="h-1 w-full rounded-t-[inherit] bg-navy" />
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <WedPassWordmark size={28} />
@@ -119,7 +120,8 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-navy hover:bg-navy/90"
+                variant="navy"
+                className="w-full"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? "Creating account..." : "Create account"}

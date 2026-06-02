@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 
 interface PublicLayoutProps {
   children: React.ReactNode
@@ -9,11 +10,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link
-            href="/"
-            className="text-lg font-semibold text-navy hover:opacity-90"
-          >
-            WedPass
+          <Link href="/" className="hover:opacity-85 transition-opacity">
+            <WedPassWordmark size={20} />
           </Link>
           <nav className="flex items-center gap-4">
             <Link
