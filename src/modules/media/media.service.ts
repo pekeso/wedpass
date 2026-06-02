@@ -2,6 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { r2Client, getReadSignedUrl } from "@/lib/storage/r2-client"
 import { findWeddingById, findWeddingBySlug } from "@/modules/weddings/weddings.repository"
+import { logEvent } from "@/lib/utils/logger"
 import {
   createMediaUpload,
   findPublicGalleryMedia,
@@ -118,6 +119,17 @@ export async function confirmUpload(
   if (!input.fileKey.startsWith(expectedPrefix)) {
     throw new InvalidFileKeyError()
   }
+
+  const ext = MIME_TO_EXT[input.mimeType]
+  if (!ext) throw new UnsupportedFileTypeError()
+  validateFileSize(input.mediaType, input.fileSizeBytes)
+
+  logEvent("media_upload_confirmed", {
+    weddingId,
+    mediaType: input.mediaType,
+    mimeType: input.mimeType,
+    fileSizeBytes: input.fileSizeBytes,
+  })
 
   const media = await createMediaUpload({
     id: input.uploadId,
@@ -263,6 +275,7 @@ export async function hideMediaItem(
   const media = await findMediaByWeddingAndId(weddingId, mediaId)
   if (!media) throw new MediaNotFoundError()
   await hideMedia(weddingId, mediaId)
+  logEvent("media_moderation_action", { weddingId, mediaId, action: "HIDDEN" })
   return { mediaId, status: "HIDDEN" }
 }
 
@@ -275,6 +288,7 @@ export async function showMediaItem(
   const media = await findMediaByWeddingAndId(weddingId, mediaId)
   if (!media) throw new MediaNotFoundError()
   await showMedia(weddingId, mediaId)
+  logEvent("media_moderation_action", { weddingId, mediaId, action: "SHOW" })
   return { mediaId, status: "UPLOADED" }
 }
 
@@ -287,6 +301,7 @@ export async function deleteMediaItem(
   const media = await findMediaByWeddingAndId(weddingId, mediaId)
   if (!media) throw new MediaNotFoundError()
   await deleteMedia(weddingId, mediaId)
+  logEvent("media_moderation_action", { weddingId, mediaId, action: "DELETED" })
   return { mediaId, status: "DELETED" }
 }
 

@@ -2,10 +2,12 @@
 
 ## Current Phase
 
-Phase 27
+Phase 29
 
 ## Completed Phases
 
+- Phase 28 — Security Hardening (2026-06-02)
+- Phase 27 — Analytics and Monitoring Foundation (2026-06-02)
 - Phase 26 — Bilingual English/French Foundation (2026-06-02)
 - Phase 25 — Gallery Privacy Settings (2026-06-02)
 - Phase 24 — Organizer Media Moderation (2026-06-02)
@@ -42,6 +44,73 @@ None.
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 28 — Security Hardening
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - middleware.ts (Next.js Edge middleware — rate limiting on auth, upload, gallery, sync endpoints)
+  - src/lib/rate-limit/rate-limiter.ts (Upstash ratelimit utility with graceful fallback when Redis is unconfigured)
+- **Files Modified:**
+  - src/modules/media/media.service.ts (confirmUpload now re-validates MIME type and file size — prevents metadata spoofing at confirm time)
+  - .env.example (added UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN)
+  - package.json (added @upstash/ratelimit and @upstash/redis)
+  - PROGRESS.md
+- **Dependencies Added:** @upstash/ratelimit, @upstash/redis
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Security Issues Found and Fixed:**
+  - **[FIXED] No rate limiting** — Entire project had no rate limiting. Added Next.js Edge middleware with sliding-window rate limits: auth 5/min, upload 30/min, gallery 120/min, sync 20/min. Requires UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN in production; gracefully skips when unconfigured (development).
+  - **[FIXED] confirmUpload metadata spoofing** — The `confirmUpload` service accepted client-provided `mimeType` and `fileSizeBytes` at confirm time without re-validating them. A malicious client could call confirm with a different MIME type or size than what was validated at upload-URL-request time. Fixed by adding `validateFileSize` and MIME type check inside `confirmUpload`.
+- **Security Items Verified as Correct:**
+  - QR tokens: `crypto.randomUUID()` twice, 64 hex chars (256-bit entropy) ✓
+  - Wedding-scoped authorization: all services check `organizerId` against `wedding.organizerId` ✓
+  - Staff token scope isolation: separate `STAFF_JWT_SECRET`, `scope: "staff"` claim, and cross-wedding `weddingId` check on sync/snapshot/verify routes ✓
+  - File upload MIME allowlist: only image/jpeg, image/png, video/mp4 — SVG rejected at service layer ✓
+  - File size limits: images 10MB, videos 100MB, enforced before signing ✓
+  - Public wedding endpoint: returns only name, coupleNames, eventDate, location, coverImageUrl, galleryEnabled — no organizer email, guest list, staff info ✓
+  - Public gallery: `findPublicGalleryMedia` filters to UPLOADED/APPROVED only — HIDDEN/DELETED excluded ✓
+  - Zod validation: every POST/PATCH route handler validates with Zod on the server ✓
+  - Pagination bounded: pageSize max 100 on all listing endpoints ✓
+  - Error responses: no raw Prisma errors, no stack traces, clean error codes ✓
+  - Environment: .env in .gitignore, .env.example present, no hardcoded secrets in source ✓
+  - IndexedDB: no organizer password, no refresh tokens — staff token in localStorage (intentional for offline operation) ✓
+  - Staff device revocation: `requireStaffAuth` rejects devices not in ACTIVE status ✓
+- **Known Issues:** None.
+- **Blocked Items:** Rate limiting requires Upstash Redis in production. Development gracefully bypasses when unconfigured.
+- **Git Commit Message:** chore: harden security controls
+
+---
+
+### Phase 27 — Analytics and Monitoring Foundation
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - sentry.client.config.ts (Sentry browser config with Replay integration)
+  - sentry.server.config.ts (Sentry Node.js config)
+  - sentry.edge.config.ts (Sentry edge runtime config)
+  - instrumentation.ts (Next.js instrumentation hook — loads Sentry at startup)
+  - src/lib/utils/logger.ts (logEvent — structured JSON console logging)
+  - src/modules/feedback/feedback.schemas.ts (submitFeedbackSchema — rating 1-10, 5 text fields)
+  - src/modules/feedback/feedback.repository.ts (createFeedback)
+  - src/modules/feedback/feedback.service.ts (submitFeedback + error classes)
+  - src/app/api/v1/weddings/[weddingId]/feedback/route.ts (POST — organizer auth)
+  - src/components/shared/beta-feedback-form.tsx (rating 1-10, 5 textarea fields, submitted state)
+- **Files Modified:**
+  - next.config.mjs (wrapped with withSentryConfig)
+  - .env.example (added NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT)
+  - src/app/api/v1/staff/weddings/[weddingId]/snapshot/route.ts (logEvent: snapshot_downloaded)
+  - src/modules/sync/sync.service.ts (logEvent: sync_attempt, sync_completed, sync_failed, sync_duplicate_checkins)
+  - src/modules/media/media.service.ts (logEvent: media_upload_confirmed, media_moderation_action)
+  - src/app/dashboard/wedding/[weddingId]/page.tsx (added pendingGuests, checkinPercentage, lastSyncAt to stats display)
+  - src/app/dashboard/wedding/[weddingId]/settings/page.tsx (added BetaFeedbackForm section)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** Dashboard shows 4 stat cards: Total Guests, Checked In, Check-in Rate (%), Media Uploads. Last sync time rendered below cards when available. BetaFeedbackForm visible in settings page under "Beta Feedback" heading. Rating picker (1-10 buttons), 5 textarea fields, Submit button. Submitted state shows confirmation message. logEvent outputs JSON to console on: snapshot download, sync attempt/completed/failed/duplicate, media confirm, media hide/show/delete, feedback submit. Sentry configured via withSentryConfig — reads SENTRY_DSN (server) and NEXT_PUBLIC_SENTRY_DSN (client).
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add analytics and monitoring foundation
 
 ## Important Decisions
 
