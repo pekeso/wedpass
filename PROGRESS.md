@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 25
+Phase 26
 
 ## Completed Phases
 
+- Phase 25 — Gallery Privacy Settings (2026-06-02)
 - Phase 24 — Organizer Media Moderation (2026-06-02)
 - Phase 23 — Guest Gallery (2026-06-02)
 - Phase 22 — Media Upload Signed URL Flow (2026-06-02)
@@ -74,6 +75,22 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 25 — Gallery Privacy Settings
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/components/ui/switch.tsx (simple accessible toggle, role="switch", navy active state)
+  - src/app/dashboard/wedding/[weddingId]/settings/page.tsx (settings form — wedding details + gallery toggle, EVENT_MODE locking)
+- **Files Modified:**
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** Backend already supported galleryEnabled in PATCH /api/v1/weddings/:weddingId (from Phase 06). Settings page fetches wedding via TanStack Query, populates form on load. Text fields (name, coupleNames, eventDate, location, country) disabled when status is EVENT_MODE or COMPLETED. Gallery toggle always enabled except when COMPLETED. Save button disabled and submit blocked for COMPLETED weddings. Successful save invalidates ["wedding", weddingId] query and shows sonner toast. GalleryView already handled galleryEnabled=false with "Gallery not available" message (from Phase 23). Upload page unaffected by gallery toggle — guests can always upload.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add gallery privacy settings
 
 ---
 
