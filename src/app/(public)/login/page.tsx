@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 import { loginOrganizer } from "@/lib/api/auth-client"
 import { useAuthStore } from "@/stores/auth-store"
 import { loginSchema, type LoginInput } from "@/modules/auth/auth.schemas"
@@ -47,6 +48,9 @@ export default function LoginPage() {
     <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <WedPassWordmark size={28} />
+          </div>
           <CardTitle className="text-2xl font-bold text-navy">Welcome back</CardTitle>
           <CardDescription>Sign in to your WedPass account</CardDescription>
         </CardHeader>

@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 import { registerOrganizer } from "@/lib/api/auth-client"
 import { useAuthStore } from "@/stores/auth-store"
 import { registerSchema, type RegisterInput } from "@/modules/auth/auth.schemas"
@@ -47,6 +48,9 @@ export default function RegisterPage() {
     <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <WedPassWordmark size={28} />
+          </div>
           <CardTitle className="text-2xl font-bold text-navy">Create your account</CardTitle>
           <CardDescription>Start managing your wedding with WedPass</CardDescription>
         </CardHeader>

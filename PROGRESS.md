@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 30
+Phase 33
 
 ## Completed Phases
 
+- Phase 32 — WedPass Wordmark Component (2026-06-02)
 - Phase 29 — End-to-End Testing (2026-06-02)
 - Phase 28 — Security Hardening (2026-06-02)
 - Phase 27 — Analytics and Monitoring Foundation (2026-06-02)
@@ -147,6 +148,40 @@ None.
 - **Known Issues:** None.
 - **Blocked Items:** None.
 - **Git Commit Message:** feat: add analytics and monitoring foundation
+
+### Phase 32 — WedPass Wordmark Component
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/components/shared/wedpass-wordmark.tsx (split-W SVG mark + "WedPass" logotype, server component)
+- **Files Modified:**
+  - src/app/globals.css (added --color-champagne-deep: #A8843F)
+  - src/components/layout/app-sidebar.tsx (replaced plain text span with WedPassWordmark size=22 textColor="#fff")
+  - src/app/(public)/login/page.tsx (added WedPassWordmark size=28 above CardTitle)
+  - src/app/(public)/register/page.tsx (added WedPassWordmark size=28 above CardTitle)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add WedPass wordmark component
+
+---
+
+## Design Gap Phases (32–36)
+
+Five phases were added on 2026-06-02 to close the visual gap between the approved design prototype and the current implementation. Run them in order before Phase 30.
+
+| Phase | Title | Key change |
+|---|---|---|
+| 32 | WedPass Wordmark Component | Custom split-W SVG + "Wed**Pass**" logotype replaces plain text in sidebar and auth pages |
+| 33 | Sidebar Gold Active State | Gold-tinted active nav highlight + organizer profile card pinned at bottom of sidebar |
+| 34 | Dashboard Rich Layout | Replaces nav-link card grid with readiness card, staff devices card, navy sync card, and media thumbnails |
+| 35 | Branded Button Variants | Adds `navy` and `gold` variants + `xl` size to shadcn Button; applies to key CTAs |
+| 36 | Staff Mode Visual Polish | Dark operational sync bar, navy login screen, oversized scan button, bold success screen |
+
+Recommended execution order: 32 → 33 → 35 → 34 → 36
+
+---
 
 ## Important Decisions
 

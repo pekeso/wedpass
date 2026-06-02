@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 import {
   BarChart2,
   Image as ImageIcon,
@@ -79,7 +80,7 @@ export function AppSidebar({ weddingId }: AppSidebarProps) {
   return (
     <aside className="flex w-56 shrink-0 flex-col bg-navy text-white">
       <div className="border-b border-white/10 px-5 py-4">
-        <span className="text-lg font-semibold tracking-tight">WedPass</span>
+        <WedPassWordmark size={22} textColor="#fff" />
       </div>
       <nav className="flex-1 space-y-0.5 px-2 py-3">
         {navItems.map((item) => {
