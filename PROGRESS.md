@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 15 — Check-In Sync Endpoint
+Phase 16 — Server-Side Check-In Sync Endpoint
 
 ## Completed Phases
 
@@ -64,7 +64,29 @@ Phase 10 — Event Mode Preparation
 
 ## Last Updated
 
-2026-06-01
+2026-06-02
+
+---
+
+### Phase 15 — Client Sync Queue and Sync Engine
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/lib/offline/checkins/sync-result-processor.ts (processSyncResult — handles ACCEPTED, DUPLICATE, ALREADY_PROCESSED, REJECTED, INVALID_GUEST, SNAPSHOT_MISMATCH in a single Dexie transaction)
+  - src/lib/offline/checkins/checkin-sync-client.ts (syncCheckins — reads queue, batches 100, POSTs to sync endpoint, processes results, handles SnapshotMismatchError, stores lastSuccessfulSyncAt)
+  - src/lib/offline/network/network-monitor.ts (setupNetworkMonitor — online/offline + visibilitychange listeners + 60s interval timer, returns cleanup function)
+  - src/hooks/use-sync-engine.ts (useSyncEngine — triggerSync + syncState: idle/syncing/failed/offline, concurrency guard via isSyncing ref)
+  - src/lib/offline/checkins/sync-result-processor.test.ts (6 unit tests)
+  - src/lib/offline/checkins/checkin-sync-client.test.ts (8 unit tests)
+- **Files Modified:**
+  - src/hooks/use-sync-status.ts (now composes useSyncEngine, exposes triggerSync, reads lastSuccessfulSyncAt)
+  - src/app/staff/[weddingId]/sync/page.tsx (Sync Now button wired to triggerSync, syncState shown, SNAPSHOT_MISMATCH warning reads from metadata)
+  - PROGRESS.md
+- **Tests Run:** npm run test, npm run lint
+- **Test Results:** 39 tests pass (14 new + 25 existing). lint — zero errors.
+- **Manual QA:** Sync client skips when offline or no token. INVALID_GUEST items excluded from retry. syncAttempts incremented before each POST. Snapshot mismatch stored in metadata and shown on sync page. Sync Now button shows spinner during sync, disabled when offline. SyncStatusBar updates via syncState prop. Network monitor triggers sync on "online" event and every 60s while online.
+- **Known Issues:** None. Server-side endpoint is Phase 16 — tests use mock fetch.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add client sync queue and engine
 
 ---
 

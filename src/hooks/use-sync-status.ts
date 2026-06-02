@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { offlineDb } from "@/lib/offline/db"
 import { getMetadata } from "@/lib/offline/metadata"
 import { useNetworkStatus } from "@/hooks/use-network-status"
+import { useSyncEngine } from "@/hooks/use-sync-engine"
 import type { SyncState } from "@/components/staff/sync-status-bar"
 
 export interface SyncStatus {
@@ -11,10 +12,12 @@ export interface SyncStatus {
   lastSyncedAt: string | undefined
   isOnline: boolean
   syncState: SyncState
+  triggerSync: () => Promise<void>
 }
 
 export function useSyncStatus(weddingId: string): SyncStatus {
   const { isOnline } = useNetworkStatus()
+  const { triggerSync, syncState } = useSyncEngine(weddingId)
   const [pendingCount, setPendingCount] = useState(0)
   const [lastSyncedAt, setLastSyncedAt] = useState<string | undefined>()
 
@@ -28,7 +31,7 @@ export function useSyncStatus(weddingId: string): SyncStatus {
         .then(setPendingCount)
         .catch(() => setPendingCount(0))
 
-      getMetadata("lastSyncedAt")
+      getMetadata("lastSuccessfulSyncAt")
         .then(setLastSyncedAt)
         .catch(() => setLastSyncedAt(undefined))
     }
@@ -39,7 +42,5 @@ export function useSyncStatus(weddingId: string): SyncStatus {
     return () => clearInterval(interval)
   }, [weddingId])
 
-  const syncState: SyncState = isOnline ? "idle" : "offline"
-
-  return { pendingCount, lastSyncedAt, isOnline, syncState }
+  return { pendingCount, lastSyncedAt, isOnline, syncState, triggerSync }
 }
