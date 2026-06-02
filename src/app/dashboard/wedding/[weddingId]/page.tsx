@@ -3,8 +3,7 @@
 import Link from "next/link"
 import { use } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Users, QrCode, Camera, CalendarDays, MapPin, Settings, CheckSquare, UserCheck } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Camera, CalendarDays, MapPin, Settings, CheckSquare, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatCard } from "@/components/shared/stat-card"
@@ -13,6 +12,10 @@ import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
 import { useAuthStore } from "@/stores/auth-store"
 import { getWedding } from "@/lib/api/weddings-client"
+import { DashboardReadinessCard } from "@/components/wedding/dashboard-readiness-card"
+import { DashboardStaffDevicesCard } from "@/components/wedding/dashboard-staff-devices-card"
+import { DashboardSyncCard } from "@/components/wedding/dashboard-sync-card"
+import { DashboardMediaThumbnails } from "@/components/wedding/dashboard-media-thumbnails"
 import type { ApiResponse } from "@/types/api"
 import type { WeddingStatus } from "@/generated/prisma/enums"
 
@@ -48,15 +51,6 @@ function weddingStatusBadge(status: WeddingStatus) {
   }
 }
 
-const NAV_LINKS = [
-  { href: "guests", label: "Guests", icon: Users, description: "Manage guest list" },
-  { href: "qr-codes", label: "QR Codes", icon: QrCode, description: "Download QR codes" },
-  { href: "event-mode", label: "Event Mode", icon: CheckSquare, description: "Prepare for event day" },
-  { href: "staff", label: "Staff", icon: UserCheck, description: "Manage staff access" },
-  { href: "checkins", label: "Check-ins", icon: CalendarDays, description: "View check-in activity" },
-  { href: "gallery", label: "Gallery", icon: Camera, description: "Moderate media uploads" },
-  { href: "settings", label: "Settings", icon: Settings, description: "Wedding settings" },
-]
 
 export default function WeddingOverviewPage({
   params,
@@ -151,24 +145,19 @@ export default function WeddingOverviewPage({
         </p>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {NAV_LINKS.map(({ href, label, icon: Icon, description }) => (
-          <Link key={href} href={`/dashboard/wedding/${weddingId}/${href}`}>
-            <Card className="cursor-pointer transition-shadow hover:shadow-md">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-navy/10">
-                    <Icon className="size-4 text-navy" />
-                  </div>
-                  <CardTitle className="text-sm font-semibold">{label}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">{description}</p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <DashboardReadinessCard weddingId={weddingId} accessToken={accessToken!} />
+          <DashboardStaffDevicesCard weddingId={weddingId} accessToken={accessToken!} />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <DashboardSyncCard
+            checkedInGuests={statsData?.checkedInGuests ?? 0}
+            pendingGuests={statsData?.pendingGuests ?? 0}
+            lastSyncAt={statsData?.lastSyncAt ?? null}
+          />
+          <DashboardMediaThumbnails weddingId={weddingId} accessToken={accessToken!} />
+        </div>
       </div>
     </div>
   )
