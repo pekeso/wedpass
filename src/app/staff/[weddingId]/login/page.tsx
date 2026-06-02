@@ -2,10 +2,9 @@
 
 import { use, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Smartphone } from "lucide-react"
+import { Lock, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 import { verifyStaffToken } from "@/lib/api/staff-client"
 import { useTranslations } from "@/lib/i18n/use-translations"
 
@@ -47,47 +46,67 @@ export default function StaffLoginPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-navy text-white">
-            <Smartphone className="size-6" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-navy text-white">
+      <div className="pointer-events-none absolute right-[-60px] top-10 opacity-[0.05]">
+        <WedPassWordmark size={300} textColor="#fff" />
+      </div>
+
+      <div className="relative flex flex-1 flex-col items-center justify-center px-6 pb-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 flex justify-center">
+            <WedPassWordmark size={60} textColor="#fff" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">{t("login.title")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t("login.description")}
+
+          <h1 className="mb-2 text-center text-[23px] font-bold">Event Mode</h1>
+          <p className="mb-8 text-center text-sm leading-relaxed text-white/60">
+            Enter your staff access to begin checking in guests.
           </p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="staff-token">{t("login.tokenLabel")}</Label>
-            <Input
-              id="staff-token"
-              type="text"
-              placeholder={t("login.tokenPlaceholder")}
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              autoComplete="off"
-              autoCapitalize="off"
-              autoCorrect="off"
-              spellCheck={false}
-              className="font-mono text-sm"
-            />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="staff-token"
+                className="mb-2 block text-[12.5px] font-semibold text-white/60"
+              >
+                {t("login.tokenLabel")}
+              </label>
+              <div className="flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-3.5">
+                <Lock className="size-5 shrink-0 text-white/45" />
+                <input
+                  id="staff-token"
+                  type="text"
+                  placeholder={t("login.tokenPlaceholder")}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="flex-1 border-0 bg-transparent text-base font-semibold text-white outline-none placeholder:text-white/30"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-sm text-danger">{error}</p>
+            )}
+
+            <Button
+              type="submit"
+              variant="gold"
+              size="xl"
+              className="mt-6 w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? t("login.verifying") : "Enter Event Mode →"}
+            </Button>
+          </form>
+
+          <div className="mt-5 flex items-center justify-center gap-2 text-xs text-white/50">
+            <ShieldCheck className="size-3.5 text-champagne" />
+            Staff access is limited &amp; secure
           </div>
-
-          {error && (
-            <p className="text-sm text-danger">{error}</p>
-          )}
-
-          <Button type="submit" className="h-14 w-full text-base" disabled={isLoading}>
-            {isLoading ? t("login.verifying") : t("login.button")}
-          </Button>
-        </form>
-
-        <p className="text-center text-xs text-muted-foreground">
-          {t("login.deviceNote")}
-        </p>
+        </div>
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { QrCode, Search } from "lucide-react"
+import { ScanLine, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTranslations } from "@/lib/i18n/use-translations"
 
@@ -18,15 +18,16 @@ export function ScanActionCard({ onScanQr, onSearchGuest }: ScanActionCardProps)
         variant="navy"
         size="xl"
         onClick={onScanQr}
-        className="w-full rounded-2xl font-semibold"
+        className="w-full flex-col gap-2 rounded-[20px] min-h-[132px]"
       >
-        <QrCode className="size-6" />
-        {t("scan.title")}
+        <ScanLine className="size-10 text-champagne" />
+        <span className="text-[19px] font-semibold">Scan QR Code</span>
+        <span className="text-[12.5px] font-medium text-white/60">Point the camera at a guest pass</span>
       </Button>
       <Button
         variant="outline"
         onClick={onSearchGuest}
-        className="h-14 w-full gap-3 rounded-2xl text-base font-medium"
+        className="h-14 w-full gap-3 rounded-2xl border-2 border-navy text-base font-medium"
       >
         <Search className="size-5" />
         {t("search.title")}

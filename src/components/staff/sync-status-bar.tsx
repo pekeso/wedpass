@@ -1,7 +1,6 @@
 "use client"
 
 import { AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useTranslations } from "@/lib/i18n/use-translations"
 
 export type SyncState = "idle" | "syncing" | "failed" | "offline"
@@ -15,23 +14,31 @@ export interface SyncStatusBarProps {
 
 const stateConfig: Record<
   SyncState,
-  { className: string; icon: React.ReactNode }
+  { bg: string; dot: string; icon: React.ReactNode; savedLocally: boolean }
 > = {
   idle: {
-    className: "bg-success-light text-success",
-    icon: <Wifi className="size-3.5 shrink-0" />,
+    bg: "#0f3d24",
+    dot: "#3ddc84",
+    icon: <Wifi className="size-4 shrink-0" style={{ color: "rgba(255,255,255,0.85)" }} />,
+    savedLocally: false,
   },
   syncing: {
-    className: "bg-sync-light text-sync",
-    icon: <RefreshCw className="size-3.5 shrink-0 animate-spin" />,
+    bg: "#15294d",
+    dot: "#5b9bff",
+    icon: <RefreshCw className="size-4 shrink-0 animate-spin" style={{ color: "rgba(255,255,255,0.85)" }} />,
+    savedLocally: false,
   },
   failed: {
-    className: "bg-danger-light text-danger",
-    icon: <AlertTriangle className="size-3.5 shrink-0" />,
+    bg: "#3a1717",
+    dot: "#f06b6b",
+    icon: <AlertTriangle className="size-4 shrink-0" style={{ color: "rgba(255,255,255,0.85)" }} />,
+    savedLocally: true,
   },
   offline: {
-    className: "bg-offline-light text-offline",
-    icon: <WifiOff className="size-3.5 shrink-0" />,
+    bg: "#2b2118",
+    dot: "#f0b463",
+    icon: <WifiOff className="size-4 shrink-0" style={{ color: "rgba(255,255,255,0.85)" }} />,
+    savedLocally: true,
   },
 }
 
@@ -42,7 +49,7 @@ export function SyncStatusBar({
   syncState,
 }: SyncStatusBarProps) {
   const { t } = useTranslations()
-  const config = stateConfig[syncState]
+  const cfg = stateConfig[syncState]
 
   let statusText: string
   if (!isOnline) {
@@ -63,17 +70,28 @@ export function SyncStatusBar({
 
   return (
     <div
-      className={cn(
-        "sticky top-0 z-40 flex items-center justify-between gap-2 px-4 py-2 text-xs font-medium",
-        config.className
-      )}
+      style={{ background: cfg.bg }}
+      className="sticky top-0 z-40 flex items-center gap-2.5 px-4 py-2.5 text-white"
     >
-      <div className="flex items-center gap-1.5">
-        {config.icon}
-        <span>{statusText}</span>
-      </div>
+      <span
+        style={{
+          width: 9,
+          height: 9,
+          borderRadius: "50%",
+          background: cfg.dot,
+          boxShadow: `0 0 0 4px ${cfg.dot}22`,
+          flexShrink: 0,
+        }}
+      />
+      {cfg.icon}
+      <span className="text-[13.5px] font-semibold tracking-[0.01em]">{statusText}</span>
       {lastSyncedAt && syncState === "idle" && (
-        <span className="opacity-70">{t("syncBar.syncedAt", { time: lastSyncedAt })}</span>
+        <span className="ml-auto text-[12px] opacity-70">{t("syncBar.syncedAt", { time: lastSyncedAt })}</span>
+      )}
+      {cfg.savedLocally && (
+        <span className="ml-auto text-[12px] font-semibold" style={{ color: cfg.dot }}>
+          Saved locally
+        </span>
       )}
     </div>
   )

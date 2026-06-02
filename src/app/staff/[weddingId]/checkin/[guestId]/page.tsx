@@ -148,27 +148,29 @@ export default function StaffCheckinGuestPage({
           <div className="flex flex-col items-center gap-6 pt-6 text-center">
             {result.status === "checked_in_locally" ? (
               <>
-                <div className="flex size-20 items-center justify-center rounded-full bg-success-light">
-                  <CheckCircle className="size-10 text-success" />
+                <div className="mx-auto mb-4 flex size-24 items-center justify-center rounded-full bg-success-light text-success">
+                  <CheckCircle className="size-12" strokeWidth={2} />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-foreground">
-                    {guest?.fullName}
+                  <p className="text-2xl font-bold text-navy">
+                    {guest?.fullName} is in!
                   </p>
-                  <p className="text-base font-semibold text-success">
-                    {t("checkin.checkedInSuccessfully")}
+                  <p className="text-sm text-muted-foreground">
+                    Saved on this device. Will sync when internet returns.
                   </p>
                   <p className="text-sm text-muted-foreground">
                     at {formatTime(result.checkedInAt)}
                   </p>
                 </div>
                 <Button
+                  variant="gold"
+                  size="xl"
                   onClick={() =>
                     router.push(`/staff/${weddingId}/checkin`)
                   }
-                  className="h-14 w-full rounded-2xl text-base font-semibold"
+                  className="w-full"
                 >
-                  {t("checkin.nextGuest")}
+                  Continue Scanning
                 </Button>
               </>
             ) : result.status === "already_checked_in" ? (
