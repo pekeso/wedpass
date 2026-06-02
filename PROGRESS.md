@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 20
+Phase 21 and Phase 27
 
 ## Completed Phases
 
+- Phase 20 — Check-In Stats and Post-Event Sync Closeout (2026-06-02)
 - Phase 19 — Staff Device Readiness UI (2026-06-02)
 - Phase 18 — Event Readiness Command Center (2026-06-02)
 - Phase 17 — Multi-Device Conflict Handling Tests (2026-06-02)
@@ -69,6 +70,26 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 20 — Check-In Stats and Post-Event Sync Closeout
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/modules/weddings/analytics.service.ts (getWeddingStats, getCheckinStats, error classes)
+  - src/app/api/v1/weddings/[weddingId]/checkins/stats/route.ts (GET per-device breakdown)
+- **Files Modified:**
+  - src/app/api/v1/weddings/[weddingId]/stats/route.ts (now uses analytics service — real checkedInGuests, checkinPercentage, lastSyncAt)
+  - src/app/dashboard/wedding/[weddingId]/checkins/page.tsx (full implementation: 4 StatCards + per-device table, 30s TanStack Query polling)
+  - src/lib/offline/metadata.ts (added clearLocalEventData — only clears synced items, throws if unsynced remain)
+  - src/app/staff/[weddingId]/sync/page.tsx (All Synced state, Clear Local Data section with ConfirmDialog, pendingCount-based blocking, navigate to login after clear)
+  - PROGRESS.md
+- **Tests Run:** npm run lint, npm run test
+- **Test Results:** lint — PASS (zero errors). 52 unit tests pass (5 test files, no regressions).
+- **Manual QA:** Stats endpoint returns real check-in counts. Per-device table shows each device label, status badge, last-seen time, and non-duplicate check-in count. Checkins page polls every 30s. Staff sync page shows "All check-ins are synced" green banner when pendingCount=0. Clear Local Data blocked with error message when pending > 0. Clear triggers ConfirmDialog with danger variant. clearLocalEventData throws if unsynced items exist. On successful clear, navigates to /staff/[weddingId]/login.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add post-event sync closeout
 
 ---
 

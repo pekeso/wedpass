@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireAuth, UnauthorizedError } from "@/lib/auth/require-auth"
 import {
-  getWeddingStats,
+  getCheckinStats,
   AnalyticsWeddingNotFoundError,
   AnalyticsForbiddenError,
 } from "@/modules/weddings/analytics.service"
@@ -14,7 +14,7 @@ export async function GET(
     const { userId } = requireAuth(request)
     const { weddingId } = await params
 
-    const data = await getWeddingStats(weddingId, userId)
+    const data = await getCheckinStats(weddingId, userId)
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
@@ -36,7 +36,7 @@ export async function GET(
         { status: 403 }
       )
     }
-    console.error("[GET /api/v1/weddings/:weddingId/stats]", error)
+    console.error("[GET /api/v1/weddings/:weddingId/checkins/stats]", error)
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_SERVER_ERROR", message: "An error occurred" } },
       { status: 500 }
