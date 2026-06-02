@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 35
+Phase 36
 
 ## Completed Phases
 
+- Phase 35 — Branded Button Variants (2026-06-02)
 - Phase 34 — Organizer Dashboard Rich Layout (2026-06-02)
 - Phase 33 — Sidebar Gold Active State and User Profile Card (2026-06-02)
 - Phase 32 — WedPass Wordmark Component (2026-06-02)
@@ -47,7 +48,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 34 complete)
+2026-06-02 (Phase 35 complete)
 
 ---
 

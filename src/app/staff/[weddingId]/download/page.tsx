@@ -171,7 +171,9 @@ export default function StaffDownloadPage({
         {isReady ? (
           <div className="space-y-3">
             <Button
-              className="h-14 w-full text-base gap-2"
+              variant="navy"
+              size="xl"
+              className="w-full"
               onClick={() => router.push(`/staff/${weddingId}/checkin`)}
             >
               {t("download.startCheckin")}
@@ -189,7 +191,9 @@ export default function StaffDownloadPage({
           </div>
         ) : (
           <Button
-            className="h-14 w-full text-base gap-2"
+            variant="navy"
+            size="xl"
+            className="w-full"
             onClick={handleDownload}
             disabled={isDownloading || status.isLoading}
           >

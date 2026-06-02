@@ -139,9 +139,11 @@ export default function StaffSyncPage({
         </div>
 
         <Button
+          variant="gold"
+          size="lg"
           disabled={!isOnline || isSyncing}
           onClick={() => void triggerSync()}
-          className="h-14 w-full gap-3 rounded-2xl text-base font-semibold"
+          className="h-14 w-full gap-3 rounded-2xl text-base"
         >
           <RefreshCw className={`size-5 ${isSyncing ? "animate-spin" : ""}`} />
           {isSyncing ? t("sync.syncing") : t("sync.syncNow")}

@@ -127,6 +127,7 @@ export default function EventModePage({
 
         <div className="mt-4">
           <Button
+            variant="navy"
             size="lg"
             disabled={!allPassed || enableMutation.isPending}
             onClick={() => setConfirmOpen(true)}

@@ -15,8 +15,10 @@ export function ScanActionCard({ onScanQr, onSearchGuest }: ScanActionCardProps)
   return (
     <div className="space-y-3">
       <Button
+        variant="navy"
+        size="xl"
         onClick={onScanQr}
-        className="h-16 w-full gap-3 rounded-2xl text-lg font-semibold"
+        className="w-full rounded-2xl font-semibold"
       >
         <QrCode className="size-6" />
         {t("scan.title")}
