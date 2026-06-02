@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 41
+Phase 42
 
 ## Completed Phases
 
+- Phase 41 — Dashboard Header Sign-Out and User Context (2026-06-02)
 - Phase 40 — Public Layout and Auth Pages Polish (2026-06-02)
 - Phase 39 — System Utility Pages (2026-06-02)
 - Phase 38 — Beta Signup Page (2026-06-02)
@@ -53,7 +54,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 40 complete)
+2026-06-02 (Phase 41 complete)
 
 ---
 
