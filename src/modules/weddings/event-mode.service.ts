@@ -8,6 +8,30 @@ import {
 } from "./snapshot.repository"
 import { updateLastSeen } from "@/modules/staff/staff.repository"
 
+export type StaffDeviceStatusDTO = {
+  id: string
+  label: string | null
+  status: "ACTIVE" | "REVOKED"
+  lastSeenAt: string | null
+}
+
+export type EventDayStatusDTO = {
+  weddingId: string
+  weddingStatus: "DRAFT" | "ACTIVE" | "EVENT_MODE" | "COMPLETED"
+  snapshot: {
+    id: string
+    version: number
+    guestCount: number
+    createdAt: string
+  } | null
+  staffDevices: StaffDeviceStatusDTO[]
+  checkinStats: {
+    total: number
+    checkedIn: number
+    pending: number
+  }
+}
+
 export class EventModeWeddingNotFoundError extends Error {
   readonly code = "NOT_FOUND"
   constructor() {
@@ -174,6 +198,48 @@ export async function getActiveSnapshotForOrganizer(weddingId: string, organizer
     version: snapshot.version,
     guestCount: snapshot.guestCount,
     createdAt: snapshot.createdAt.toISOString(),
+  }
+}
+
+export async function getEventDayStatus(
+  weddingId: string,
+  organizerId: string
+): Promise<EventDayStatusDTO> {
+  const wedding = await ensureWeddingAccess(weddingId, organizerId)
+
+  const [snapshot, staffDevices, totalGuests, checkedInGuests] = await Promise.all([
+    findActiveSnapshot(weddingId),
+    prisma.staffDevice.findMany({
+      where: { weddingId },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, label: true, status: true, lastSeenAt: true },
+    }),
+    prisma.guest.count({ where: { weddingId, deletedAt: null } }),
+    prisma.guest.count({ where: { weddingId, deletedAt: null, isCheckedIn: true } }),
+  ])
+
+  return {
+    weddingId,
+    weddingStatus: wedding.status as EventDayStatusDTO["weddingStatus"],
+    snapshot: snapshot
+      ? {
+          id: snapshot.id,
+          version: snapshot.version,
+          guestCount: snapshot.guestCount,
+          createdAt: snapshot.createdAt.toISOString(),
+        }
+      : null,
+    staffDevices: staffDevices.map((d) => ({
+      id: d.id,
+      label: d.label,
+      status: d.status as "ACTIVE" | "REVOKED",
+      lastSeenAt: d.lastSeenAt ? d.lastSeenAt.toISOString() : null,
+    })),
+    checkinStats: {
+      total: totalGuests,
+      checkedIn: checkedInGuests,
+      pending: totalGuests - checkedInGuests,
+    },
   }
 }
 

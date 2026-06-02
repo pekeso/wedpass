@@ -2,10 +2,12 @@
 
 ## Current Phase
 
-Phase 17 — Organizer Check-In Stats Dashboard
+Phase 19 and Phase 20
 
 ## Completed Phases
 
+- Phase 18 — Event Readiness Command Center (2026-06-02)
+- Phase 17 — Multi-Device Conflict Handling Tests (2026-06-02)
 - Phase 16 — Check-In Sync Backend (2026-06-02)
 - Phase 14B — Check-In Confirmation UI (2026-06-01)
 - Phase 00 — Repository Review and Planning (2026-05-31)
@@ -66,6 +68,49 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 18 — Event Readiness Command Center
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/app/api/v1/weddings/[weddingId]/event-day-status/route.ts
+  - src/components/wedding/event-readiness-card.tsx
+  - src/components/staff/staff-device-status-card.tsx
+  - src/components/wedding/snapshot-summary-card.tsx
+  - src/components/wedding/manual-desk-guidance.tsx
+  - src/components/wedding/emergency-instructions.tsx
+- **Files Modified:**
+  - src/modules/weddings/event-mode.service.ts (added getEventDayStatus, EventDayStatusDTO, StaffDeviceStatusDTO)
+  - src/lib/api/event-mode-client.ts (added getEventDayStatus client function)
+  - src/app/dashboard/wedding/[weddingId]/event-mode/page.tsx (full command center for EVENT_MODE, 30s polling)
+  - PROGRESS.md
+
+---
+
+### Phase 17 — Multi-Device Conflict Handling Tests
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - tests/e2e/multi-device-conflict.spec.ts (3 E2E scenarios: earlier-timestamp-wins, queue preservation, DUPLICATE status for later device)
+  - tests/e2e/snapshot-mismatch.spec.ts (4 E2E scenarios: warning shown, queue preserved, metadata persisted, retry after refresh)
+- **Files Modified:**
+  - vitest.config.ts (added `include: ["src/**/*.test.ts"]` and `exclude: ["tests/**"]` to prevent Playwright specs from being run by Vitest)
+  - PROGRESS.md
+- **Tests Run:** npm run test
+- **Test Results:** 52 unit tests pass (5 test files). E2E tests created but require dev server + browser for execution (`npx playwright test`).
+- **Unit test breakdown:**
+  - src/tests/offline/offline.test.ts: 13 tests
+  - src/lib/offline/checkins/checkin-local-service.test.ts: 9 tests
+  - src/lib/offline/checkins/sync-result-processor.test.ts: 6 tests
+  - src/lib/offline/checkins/checkin-sync-client.test.ts: 8 tests
+  - src/modules/sync/sync.service.test.ts: 16 tests
+- **E2E test coverage:**
+  - offline-checkin.spec.ts: single device offline, duplicate prevention, browser refresh persistence, queue preservation, sync ACCEPTED
+  - multi-device-conflict.spec.ts: earlier timestamp wins, queue never deleted before ack, DUPLICATE status correctly applied
+  - snapshot-mismatch.spec.ts: warning shown, queue preserved, mismatch stored in metadata, retry works after refresh
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** test: add multi-device conflict handling tests
 
 ---
 

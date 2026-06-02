@@ -2,22 +2,25 @@
 
 import { use, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { CheckCircle2, XCircle, AlertTriangle, CalendarCheck, Loader2 } from "lucide-react"
+import { AlertTriangle, CalendarCheck, Loader2, Users, UserCheck, Clock } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
-import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/stores/auth-store"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import {
   getEventModeReadiness,
   enableEventMode,
-  getActiveSnapshot,
+  getEventDayStatus,
 } from "@/lib/api/event-mode-client"
-import type { ReadinessCheck } from "@/modules/weddings/event-mode.service"
-import type { SnapshotDTO } from "@/lib/api/event-mode-client"
+import { EventReadinessCard } from "@/components/wedding/event-readiness-card"
+import { StaffDeviceStatusCard } from "@/components/staff/staff-device-status-card"
+import { SnapshotSummaryCard } from "@/components/wedding/snapshot-summary-card"
+import { ManualDeskGuidance } from "@/components/wedding/manual-desk-guidance"
+import { EmergencyInstructions } from "@/components/wedding/emergency-instructions"
+import type { EventDayStatusDTO } from "@/modules/weddings/event-mode.service"
 
 export default function EventModePage({
   params,
@@ -31,23 +34,23 @@ export default function EventModePage({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [enableError, setEnableError] = useState<string | null>(null)
 
+  const eventDayQuery = useQuery({
+    queryKey: ["event-day-status", weddingId],
+    queryFn: async () => {
+      if (!accessToken) throw new Error("Not authenticated")
+      return getEventDayStatus(weddingId, accessToken)
+    },
+    enabled: !!accessToken,
+    refetchInterval: 30_000,
+  })
+
   const readinessQuery = useQuery({
     queryKey: ["event-mode-readiness", weddingId],
     queryFn: async () => {
       if (!accessToken) throw new Error("Not authenticated")
       return getEventModeReadiness(weddingId, accessToken)
     },
-    enabled: !!accessToken,
-    refetchInterval: 10_000,
-  })
-
-  const snapshotQuery = useQuery({
-    queryKey: ["active-snapshot", weddingId],
-    queryFn: async () => {
-      if (!accessToken) throw new Error("Not authenticated")
-      return getActiveSnapshot(weddingId, accessToken)
-    },
-    enabled: !!accessToken,
+    enabled: !!accessToken && eventDayQuery.data?.weddingStatus !== "EVENT_MODE",
   })
 
   const enableMutation = useMutation({
@@ -57,8 +60,8 @@ export default function EventModePage({
     },
     onSuccess: () => {
       setEnableError(null)
+      void queryClient.invalidateQueries({ queryKey: ["event-day-status", weddingId] })
       void queryClient.invalidateQueries({ queryKey: ["event-mode-readiness", weddingId] })
-      void queryClient.invalidateQueries({ queryKey: ["active-snapshot", weddingId] })
       void queryClient.invalidateQueries({ queryKey: ["wedding", weddingId] })
     },
     onError: (err) => {
@@ -66,21 +69,20 @@ export default function EventModePage({
     },
   })
 
-  if (readinessQuery.isLoading || snapshotQuery.isLoading) {
+  if (eventDayQuery.isLoading) {
     return <LoadingState message="Loading Event Mode status..." />
   }
 
-  if (readinessQuery.isError) {
+  if (eventDayQuery.isError) {
     return (
-      <ErrorState title="Failed to load readiness" description="Please refresh and try again." />
+      <ErrorState title="Failed to load event status" description="Please refresh and try again." />
     )
   }
 
-  const snapshot = snapshotQuery.data as SnapshotDTO | null | undefined
-  const isEventModeActive = !!snapshot
+  const status = eventDayQuery.data as EventDayStatusDTO
 
-  if (isEventModeActive && snapshot) {
-    return <EventModeActiveState snapshot={snapshot} />
+  if (status.weddingStatus === "EVENT_MODE") {
+    return <EventCommandCenter status={status} />
   }
 
   const checks = readinessQuery.data?.checks ?? []
@@ -96,9 +98,9 @@ export default function EventModePage({
       <SectionCard title="Readiness Checklist">
         <div className="space-y-3">
           {checks.map((check) => (
-            <ReadinessItem key={check.key} check={check} />
+            <EventReadinessCard key={check.key} check={check} />
           ))}
-          {checks.length === 0 && (
+          {checks.length === 0 && readinessQuery.isLoading && (
             <p className="text-sm text-muted-foreground">Loading checklist...</p>
           )}
         </div>
@@ -165,85 +167,98 @@ export default function EventModePage({
   )
 }
 
-function ReadinessItem({ check }: { check: ReadinessCheck }) {
-  return (
-    <div className="flex items-center gap-3">
-      {check.passed ? (
-        <CheckCircle2 className="size-5 shrink-0 text-success" />
-      ) : (
-        <XCircle className="size-5 shrink-0 text-danger" />
-      )}
-      <span
-        className={`text-sm ${check.passed ? "text-foreground" : "text-muted-foreground"}`}
-      >
-        {check.label}
-      </span>
-      <StatusBadge
-        label={check.passed ? "Ready" : "Not ready"}
-        variant={check.passed ? "success" : "warning"}
-      />
-    </div>
-  )
-}
+function EventCommandCenter({ status }: { status: EventDayStatusDTO }) {
+  const { checkinStats, staffDevices, snapshot } = status
+  const activeDevices = staffDevices.filter((d) => d.status === "ACTIVE")
 
-function EventModeActiveState({ snapshot }: { snapshot: SnapshotDTO }) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Event Mode"
-        description="Event Mode is active. Your guest list is locked and the offline snapshot is ready."
+        title="Event Day Command Center"
+        description="Event Mode is active. Monitor your check-in progress and staff device status below."
       />
 
-      <SectionCard title="Snapshot Created">
-        <div className="flex items-start gap-3 rounded-lg border border-success/40 bg-success/10 p-4">
-          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">Event Mode is active</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              A snapshot of your guest list has been created. Staff devices can now download the
-              offline check-in data.
-            </p>
-          </div>
-        </div>
+      {snapshot && <SnapshotSummaryCard snapshot={snapshot} />}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <SnapshotStat label="Snapshot version" value={`v${snapshot.version}`} />
-          <SnapshotStat label="Guests in snapshot" value={snapshot.guestCount.toString()} />
-          <SnapshotStat
-            label="Created"
-            value={new Date(snapshot.createdAt).toLocaleDateString()}
+      <SectionCard title="Check-in Progress">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={<Users className="size-5 text-muted-foreground" />}
+            label="Total guests"
+            value={checkinStats.total.toString()}
+          />
+          <StatCard
+            icon={<UserCheck className="size-5 text-success" />}
+            label="Checked in"
+            value={checkinStats.checkedIn.toString()}
+            valueClass="text-success"
+          />
+          <StatCard
+            icon={<Clock className="size-5 text-warning" />}
+            label="Pending"
+            value={checkinStats.pending.toString()}
+            valueClass="text-warning"
           />
         </div>
+        {checkinStats.total > 0 && (
+          <div className="mt-4">
+            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+              <span>Progress</span>
+              <span>
+                {Math.round((checkinStats.checkedIn / checkinStats.total) * 100)}%
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-success transition-all"
+                style={{
+                  width: `${Math.round((checkinStats.checkedIn / checkinStats.total) * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </SectionCard>
 
-      <SectionCard title="Next Steps">
-        <ol className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex gap-2">
-            <span className="font-semibold text-foreground">1.</span>
-            Go to <strong>Staff Devices</strong> and ensure all check-in devices have active access
-            tokens.
-          </li>
-          <li className="flex gap-2">
-            <span className="font-semibold text-foreground">2.</span>
-            On each staff device, open the staff check-in URL and download the offline guest
-            snapshot.
-          </li>
-          <li className="flex gap-2">
-            <span className="font-semibold text-foreground">3.</span>
-            Staff devices can check in guests offline. Syncing happens automatically when internet
-            is available.
-          </li>
-        </ol>
+      <SectionCard
+        title="Staff Devices"
+        description={`${activeDevices.length} active device${activeDevices.length !== 1 ? "s" : ""}`}
+      >
+        {staffDevices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No staff devices registered.</p>
+        ) : (
+          <div className="space-y-2">
+            {staffDevices.map((device) => (
+              <StaffDeviceStatusCard key={device.id} device={device} />
+            ))}
+          </div>
+        )}
       </SectionCard>
+
+      <ManualDeskGuidance />
+      <EmergencyInstructions />
     </div>
   )
 }
 
-function SnapshotStat({ label, value }: { label: string; value: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  valueClass,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  valueClass?: string
+}) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-base font-semibold text-foreground">{value}</p>
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-3">
+      {icon}
+      <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className={`text-xl font-bold ${valueClass ?? "text-foreground"}`}>{value}</p>
+      </div>
     </div>
   )
 }

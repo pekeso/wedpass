@@ -1,4 +1,4 @@
-import type { ReadinessResult } from "@/modules/weddings/event-mode.service"
+import type { ReadinessResult, EventDayStatusDTO } from "@/modules/weddings/event-mode.service"
 
 const BASE = "/api/v1"
 
@@ -55,4 +55,16 @@ export async function getActiveSnapshot(
   const json = await res.json()
   if (!json.success) throw new Error(json.error?.message ?? "Failed to get snapshot")
   return (json.data as { snapshot: SnapshotDTO }).snapshot
+}
+
+export async function getEventDayStatus(
+  weddingId: string,
+  accessToken: string
+): Promise<EventDayStatusDTO> {
+  const res = await fetch(`${BASE}/weddings/${weddingId}/event-day-status`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  const json = await res.json()
+  if (!json.success) throw new Error(json.error?.message ?? "Failed to get event day status")
+  return json.data as EventDayStatusDTO
 }
