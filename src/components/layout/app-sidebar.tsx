@@ -14,11 +14,21 @@ import {
   Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/stores/auth-store"
 
 interface NavItem {
   label: string
   href: string
   icon: React.ReactNode
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 }
 
 function getNavItems(weddingId?: string): NavItem[] {
@@ -45,7 +55,7 @@ function getNavItems(weddingId?: string): NavItem[] {
       icon: <Radio className="size-4" />,
     },
     {
-      label: "Staff Access",
+      label: "Staff Devices",
       href: `${base}/staff`,
       icon: <Shield className="size-4" />,
     },
@@ -55,7 +65,7 @@ function getNavItems(weddingId?: string): NavItem[] {
       icon: <BarChart2 className="size-4" />,
     },
     {
-      label: "Gallery",
+      label: "Memories",
       href: `${base}/gallery`,
       icon: <ImageIcon className="size-4" />,
     },
@@ -73,16 +83,17 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ weddingId }: AppSidebarProps) {
   const pathname = usePathname()
+  const { user } = useAuthStore()
   const effectiveWeddingId =
     weddingId ?? pathname.match(/\/dashboard\/wedding\/([^/]+)/)?.[1]
   const navItems = getNavItems(effectiveWeddingId)
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col bg-navy text-white">
+    <aside className="flex h-full w-56 shrink-0 flex-col bg-navy text-white">
       <div className="border-b border-white/10 px-5 py-4">
         <WedPassWordmark size={22} textColor="#fff" />
       </div>
-      <nav className="flex-1 space-y-0.5 px-2 py-3">
+      <nav className="space-y-0.5 px-2 py-3">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -95,9 +106,17 @@ export function AppSidebar({ weddingId }: AppSidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                 isActive
-                  ? "bg-white/10 font-medium text-white"
+                  ? "font-semibold"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               )}
+              style={
+                isActive
+                  ? {
+                      backgroundColor: "rgba(200,164,93,0.16)",
+                      color: "var(--color-champagne)",
+                    }
+                  : undefined
+              }
             >
               {item.icon}
               {item.label}
@@ -105,6 +124,24 @@ export function AppSidebar({ weddingId }: AppSidebarProps) {
           )
         })}
       </nav>
+      {user && (
+        <div className="mt-auto pt-3 px-2 pb-3">
+          <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/5 px-3 py-2.5">
+            <div
+              className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-navy"
+              style={{ background: "var(--color-champagne)" }}
+            >
+              {getInitials(user.fullName)}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-[13px] font-semibold leading-tight text-white">
+                {user.fullName}
+              </div>
+              <div className="text-[11px] leading-tight text-white/55">Organizer</div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }
