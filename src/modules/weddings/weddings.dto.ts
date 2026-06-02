@@ -32,3 +32,16 @@ export interface ListWeddingsResponseDTO {
 export interface WeddingResponseDTO {
   wedding: WeddingDTO
 }
+
+export interface PublicWeddingDTO {
+  name: string
+  coupleNames: string | null
+  eventDate: string | null
+  location: string | null
+  coverImageUrl: string | null
+  galleryEnabled: boolean
+}
+
+export interface PublicWeddingResponseDTO {
+  wedding: PublicWeddingDTO
+}

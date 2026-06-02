@@ -22,6 +22,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
+import { BetaFeedbackForm } from "@/components/shared/beta-feedback-form"
 import { useAuthStore } from "@/stores/auth-store"
 import { getWedding, updateWedding } from "@/lib/api/weddings-client"
 import { updateWeddingSchema, type UpdateWeddingInput } from "@/modules/weddings/weddings.schemas"
@@ -270,6 +271,17 @@ export default function WeddingSettingsPage({
           </div>
         </form>
       </Form>
+
+      {/* Beta Feedback */}
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold">Beta Feedback</h2>
+          <p className="text-sm text-muted-foreground">
+            Share your experience using WedPass at this wedding.
+          </p>
+        </div>
+        <BetaFeedbackForm weddingId={weddingId} />
+      </div>
     </div>
   )
 }

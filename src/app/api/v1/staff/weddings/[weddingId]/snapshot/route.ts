@@ -9,6 +9,7 @@ import {
   EventModeWeddingNotFoundError,
   EventModeSnapshotNotFoundError,
 } from "@/modules/weddings/event-mode.service"
+import { logEvent } from "@/lib/utils/logger"
 
 export async function GET(
   request: NextRequest,
@@ -29,6 +30,14 @@ export async function GET(
     }
 
     const data = await getSnapshotForStaffDownload(weddingId, staffDeviceId)
+
+    logEvent("snapshot_downloaded", {
+      weddingId,
+      staffDeviceId,
+      guestCount: data.guests?.length ?? 0,
+      snapshotId: data.snapshot?.id ?? null,
+    })
+
     return NextResponse.json({ success: true, data })
   } catch (error) {
     if (error instanceof StaffUnauthorizedError) {

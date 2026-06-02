@@ -72,7 +72,9 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ weddingId }: AppSidebarProps) {
   const pathname = usePathname()
-  const navItems = getNavItems(weddingId)
+  const effectiveWeddingId =
+    weddingId ?? pathname.match(/\/dashboard\/wedding\/([^/]+)/)?.[1]
+  const navItems = getNavItems(effectiveWeddingId)
 
   return (
     <aside className="flex w-56 shrink-0 flex-col bg-navy text-white">

@@ -19,7 +19,10 @@ import type { WeddingStatus } from "@/generated/prisma/enums"
 interface WeddingStats {
   totalGuests: number
   checkedInGuests: number
+  pendingGuests: number
+  checkinPercentage: number
   totalMediaUploads: number
+  lastSyncAt: string | null
 }
 
 async function getWeddingStats(
@@ -128,11 +131,25 @@ export default function WeddingOverviewPage({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Guests" value={statsData?.totalGuests ?? 0} icon={<Users className="size-4" />} />
         <StatCard title="Checked In" value={statsData?.checkedInGuests ?? 0} variant="success" icon={<CheckSquare className="size-4" />} />
+        <StatCard
+          title="Check-in Rate"
+          value={`${statsData?.checkinPercentage ?? 0}%`}
+          icon={<CheckSquare className="size-4" />}
+        />
         <StatCard title="Media Uploads" value={statsData?.totalMediaUploads ?? 0} icon={<Camera className="size-4" />} />
       </div>
+      {statsData?.lastSyncAt && (
+        <p className="text-xs text-muted-foreground">
+          Last sync:{" "}
+          {new Date(statsData.lastSyncAt).toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
+        </p>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {NAV_LINKS.map(({ href, label, icon: Icon, description }) => (

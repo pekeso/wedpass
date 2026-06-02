@@ -7,6 +7,7 @@ import {
   updateGuestCheckedIn,
 } from "@/modules/checkins/checkins.repository"
 import { findProcessedQueueItem, createSyncLog } from "./sync.repository"
+import { logEvent } from "@/lib/utils/logger"
 import type { SyncPayloadInput } from "./sync.schemas"
 import type { SyncBatchResult, SyncItemResult } from "./sync.types"
 
@@ -27,6 +28,13 @@ export async function processSyncBatch(
 
   const activeSnapshot = await findActiveSnapshot(weddingId)
 
+  logEvent("sync_attempt", {
+    weddingId,
+    staffDeviceId,
+    payloadCount: payload.checkins.length,
+    snapshotId: payload.snapshotId,
+  })
+
   if (
     !activeSnapshot ||
     activeSnapshot.id !== payload.snapshotId ||
@@ -43,6 +51,11 @@ export async function processSyncBatch(
       errorCount: 0,
       syncStartedAt,
       syncCompletedAt: new Date(),
+    })
+    logEvent("sync_failed", {
+      weddingId,
+      staffDeviceId,
+      error: "SNAPSHOT_MISMATCH",
     })
     throw new SyncSnapshotMismatchError()
   }
@@ -184,6 +197,8 @@ export async function processSyncBatch(
     }
   })
 
+  const syncCompletedAt = new Date()
+
   // Sync log is always written, even after partial failures, outside the main transaction
   await createSyncLog({
     weddingId,
@@ -195,8 +210,28 @@ export async function processSyncBatch(
     rejectedCount,
     errorCount,
     syncStartedAt,
-    syncCompletedAt: new Date(),
+    syncCompletedAt,
   })
+
+  logEvent("sync_completed", {
+    weddingId,
+    staffDeviceId,
+    snapshotId: activeSnapshot.id,
+    payloadCount: payload.checkins.length,
+    acceptedCount,
+    duplicateCount,
+    rejectedCount,
+    errorCount,
+    durationMs: syncCompletedAt.getTime() - syncStartedAt.getTime(),
+  })
+
+  if (duplicateCount > 0) {
+    logEvent("sync_duplicate_checkins", {
+      weddingId,
+      staffDeviceId,
+      duplicateCount,
+    })
+  }
 
   return {
     results,

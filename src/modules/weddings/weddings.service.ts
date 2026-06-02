@@ -12,6 +12,8 @@ import type {
   WeddingListItemDTO,
   ListWeddingsResponseDTO,
   WeddingResponseDTO,
+  PublicWeddingDTO,
+  PublicWeddingResponseDTO,
 } from "./weddings.dto"
 
 export class WeddingNotFoundError extends Error {
@@ -121,6 +123,39 @@ export async function getWeddingForOrganizer(
   if (!wedding) throw new WeddingNotFoundError()
   if (wedding.organizerId !== organizerId) throw new WeddingForbiddenError()
   return { wedding: toWeddingDTO(wedding) }
+}
+
+function toPublicWeddingDTO(wedding: {
+  name: string
+  coupleNames: string | null
+  eventDate: Date | null
+  location: string | null
+  coverImageUrl: string | null
+  galleryEnabled: boolean
+}): PublicWeddingDTO {
+  return {
+    name: wedding.name,
+    coupleNames: wedding.coupleNames,
+    eventDate: wedding.eventDate ? wedding.eventDate.toISOString().split("T")[0] : null,
+    location: wedding.location,
+    coverImageUrl: wedding.coverImageUrl,
+    galleryEnabled: wedding.galleryEnabled,
+  }
+}
+
+export async function getPublicWedding(slug: string): Promise<PublicWeddingResponseDTO> {
+  const wedding = await findWeddingBySlug(slug)
+  if (!wedding) throw new WeddingNotFoundError()
+  return { wedding: toPublicWeddingDTO(wedding) }
+}
+
+export async function getWeddingForUploadPage(slug: string): Promise<{
+  weddingId: string
+  wedding: PublicWeddingDTO
+}> {
+  const wedding = await findWeddingBySlug(slug)
+  if (!wedding) throw new WeddingNotFoundError()
+  return { weddingId: wedding.id, wedding: toPublicWeddingDTO(wedding) }
 }
 
 export async function updateWedding(

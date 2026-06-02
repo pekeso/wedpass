@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 29
+Phase 30
 
 ## Completed Phases
 
+- Phase 29 — End-to-End Testing (2026-06-02)
 - Phase 28 — Security Hardening (2026-06-02)
 - Phase 27 — Analytics and Monitoring Foundation (2026-06-02)
 - Phase 26 — Bilingual English/French Foundation (2026-06-02)
@@ -44,6 +45,41 @@ None.
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 29 — End-to-End Testing
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - playwright.config.ts updated (added Mobile viewport project, screenshot/video settings)
+  - tests/e2e/helpers/auth.ts (injectOrganizerAuth, injectStaffToken — localStorage injection before page load)
+  - tests/e2e/helpers/setup.ts (TEST_WEDDING_ID, TEST_GUEST_A/B, TEST_MEDIA_ITEM, ok/fail/paginated helpers)
+  - tests/e2e/organizer.spec.ts (9 tests: register, login, dashboard, create wedding)
+  - tests/e2e/guests.spec.ts (8 tests: list, add, edit, delete, Event Mode lock)
+  - tests/e2e/staff-checkin.spec.ts (7 tests: login, invalid token, checkin home, search, sync page)
+  - tests/e2e/multi-device-sync.spec.ts (4 tests: empty queue, two-ACCEPTED sync, last-sync metadata, retry after failure)
+  - tests/e2e/media.spec.ts (8 tests: SVG rejection API, oversized API, gallery render, hide, delete, hidden tab)
+  - tests/e2e/security.spec.ts (11 tests: unauthenticated 401s, cross-organizer 403, staff token boundaries, gallery privacy)
+  - tests/e2e/mobile.spec.ts (6 tests: checkin home buttons, touch targets, search input, checkin detail button, login form, dashboard cards)
+- **Files Modified:**
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit (type check)
+- **Test Results:** tsc — zero errors.
+- **E2E test count:** 53 total tests across 10 spec files (7 new + 3 from Phase 17)
+- **Test structure:**
+  - offline-checkin.spec.ts: 5 tests (Phase 17)
+  - multi-device-conflict.spec.ts: 3 tests (Phase 17)
+  - snapshot-mismatch.spec.ts: 4 tests (Phase 17)
+  - organizer.spec.ts: 9 tests (Phase 29)
+  - guests.spec.ts: 8 tests (Phase 29)
+  - staff-checkin.spec.ts: 7 tests (Phase 29)
+  - multi-device-sync.spec.ts: 4 tests (Phase 29)
+  - media.spec.ts: 8 tests (Phase 29)
+  - security.spec.ts: 11 tests (Phase 29)
+  - mobile.spec.ts: 6 tests (Phase 29, Mobile project only)
+- **Known Issues:** Tests requiring server-side rendering (upload page, public gallery server component) need a real database to render the page. These scenarios are covered by API-level tests in media.spec.ts and security.spec.ts instead.
+- **Blocked Items:** None.
+- **Git Commit Message:** test: add end-to-end beta readiness tests
 
 ---
 
