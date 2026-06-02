@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 16 — Server-Side Check-In Sync Endpoint
+Phase 17 — Organizer Check-In Stats Dashboard
 
 ## Completed Phases
 
+- Phase 16 — Check-In Sync Backend (2026-06-02)
 - Phase 14B — Check-In Confirmation UI (2026-06-01)
 - Phase 00 — Repository Review and Planning (2026-05-31)
 - Phase 01 — Project Setup and Tooling (2026-05-31)
@@ -65,6 +66,27 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 16 — Check-In Sync Backend
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/modules/sync/sync.schemas.ts (syncPayloadSchema — max 100 check-ins, Zod validation)
+  - src/modules/sync/sync.types.ts (SyncItemStatus, SyncItemResult, SyncSummary, SyncBatchResult)
+  - src/modules/sync/sync.dto.ts (SyncResponseDTO)
+  - src/modules/sync/sync.repository.ts (findProcessedQueueItem — idempotency check, createSyncLog)
+  - src/modules/sync/sync.service.ts (processSyncBatch — conflict resolution, earliest-timestamp-wins, sync log always written)
+  - src/modules/checkins/checkins.repository.ts (findAcceptedCheckinByGuest, createCheckin, markCheckinDuplicate, updateGuestCheckedIn)
+  - src/app/api/v1/staff/weddings/[weddingId]/checkins/sync/route.ts (POST handler)
+- **Files Modified:**
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** Endpoint rejects invalid staff tokens (401). Snapshot mismatch returns 409 with sync log written. ACCEPTED path creates check-in and updates guest denormalized state. DUPLICATE path stores audit record with duplicateOfId pointing to accepted. Earliest-timestamp-wins: if incoming is earlier than existing accepted, the existing is marked duplicate of the new accepted check-in (correct order — new accepted created first, then old marked duplicate). ALREADY_PROCESSED: same staffDeviceId+queueId returns previous authoritative timestamp without creating duplicate records. INVALID_GUEST: guest not found in snapshot_guests returns per-item error without failing the batch. Sync log always written outside main transaction, even after partial failures.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement checkin sync backend
 
 ---
 
