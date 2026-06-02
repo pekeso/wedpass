@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 39
+Phase 40
 
 ## Completed Phases
 
+- Phase 39 — System Utility Pages (2026-06-02)
 - Phase 38 — Beta Signup Page (2026-06-02)
 - Phase 37 — Marketing Landing Page (2026-06-02)
 - Phase 36 — Staff Mode Visual Polish (2026-06-02)
@@ -51,7 +52,7 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 38 complete)
+2026-06-02 (Phase 39 complete)
 
 ---
 
