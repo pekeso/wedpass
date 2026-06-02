@@ -2,10 +2,13 @@
 
 ## Current Phase
 
-Phase 21 and Phase 27
+Phase 24
 
 ## Completed Phases
 
+- Phase 23 — Guest Gallery (2026-06-02)
+- Phase 22 — Media Upload Signed URL Flow (2026-06-02)
+- Phase 21 — Guest Public Wedding Page (2026-06-02)
 - Phase 20 — Check-In Stats and Post-Event Sync Closeout (2026-06-02)
 - Phase 19 — Staff Device Readiness UI (2026-06-02)
 - Phase 18 — Event Readiness Command Center (2026-06-02)
@@ -70,6 +73,75 @@ Phase 10 — Event Mode Preparation
 ## Last Updated
 
 2026-06-02
+
+---
+
+### Phase 23 — Guest Gallery
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/app/api/v1/public/weddings/[slug]/media/route.ts (GET — public, paginated, filterable by mediaType)
+  - src/components/media/media-card.tsx (image/video card, next/image lazy-loaded, play icon overlay for videos)
+  - src/components/media/media-grid.tsx (responsive 2-col mobile / 4-col desktop grid, skeleton loading state)
+  - src/components/media/media-lightbox.tsx (full-screen overlay, ESC to close, video with controls + no autoplay)
+  - src/components/media/gallery-view.tsx (client component — useInfiniteQuery, filter tabs All/Photos/Videos, Load More, empty state, gallery-disabled state)
+  - src/app/w/[slug]/gallery/page.tsx (server component — getPublicWedding, passes galleryEnabled + coupleNames to GalleryView)
+- **Files Modified:**
+  - src/modules/media/media.repository.ts (added findPublicGalleryMedia — UPLOADED/APPROVED only, paginated)
+  - src/modules/media/media.dto.ts (added PublicGalleryMediaItemDTO, PublicGalleryPaginationDTO, PublicGalleryResponseDTO)
+  - src/modules/media/media.schemas.ts (added publicGalleryQuerySchema, PublicGalleryQuery type)
+  - src/modules/media/media.service.ts (added getPublicGalleryMedia, GalleryDisabledError, buildFileUrl helper)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — zero errors.
+- **Manual QA:** API filters to status UPLOADED/APPROVED — HIDDEN/DELETED excluded. galleryEnabled=false returns empty items array with galleryEnabled:false flag. Pagination: page + pageSize params supported. mediaType filter: IMAGE-only or VIDEO-only query works. Gallery page fetches wedding server-side, shows couple name as heading. GalleryView uses useInfiniteQuery (TanStack Query v5). Filter tabs change queryKey and reset pages. Load More appends next page. Lightbox ESC key closes overlay. Video rendered with controls, no autoplay. next/image used with unoptimized=true (R2 domain is env-specific). Gallery-disabled message shown when galleryEnabled=false. Empty state shown when no media for current filter.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add guest gallery
+
+---
+
+### Phase 22 — Media Upload Signed URL Flow
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/lib/storage/r2-client.ts (S3Client configured for Cloudflare R2)
+  - src/modules/media/media.schemas.ts (requestUploadUrlSchema, confirmUploadSchema)
+  - src/modules/media/media.dto.ts (UploadUrlResponseDTO, MediaUploadDTO, ConfirmUploadResponseDTO)
+  - src/modules/media/media.repository.ts (createMediaUpload — BigInt conversion for fileSizeBytes)
+  - src/modules/media/media.service.ts (requestUploadUrl, confirmUpload + error classes)
+  - src/app/api/v1/weddings/[weddingId]/media/upload-url/route.ts (POST — public, no auth)
+  - src/app/api/v1/weddings/[weddingId]/media/confirm/route.ts (POST — public, no auth)
+  - src/lib/offline/media/media-upload-queue.ts (queueMediaUpload, processMediaQueue, getQueueStatus)
+  - src/components/media/upload-progress.tsx (animated progress bar)
+  - src/components/media/media-upload-form.tsx (file picker, online/offline branching, XHR progress)
+- **Files Modified:**
+  - src/modules/weddings/weddings.service.ts (added getWeddingForUploadPage — returns weddingId + public DTO)
+  - src/app/w/[slug]/upload/page.tsx (full upload page — resolves weddingId server-side, passes to client form)
+  - package.json (added @aws-sdk/client-s3, @aws-sdk/s3-request-presigner)
+  - PROGRESS.md
+- **Dependencies Added:** @aws-sdk/client-s3, @aws-sdk/s3-request-presigner
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Server validates MIME type (image/jpeg, image/png, video/mp4 only — SVG rejected). File size enforced: images 10MB max, videos 100MB max. fileKey generated server-side (weddings/{weddingId}/media/{uploadId}.{ext}). confirm endpoint validates fileKey prefix matches weddingId. Offline: file queued to Dexie mediaQueue with blob. Online: XHR PUT directly to R2 signed URL with progress tracking; confirm called after success. Upload page resolves weddingId from slug server-side — weddingId not in public API response.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: implement media upload signed url flow
+
+---
+
+### Phase 21 — Guest Public Wedding Page
+- **Completed:** 2026-06-02
+- **Files Created:**
+  - src/app/api/v1/public/weddings/[slug]/route.ts (GET — public, no auth, returns only safe public fields)
+- **Files Modified:**
+  - src/modules/weddings/weddings.dto.ts (added PublicWeddingDTO, PublicWeddingResponseDTO)
+  - src/modules/weddings/weddings.service.ts (added toPublicWeddingDTO, getPublicWedding)
+  - src/app/w/[slug]/page.tsx (full guest landing page — Server Component with generateMetadata, cover image, couple names in Playfair Display, event details, conditional gallery CTA, privacy note)
+- **Tests Run:** npm run lint, npx tsc --noEmit
+- **Test Results:** lint — PASS (zero errors). tsc — PASS (zero errors).
+- **Manual QA:** Public API returns only name, coupleNames, eventDate, location, coverImageUrl, galleryEnabled — no organizer email, guest list, or internal IDs. Page uses Next.js notFound() for unknown slugs. OG meta tags generated per wedding (og:title, og:description, og:image). "See you soon" message for future dates; "Thank you for celebrating" for past dates. "View Gallery" button shown only when galleryEnabled=true. Guest layout wired via src/app/w/[slug]/layout.tsx. Privacy note rendered below CTAs.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** feat: add guest public wedding page
 
 ---
 
