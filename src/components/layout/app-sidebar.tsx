@@ -152,6 +152,9 @@ export function AppSidebar({ weddingId }: AppSidebarProps) {
               <div className="text-[11px] leading-tight text-white/55">Organizer</div>
             </div>
           </div>
+          <p className="mt-2 text-center text-[10px] text-white/25">
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+          </p>
         </div>
       )}
     </aside>

@@ -1,8 +1,15 @@
 import { withSentryConfig } from "@sentry/nextjs"
+import { createRequire } from "module"
+
+const require = createRequire(import.meta.url)
+const { version } = require("./package.json")
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: ["192.168.1.7"],
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
 }
 
 export default withSentryConfig(nextConfig, {
