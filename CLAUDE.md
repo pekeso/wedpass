@@ -1152,6 +1152,20 @@ If a feature is not listed in V1, do not implement it without explicit approval.
 
 ---
 
+## Git Workflow
+
+All development must follow the feature branch → pull request → merge to `main` workflow.
+
+Rules:
+
+- Never commit directly to `main`.
+- Create a branch for every piece of work: `feature/<name>`, `fix/<name>`, or `chore/<name>`.
+- Open a pull request to merge the branch into `main`.
+- `main` must always be in a deployable state.
+- Delete the branch after merging.
+
+---
+
 ## Claude Code Operating Instructions
 
 When implementing features:
@@ -1169,6 +1183,7 @@ When implementing features:
 11. Do not invent new product scope.
 12. Ask for clarification if a requested feature conflicts with V1 scope.
 13. Use the latest stable version of any npm package unless a conflict requires otherwise (see Package Management Rules).
+14. Always work on a feature branch. Never commit directly to `main`.
 
 ---
 

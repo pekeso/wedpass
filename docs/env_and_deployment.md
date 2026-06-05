@@ -590,17 +590,27 @@ pnpm build
 
 ---
 
-## 31. Recommended Branching
+## 31. Branching and Pull Request Workflow
 
-For solo development:
+All work must happen on a feature branch. Direct commits to `main` are not allowed.
+
+Branch naming:
 
 ```text
-main
 feature/<feature-name>
 fix/<fix-name>
+chore/<task-name>
 ```
 
-For beta, keep `main` deployable.
+Workflow:
+
+1. Create a branch from `main`.
+2. Do all work on that branch.
+3. Open a pull request to merge into `main`.
+4. Review and confirm the PR before merging.
+5. Delete the branch after merge.
+
+`main` must always be deployable.
 
 Do not commit broken code to `main`.
 
