@@ -3,8 +3,7 @@
 import { use, useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Html5Qrcode } from "html5-qrcode"
-import { ArrowLeft, Camera, CameraOff, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle, Camera, CameraOff, Search, X, Zap } from "lucide-react"
 import { SyncStatusBar } from "@/components/staff/sync-status-bar"
 import type { SyncState } from "@/components/staff/sync-status-bar"
 import { ScannerFrame } from "@/components/staff/scanner-frame"
@@ -139,79 +138,170 @@ export default function StaffScanPage({
     }
   }, [handleScanSuccess])
 
+  function goBack() {
+    router.push(`/staff/${weddingId}/checkin`)
+  }
+
   function goToSearch() {
     router.push(`/staff/${weddingId}/search`)
   }
 
+  const showError = status === "not-found" || status === "error"
+  const errorMessage =
+    status === "not-found" ? t("scan.qrNotRecognized") : t("scan.cameraUnavailable")
+
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div
+      className="flex min-h-dvh flex-col"
+      style={{ background: "#0b0e16", position: "relative" }}
+    >
       <SyncStatusBar
         isOnline={isOnline}
         pendingCount={pendingCount}
         syncState={syncState}
       />
 
-      <div className="mx-auto w-full max-w-lg flex-1 space-y-4 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            aria-label="Go back"
-            className="shrink-0"
-          >
-            <ArrowLeft className="size-5" />
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">{t("scan.title")}</h1>
-        </div>
+      {/* Camera area */}
+      <div
+        className="relative flex flex-1 items-center justify-center"
+        style={{ background: "#0b0e16" }}
+      >
+        {/* Radial gradient atmosphere */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 42%, rgba(255,255,255,.05), transparent 60%)",
+          }}
+        />
 
         {status === "permission-denied" ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
-            <CameraOff className="size-12 text-muted-foreground" />
+          /* Permission denied state */
+          <div className="flex flex-col items-center gap-4 px-8 text-center">
+            <CameraOff className="size-12" style={{ color: "rgba(255,255,255,.4)" }} />
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">{t("scan.cameraAccessDenied")}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-semibold text-white">{t("scan.cameraAccessDenied")}</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,.6)" }}>
                 {t("scan.cameraAccessDeniedDesc")}
               </p>
             </div>
           </div>
         ) : (
-          <>
-            <div className="relative">
-              <ScannerFrame scannerId={SCANNER_ID} />
-              {status === "initializing" && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/60">
-                  <Camera className="size-10 animate-pulse text-white" />
-                </div>
-              )}
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground">
-              {t("scan.hint")}
-            </p>
-
-            {status === "not-found" && (
-              <div className="rounded-xl border border-danger/30 bg-danger-light px-4 py-3 text-sm text-danger">
-                {t("scan.qrNotRecognized")}
-              </div>
-            )}
-
-            {status === "error" && (
-              <div className="rounded-xl border border-danger/30 bg-danger-light px-4 py-3 text-sm text-danger">
-                {t("scan.cameraUnavailable")}
-              </div>
-            )}
-          </>
+          /* Live camera + overlay */
+          <ScannerFrame scannerId={SCANNER_ID} className="absolute inset-0" />
         )}
 
-        <Button
-          variant="outline"
-          onClick={goToSearch}
-          className="h-14 w-full gap-2 text-base"
+        {/* Initializing overlay */}
+        {status === "initializing" && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Camera className="size-10 animate-pulse text-white" />
+          </div>
+        )}
+
+        {/* Hint text */}
+        {status !== "permission-denied" && (
+          <div
+            className="pointer-events-none absolute left-0 right-0 text-center"
+            style={{
+              bottom: 100,
+              color: "rgba(255,255,255,.8)",
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          >
+            {t("scan.hint")}
+          </div>
+        )}
+
+        {/* Flash button */}
+        <button
+          aria-label="Toggle flash"
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,.12)",
+            border: 0,
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Search className="size-4" />
+          <Zap size={20} />
+        </button>
+      </div>
+
+      {/* Error banner */}
+      {showError && (
+        <div
+          style={{
+            background: "#3a1717",
+            padding: "14px 18px",
+            display: "flex",
+            gap: 11,
+            alignItems: "flex-start",
+          }}
+        >
+          <AlertTriangle size={19} color="#f0a0a0" style={{ marginTop: 1, flexShrink: 0 }} />
+          <div style={{ color: "rgba(255,255,255,.9)", fontSize: 13, lineHeight: 1.4 }}>
+            {errorMessage}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom action bar */}
+      <div
+        style={{
+          padding: 16,
+          background: "#0b0e16",
+          display: "flex",
+          gap: 10,
+        }}
+      >
+        <button
+          onClick={goBack}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            height: 48,
+            borderRadius: 12,
+            background: "rgba(255,255,255,.1)",
+            border: 0,
+            color: "#fff",
+            fontWeight: 600,
+            fontSize: 15,
+          }}
+        >
+          <X size={17} />
+          {t("common.cancel")}
+        </button>
+        <button
+          onClick={goToSearch}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            height: 48,
+            borderRadius: 12,
+            background: "#C8A45D",
+            border: 0,
+            color: "#172033",
+            fontWeight: 700,
+            fontSize: 15,
+          }}
+        >
           {t("scan.searchManually")}
-        </Button>
+          <Search size={16} />
+        </button>
       </div>
     </div>
   )

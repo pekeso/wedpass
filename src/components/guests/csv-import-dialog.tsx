@@ -22,12 +22,14 @@ interface ParsedRow {
   phoneNumber?: string
   email?: string
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber?: string
 }
 
 const SAMPLE_CSV =
-  "fullName,phoneNumber,email,numberOfAllowedGuests\n" +
-  "Michael Okoro,+2348012345678,michael@example.com,2\n" +
-  "Sarah Adebayo,+2348099876543,,1\n"
+  "fullName,phoneNumber,email,numberOfAllowedGuests,tableName,seatNumber\n" +
+  "Michael Okoro,+2348012345678,michael@example.com,2,Table 1,3\n" +
+  "Sarah Adebayo,+2348099876543,,1,Table 2,\n"
 
 function normalizeKey(key: string): string {
   return key.trim().toLowerCase().replace(/[\s_-]/g, "")
@@ -41,11 +43,15 @@ function parseRows(raw: Record<string, string>[]): ParsedRow[] {
     const email = n["email"] ?? ""
     const allowedRaw = n["numberofallowedguests"] ?? n["allowedguests"] ?? n["guests"] ?? ""
     const numberOfAllowedGuests = Math.max(1, parseInt(allowedRaw) || 1)
+    const tableName = n["tablename"] ?? n["table"] ?? ""
+    const seatNumber = n["seatnumber"] ?? n["seat"] ?? ""
     return {
       fullName,
       phoneNumber: phoneNumber || undefined,
       email: email || undefined,
       numberOfAllowedGuests,
+      tableName,
+      seatNumber: seatNumber || undefined,
     }
   })
 }
@@ -111,6 +117,12 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
           setParsedRows([])
           return
         }
+        const hasAnyTable = rows.some((r) => r.tableName.length > 0)
+        if (!hasAnyTable) {
+          setParseError('Required column "tableName" was not found. Check that your CSV headers match the template.')
+          setParsedRows([])
+          return
+        }
         setParsedRows(rows)
       },
       error: (err) => {
@@ -166,7 +178,7 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
         <DialogHeader>
           <DialogTitle>Import Guests from CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file with your guest list. Required column: <strong>fullName</strong>.
+            Upload a CSV file with your guest list. Required columns: <strong>fullName</strong>, <strong>tableName</strong>.
           </DialogDescription>
         </DialogHeader>
 
@@ -218,7 +230,8 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
                   <thead className="bg-muted/50">
                     <tr>
                       <th className="px-2 py-1.5 text-left font-medium">Name</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Phone</th>
+                      <th className="px-2 py-1.5 text-left font-medium">Table</th>
+                      <th className="px-2 py-1.5 text-left font-medium">Seat</th>
                       <th className="px-2 py-1.5 text-left font-medium">Guests</th>
                     </tr>
                   </thead>
@@ -228,7 +241,10 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
                         <td className="px-2 py-1.5">
                           {row.fullName || <span className="text-danger">missing</span>}
                         </td>
-                        <td className="px-2 py-1.5">{row.phoneNumber ?? "—"}</td>
+                        <td className="px-2 py-1.5">
+                          {row.tableName || <span className="text-danger">missing</span>}
+                        </td>
+                        <td className="px-2 py-1.5">{row.seatNumber ?? "—"}</td>
                         <td className="px-2 py-1.5">{row.numberOfAllowedGuests}</td>
                       </tr>
                     ))}

@@ -1,33 +1,27 @@
 "use client"
 
-import { Camera } from "lucide-react"
-import { useTranslations } from "@/lib/i18n/use-translations"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 interface GuestUploadHeaderProps {
   displayName: string
+  slug: string
 }
 
-export function GuestUploadHeader({ displayName }: GuestUploadHeaderProps) {
-  const { t } = useTranslations()
-
+export function GuestUploadHeader({ displayName, slug }: GuestUploadHeaderProps) {
   return (
-    <div className="mb-8 text-center">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-champagne/20">
-        <Camera className="h-7 w-7 text-champagne" aria-hidden="true" />
-      </div>
-      <h1 className="text-2xl font-bold text-navy">{t("upload.pageTitle")}</h1>
-      <p className="mt-2 text-sm text-navy/60">
-        {t("upload.pageSubtitle", { weddingName: displayName })}
+    <div className="flex items-center gap-2.5 px-5 pb-0 pt-4">
+      <Link
+        href={`/w/${slug}`}
+        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px] border border-[#e7e1d6] bg-white"
+        aria-label="Back to wedding page"
+      >
+        <ArrowLeft className="h-[18px] w-[18px] text-navy" aria-hidden="true" />
+      </Link>
+      <p className="font-serif text-[20px] font-semibold leading-tight text-navy">
+        {displayName}
       </p>
     </div>
   )
 }
 
-export function GuestUploadFooter() {
-  const { t } = useTranslations()
-  return (
-    <p className="mt-6 text-center text-xs text-navy/40">
-      {t("upload.privacyNote")}
-    </p>
-  )
-}

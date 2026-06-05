@@ -12,6 +12,7 @@ function makeGuest(overrides: Partial<LocalGuest> & { guestId: string; fullName:
     snapshotVersion: 1,
     qrToken: `qr-${overrides.guestId}`,
     allowedGuests: 1,
+    tableName: "Table 1",
     checkedIn: false,
     ...overrides,
   }

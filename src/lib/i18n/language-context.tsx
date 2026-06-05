@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react"
@@ -22,11 +23,12 @@ const LanguageContext = createContext<LanguageContextValue>({
 })
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window === "undefined") return "en"
+  const [language, setLanguageState] = useState<Language>("en")
+
+  useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
-    return stored === "fr" ? "fr" : "en"
-  })
+    if (stored === "fr") setLanguageState("fr")
+  }, [])
 
   function setLanguage(lang: Language) {
     setLanguageState(lang)

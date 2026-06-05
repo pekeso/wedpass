@@ -1,6 +1,7 @@
 "use client"
 
 import { offlineDb } from "@/lib/offline/db"
+import { generateUUID } from "@/lib/utils/uuid"
 import type { LocalMediaUpload } from "@/types/shared"
 
 export async function queueMediaUpload(
@@ -9,7 +10,7 @@ export async function queueMediaUpload(
   file: File,
   uploadedByName?: string
 ): Promise<string> {
-  const uploadId = crypto.randomUUID()
+  const uploadId = generateUUID()
   const mediaType: LocalMediaUpload["mediaType"] = file.type.startsWith("video/")
     ? "video"
     : "image"

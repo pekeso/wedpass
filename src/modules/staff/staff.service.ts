@@ -105,6 +105,20 @@ export async function listStaffDevices(
   return { items: devices.map(toStaffDeviceListItemDTO) }
 }
 
+export async function reissueStaffToken(
+  weddingId: string,
+  deviceId: string,
+  organizerId: string
+): Promise<{ staffToken: string }> {
+  await ensureWeddingOwner(weddingId, organizerId)
+
+  const device = await findStaffDeviceById(weddingId, deviceId)
+  if (!device) throw new StaffDeviceNotFoundError()
+
+  const staffToken = signStaffToken({ staffDeviceId: device.id, weddingId })
+  return { staffToken }
+}
+
 export async function revokeStaffDevice(
   weddingId: string,
   deviceId: string,

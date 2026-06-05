@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { getWeddingForUploadPage } from "@/modules/weddings/weddings.service"
 import { WeddingNotFoundError } from "@/modules/weddings/weddings.service"
 import { MediaUploadForm } from "@/components/media/media-upload-form"
-import { GuestUploadHeader, GuestUploadFooter } from "@/components/guest/guest-upload-header"
+import { GuestUploadHeader } from "@/components/guest/guest-upload-header"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -15,11 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { wedding } = await getWeddingForUploadPage(slug)
     return {
       title: wedding.coupleNames
-        ? `Share Photos — ${wedding.coupleNames} — WedPass`
-        : `Share Photos — ${wedding.name} — WedPass`,
+        ? `Share Memories — ${wedding.coupleNames} — WedPass`
+        : `Share Memories — ${wedding.name} — WedPass`,
     }
   } catch {
-    return { title: "Share Photos — WedPass" }
+    return { title: "Share Memories — WedPass" }
   }
 }
 
@@ -46,20 +46,9 @@ export default async function GuestUploadPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <div className="mx-auto max-w-lg px-5 py-10">
-        {/* Header */}
-        <GuestUploadHeader displayName={displayName} />
-
-        {/* Upload form */}
-        <div className="rounded-2xl border border-champagne/20 bg-white px-5 py-6 shadow-card">
-          <MediaUploadForm
-            weddingId={weddingId}
-            weddingSlug={slug}
-          />
-        </div>
-
-        {/* Footer note */}
-        <GuestUploadFooter />
+      <div className="mx-auto max-w-lg">
+        <GuestUploadHeader displayName={displayName} slug={slug} />
+        <MediaUploadForm weddingId={weddingId} weddingSlug={slug} />
       </div>
     </div>
   )

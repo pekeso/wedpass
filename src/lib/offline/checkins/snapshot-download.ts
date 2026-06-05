@@ -12,10 +12,12 @@ type SnapshotGuestFromAPI = {
   email?: string
   qrToken: string
   allowedGuests: number
+  tableName: string
+  seatNumber?: string
 }
 
 type SnapshotAPIResponse = {
-  wedding: { id: string; name: string; coupleNames: string | null }
+  wedding: { id: string; name: string; coupleNames: string | null; eventDate: string | null }
   snapshot: { id: string; version: number; guestCount: number }
   staffDeviceId: string
   guests: SnapshotGuestFromAPI[]
@@ -45,7 +47,7 @@ export async function downloadAndSaveSnapshot(
   }
 
   const json = await res.json()
-  const { snapshot, guests, staffDeviceId } = json.data as SnapshotAPIResponse
+  const { wedding, snapshot, guests, staffDeviceId } = json.data as SnapshotAPIResponse
 
   const deviceId = await getOrCreateDeviceId()
 
@@ -63,6 +65,8 @@ export async function downloadAndSaveSnapshot(
         email: g.email,
         qrToken: g.qrToken,
         allowedGuests: g.allowedGuests,
+        tableName: g.tableName,
+        seatNumber: g.seatNumber,
         checkedIn: false,
       }))
     )
@@ -74,6 +78,9 @@ export async function downloadAndSaveSnapshot(
     await setMetadata("staffDeviceId", staffDeviceId)
     await setMetadata("lastSnapshotDownloadedAt", new Date().toISOString())
     await setMetadata("guestCount", String(guests.length))
+    await setMetadata("weddingName", wedding.name)
+    if (wedding.coupleNames) await setMetadata("weddingCoupleNames", wedding.coupleNames)
+    if (wedding.eventDate) await setMetadata("weddingEventDate", wedding.eventDate)
   })
 
   return {

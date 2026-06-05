@@ -5,10 +5,32 @@ import { cn } from "@/lib/utils"
 
 interface LanguageToggleProps {
   className?: string
+  variant?: "default" | "cover"
 }
 
-export function LanguageToggle({ className }: LanguageToggleProps) {
+export function LanguageToggle({ className, variant = "default" }: LanguageToggleProps) {
   const { language, setLanguage } = useLanguage()
+
+  if (variant === "cover") {
+    return (
+      <div className={cn("flex items-center rounded-full bg-white/90 p-0.5", className)}>
+        {(["en", "fr"] as const).map((l) => (
+          <button
+            key={l}
+            type="button"
+            onClick={() => setLanguage(l)}
+            className={cn(
+              "rounded-full px-[11px] py-[5px] text-[11.5px] font-bold transition-colors",
+              language === l ? "bg-navy text-white" : "text-navy/60 hover:text-navy"
+            )}
+            aria-pressed={language === l}
+          >
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className={cn("flex items-center rounded-lg border border-border bg-muted p-0.5", className)}>

@@ -2,7 +2,16 @@
 
 import { use, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { AlertTriangle, CalendarCheck, Loader2, Users, UserCheck, Clock } from "lucide-react"
+import {
+  Check,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  Lock,
+  ShieldCheck,
+  Users,
+  UserCheck,
+} from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { LoadingState } from "@/components/shared/loading-state"
@@ -15,12 +24,32 @@ import {
   enableEventMode,
   getEventDayStatus,
 } from "@/lib/api/event-mode-client"
-import { EventReadinessCard } from "@/components/wedding/event-readiness-card"
 import { StaffDeviceStatusCard } from "@/components/staff/staff-device-status-card"
-import { SnapshotSummaryCard } from "@/components/wedding/snapshot-summary-card"
 import { ManualDeskGuidance } from "@/components/wedding/manual-desk-guidance"
 import { EmergencyInstructions } from "@/components/wedding/emergency-instructions"
 import type { EventDayStatusDTO } from "@/modules/weddings/event-mode.service"
+
+function WMarkWatermark({ size = 180 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size * 0.92}
+      viewBox="0 0 100 96"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M10,27 L31,90 L50,7 L69,90 L90,27"
+        fill="none"
+        stroke="white"
+        strokeWidth={13}
+        strokeLinejoin="miter"
+        strokeLinecap="butt"
+        strokeMiterlimit={20}
+      />
+    </svg>
+  )
+}
 
 export default function EventModePage({
   params,
@@ -89,68 +118,136 @@ export default function EventModePage({
   const allPassed = readinessQuery.data?.ready ?? false
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5" style={{ maxWidth: 760 }}>
       <PageHeader
-        title="Event Mode"
-        description="Enable Event Mode to lock your guest list and create the offline check-in snapshot."
+        title="Enable Event Mode"
+        description="Prepare your wedding for offline check-in"
       />
 
-      <SectionCard title="Readiness Checklist">
-        <div className="space-y-3">
-          {checks.map((check) => (
-            <EventReadinessCard key={check.key} check={check} />
-          ))}
-          {checks.length === 0 && readinessQuery.isLoading && (
-            <p className="text-sm text-muted-foreground">Loading checklist...</p>
+      {/* Navy explainer card */}
+      <div
+        className="relative overflow-hidden rounded-2xl px-6 py-6"
+        style={{ background: "#172033" }}
+      >
+        <div
+          className="pointer-events-none absolute -right-8 -top-5"
+          style={{ opacity: 0.08 }}
+        >
+          <WMarkWatermark size={180} />
+        </div>
+        <ShieldCheck className="size-[30px] text-champagne" />
+        <h2 className="mt-3 text-[21px] font-bold text-white">
+          What is Event Mode?
+        </h2>
+        <p
+          className="mt-2 max-w-[540px] leading-[1.55] text-white/70"
+          style={{ fontSize: 14.5 }}
+        >
+          Event Mode takes a snapshot of your guest list so staff phones can check
+          guests in offline. Once enabled, the list is locked so every device stays
+          consistent.
+        </p>
+      </div>
+
+      {/* Before you enable checklist */}
+      <div className="overflow-hidden rounded-2xl border border-[#efeae0] bg-white shadow-card">
+        <div className="px-6 pt-5 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#97a0b2]">
+            Before you enable
+          </p>
+        </div>
+        <div className="px-6 pb-4">
+          {checks.length === 0 && readinessQuery.isLoading ? (
+            <p className="py-4 text-sm text-muted-foreground">Loading checklist…</p>
+          ) : (
+            <div>
+              {checks.map((check, i) => (
+                <div key={check.key}>
+                  <div className="flex items-center gap-3 py-3">
+                    <div
+                      className="flex size-[22px] shrink-0 items-center justify-center rounded-full"
+                      style={
+                        check.passed
+                          ? { background: "#DCFCE7" }
+                          : { background: "#fff", border: "2px solid #e7e1d6" }
+                      }
+                    >
+                      {check.passed && (
+                        <Check
+                          className="text-[#15803d]"
+                          style={{ width: 13, height: 13, strokeWidth: 3 }}
+                        />
+                      )}
+                    </div>
+                    <span
+                      className="flex-1 text-sm"
+                      style={{ color: "#172033" }}
+                    >
+                      {check.label}
+                    </span>
+                    {!check.passed && (
+                      <span className="inline-flex items-center rounded-full bg-sync-light px-2.5 py-0.5 text-xs font-medium text-sync">
+                        Not ready
+                      </span>
+                    )}
+                  </div>
+                  {i < checks.length - 1 && (
+                    <div className="h-px bg-[#efeae0]" />
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      </SectionCard>
+      </div>
 
-      <SectionCard>
-        <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">
-              Enabling Event Mode locks your guest list
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Once enabled, you will not be able to add, edit, or remove guests. A snapshot of
-              your current guest list will be created for offline check-in. This action cannot be
-              undone.
-            </p>
-          </div>
-        </div>
+      {/* Warning banner */}
+      <div
+        className="flex items-start gap-3 rounded-2xl p-4"
+        style={{ background: "#FEF3C7" }}
+      >
+        <Lock
+          className="mt-0.5 size-5 shrink-0"
+          style={{ color: "#b45309" }}
+        />
+        <p className="leading-[1.5] text-[#92400e]" style={{ fontSize: 13.5 }}>
+          <strong>Once enabled, the guest list will be locked</strong> for offline
+          check-in consistency. You can still moderate media and view stats.
+        </p>
+      </div>
 
-        {enableError && (
-          <p className="mt-3 text-sm text-danger">{enableError}</p>
-        )}
+      {enableError && (
+        <p className="text-sm text-danger">{enableError}</p>
+      )}
 
-        <div className="mt-4">
-          <Button
-            variant="navy"
-            size="lg"
-            disabled={!allPassed || enableMutation.isPending}
-            onClick={() => setConfirmOpen(true)}
-          >
-            {enableMutation.isPending ? (
-              <>
-                <Loader2 className="animate-spin" />
-                Enabling...
-              </>
-            ) : (
-              <>
-                <CalendarCheck />
-                Enable Event Mode
-              </>
-            )}
-          </Button>
-          {!allPassed && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Complete all checklist items above to enable Event Mode.
-            </p>
+      {/* Action buttons */}
+      <div className="flex items-center gap-3">
+        <Button variant="outline">Not yet</Button>
+        <Button
+          variant="navy"
+          size="lg"
+          className="ml-auto"
+          disabled={!allPassed || enableMutation.isPending}
+          onClick={() => setConfirmOpen(true)}
+        >
+          {enableMutation.isPending ? (
+            <>
+              <Loader2 className="animate-spin" />
+              Enabling…
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="text-champagne" />
+              Enable Event Mode
+            </>
           )}
-        </div>
-      </SectionCard>
+        </Button>
+      </div>
+      {!allPassed && !readinessQuery.isLoading && (
+        <p className="text-xs text-muted-foreground">
+          Complete all checklist items above to enable Event Mode.
+        </p>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}
@@ -171,56 +268,115 @@ export default function EventModePage({
 function EventCommandCenter({ status }: { status: EventDayStatusDTO }) {
   const { checkinStats, staffDevices, snapshot } = status
   const activeDevices = staffDevices.filter((d) => d.status === "ACTIVE")
+  const checkinPct =
+    checkinStats.total > 0
+      ? Math.round((checkinStats.checkedIn / checkinStats.total) * 100)
+      : 0
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5" style={{ maxWidth: 760 }}>
       <PageHeader
         title="Event Day Command Center"
-        description="Event Mode is active. Monitor your check-in progress and staff device status below."
+        description="Event Mode is active. Monitor your check-in progress and staff devices below."
       />
 
-      {snapshot && <SnapshotSummaryCard snapshot={snapshot} />}
-
-      <SectionCard title="Check-in Progress">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={<Users className="size-5 text-muted-foreground" />}
-            label="Total guests"
-            value={checkinStats.total.toString()}
-          />
-          <StatCard
-            icon={<UserCheck className="size-5 text-success" />}
-            label="Checked in"
-            value={checkinStats.checkedIn.toString()}
-            valueClass="text-success"
-          />
-          <StatCard
-            icon={<Clock className="size-5 text-warning" />}
-            label="Pending"
-            value={checkinStats.pending.toString()}
-            valueClass="text-warning"
-          />
+      {/* Navy active-state hero */}
+      <div
+        className="relative overflow-hidden rounded-2xl px-6 py-6"
+        style={{ background: "#172033" }}
+      >
+        <div
+          className="pointer-events-none absolute -right-8 -top-5"
+          style={{ opacity: 0.08 }}
+        >
+          <WMarkWatermark size={180} />
         </div>
-        {checkinStats.total > 0 && (
-          <div className="mt-4">
-            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-              <span>Progress</span>
-              <span>
-                {Math.round((checkinStats.checkedIn / checkinStats.total) * 100)}%
-              </span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-success" />
+          <div>
+            <p className="font-semibold text-white">Event Mode is active</p>
+            <p className="mt-0.5 text-sm text-white/60">
+              Guest list is locked for offline check-in consistency.
+            </p>
+          </div>
+        </div>
+        {snapshot && (
+          <div className="mt-5 flex flex-wrap gap-4">
+            {[
+              ["Snapshot", `v${snapshot.version}`],
+              ["Guests in snapshot", snapshot.guestCount.toLocaleString()],
+              [
+                "Created",
+                new Date(snapshot.createdAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }),
+              ],
+            ].map(([label, value]) => (
               <div
-                className="h-full rounded-full bg-success transition-all"
-                style={{
-                  width: `${Math.round((checkinStats.checkedIn / checkinStats.total) * 100)}%`,
-                }}
-              />
-            </div>
+                key={label}
+                className="rounded-xl px-4 py-3"
+                style={{ background: "rgba(255,255,255,0.07)" }}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/40">
+                  {label}
+                </p>
+                <p className="mt-1 font-bold tabular-nums text-white">{value}</p>
+              </div>
+            ))}
           </div>
         )}
-      </SectionCard>
+      </div>
 
+      {/* Check-in progress */}
+      <div className="overflow-hidden rounded-2xl border border-[#efeae0] bg-white shadow-card">
+        <div className="px-6 pt-5 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#97a0b2]">
+            Check-in progress
+          </p>
+        </div>
+        <div className="px-6 pb-5">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <CheckinStatTile
+              icon={<Users className="size-5" />}
+              label="Total guests"
+              value={checkinStats.total}
+              tone="default"
+            />
+            <CheckinStatTile
+              icon={<UserCheck className="size-5" />}
+              label="Checked in"
+              value={checkinStats.checkedIn}
+              tone="success"
+            />
+            <CheckinStatTile
+              icon={<Clock className="size-5" />}
+              label="Pending"
+              value={checkinStats.pending}
+              tone="warning"
+            />
+          </div>
+          {checkinStats.total > 0 && (
+            <div className="mt-4">
+              <div className="mb-1.5 flex justify-between text-xs text-[#97a0b2]">
+                <span>Progress</span>
+                <span className="tabular-nums font-medium text-[#45506b]">
+                  {checkinPct}%
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[#F2ECE0]">
+                <div
+                  className="h-full rounded-full bg-success transition-all"
+                  style={{ width: `${checkinPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Staff devices */}
       <SectionCard
         title="Staff Devices"
         description={`${activeDevices.length} active device${activeDevices.length !== 1 ? "s" : ""}`}
@@ -242,24 +398,47 @@ function EventCommandCenter({ status }: { status: EventDayStatusDTO }) {
   )
 }
 
-function StatCard({
+const toneStyles = {
+  default: {
+    icon: "bg-navy/[.06] text-navy",
+    value: "#172033",
+  },
+  success: {
+    icon: "bg-success-light text-success",
+    value: "#16A34A",
+  },
+  warning: {
+    icon: "bg-warning-light text-warning",
+    value: "#D97706",
+  },
+} as const
+
+function CheckinStatTile({
   icon,
   label,
   value,
-  valueClass,
+  tone,
 }: {
   icon: React.ReactNode
   label: string
-  value: string
-  valueClass?: string
+  value: number
+  tone: keyof typeof toneStyles
 }) {
+  const s = toneStyles[tone]
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-3">
-      {icon}
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-xl font-bold ${valueClass ?? "text-foreground"}`}>{value}</p>
+    <div className="rounded-xl border border-[#efeae0] bg-[#fcfaf6] p-4">
+      <div
+        className={`mb-3 flex size-9 items-center justify-center rounded-xl ${s.icon}`}
+      >
+        {icon}
       </div>
+      <p
+        className="text-[28px] font-bold tabular-nums leading-none"
+        style={{ color: s.value }}
+      >
+        {value.toLocaleString()}
+      </p>
+      <p className="mt-1.5 text-[13px] font-medium text-[#97a0b2]">{label}</p>
     </div>
   )
 }

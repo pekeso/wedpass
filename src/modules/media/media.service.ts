@@ -98,7 +98,6 @@ export async function requestUploadUrl(
     Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
     Key: fileKey,
     ContentType: input.mimeType,
-    ContentLength: input.fileSizeBytes,
   })
 
   const uploadUrl = await getSignedUrl(r2Client, command, {
@@ -213,6 +212,7 @@ export async function getPublicGalleryMedia(
           : item.thumbnailKey
             ? buildFileUrl(item.thumbnailKey, null)
             : null,
+        uploadedByName: item.uploadedByName,
         createdAt: item.createdAt.toISOString(),
       })),
       pagination: {

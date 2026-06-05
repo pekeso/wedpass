@@ -107,6 +107,8 @@ model Guest {
   phoneNumber           String?
   email                 String?
   numberOfAllowedGuests Int       @default(1)
+  tableName             String
+  seatNumber            String?
   qrToken               String    @unique
   isCheckedIn           Boolean   @default(false)
   checkedInAt           DateTime?
@@ -156,6 +158,8 @@ model SnapshotGuest {
   phoneNumber           String?
   email                 String?
   numberOfAllowedGuests Int             @default(1)
+  tableName             String
+  seatNumber            String?
   qrToken               String
   createdAt             DateTime        @default(now())
 

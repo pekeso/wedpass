@@ -49,6 +49,23 @@ export async function revokeStaffDevice(
   return json.data as { revoked: boolean }
 }
 
+export async function reissueStaffToken(
+  weddingId: string,
+  deviceId: string,
+  accessToken: string
+): Promise<{ staffToken: string }> {
+  const res = await fetch(
+    `${BASE}/weddings/${weddingId}/staff/devices/${deviceId}/reissue`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  )
+  const json = await res.json()
+  if (!json.success) throw new Error(json.error?.message ?? "Failed to reissue staff token")
+  return json.data as { staffToken: string }
+}
+
 export async function verifyStaffToken(
   weddingId: string,
   staffToken: string

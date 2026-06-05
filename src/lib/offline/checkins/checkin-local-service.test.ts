@@ -14,6 +14,7 @@ function makeGuest(
     fullName: "Test Guest",
     qrToken: `qr-${overrides.guestId}`,
     allowedGuests: 2,
+    tableName: "Table 1",
     checkedIn: false,
     ...overrides,
   }

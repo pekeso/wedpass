@@ -2,11 +2,12 @@
 
 import { use, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Lock, ShieldCheck } from "lucide-react"
+import { Lock, Shield, ShieldCheck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
+import { WMark } from "@/components/shared/wmark"
 import { verifyStaffToken } from "@/lib/api/staff-client"
 import { useTranslations } from "@/lib/i18n/use-translations"
+import { useLanguage } from "@/lib/i18n/language-context"
 
 const STAFF_TOKEN_KEY = (weddingId: string) => `wedpass-staff-token-${weddingId}`
 
@@ -17,6 +18,7 @@ export default function StaffLoginPage({
 }) {
   const { weddingId } = use(params)
   const router = useRouter()
+  const { language, setLanguage } = useLanguage()
 
   const [token, setToken] = useState("")
   const [error, setError] = useState("")
@@ -47,65 +49,120 @@ export default function StaffLoginPage({
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-navy text-white">
+      {/* decorative background W mark */}
       <div className="pointer-events-none absolute right-[-60px] top-10 opacity-[0.05]">
-        <WedPassWordmark size={300} textColor="#fff" />
+        <WMark size={300} variant="mono-ivory" />
       </div>
 
-      <div className="relative flex flex-1 flex-col items-center justify-center px-6 pb-10">
-        <div className="w-full max-w-sm">
-          <div className="mb-6 flex justify-center">
-            <WedPassWordmark size={60} textColor="#fff" />
-          </div>
-
-          <h1 className="mb-2 text-center text-[23px] font-bold">Event Mode</h1>
-          <p className="mb-8 text-center text-sm leading-relaxed text-white/60">
-            Enter your staff access to begin checking in guests.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="staff-token"
-                className="mb-2 block text-[12.5px] font-semibold text-white/60"
-              >
-                {t("login.tokenLabel")}
-              </label>
-              <div className="flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-3.5">
-                <Lock className="size-5 shrink-0 text-white/45" />
-                <input
-                  id="staff-token"
-                  type="text"
-                  placeholder={t("login.tokenPlaceholder")}
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  autoComplete="off"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  className="flex-1 border-0 bg-transparent text-base font-semibold text-white outline-none placeholder:text-white/30"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <p className="text-sm text-danger">{error}</p>
-            )}
-
-            <Button
-              type="submit"
-              variant="gold"
-              size="xl"
-              className="mt-6 w-full"
-              disabled={isLoading}
+      {/* top bar – language toggle */}
+      <div className="relative flex justify-end px-[18px] py-[14px]">
+        <div className="flex rounded-full p-[3px]" style={{ background: "rgba(255,255,255,0.08)" }}>
+          {(["en", "fr"] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLanguage(l)}
+              className="rounded-full px-3 py-[5px] text-xs font-semibold transition-colors"
+              style={{
+                background: language === l ? "var(--color-champagne)" : "transparent",
+                color: language === l ? "var(--color-navy)" : "rgba(255,255,255,0.7)",
+                border: 0,
+              }}
             >
-              {isLoading ? t("login.verifying") : "Enter Event Mode →"}
-            </Button>
-          </form>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          <div className="mt-5 flex items-center justify-center gap-2 text-xs text-white/50">
-            <ShieldCheck className="size-3.5 text-champagne" />
-            Staff access is limited &amp; secure
+      {/* main content */}
+      <div className="relative flex flex-1 flex-col justify-center px-[26px] pb-10">
+        {/* W mark logo */}
+        <div className="mb-[18px] flex justify-center">
+          <WMark size={62} variant="duo" />
+        </div>
+
+        <h1 className="mb-[6px] text-center text-[23px] font-bold leading-tight">
+          {t("login.title")}
+        </h1>
+        <p className="mb-[30px] text-center text-sm leading-[1.45] text-white/60">
+          {t("login.description")}
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          {/* wedding access code */}
+          <label
+            htmlFor="staff-token"
+            className="mb-2 block text-[12.5px] font-semibold tracking-[0.02em] text-white/60"
+          >
+            {t("login.tokenLabel")}
+          </label>
+          <div
+            className="flex items-center gap-[11px] rounded-[13px] px-[15px] py-[14px]"
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.14)",
+            }}
+          >
+            <Lock className="size-[18px] shrink-0 text-white/45" />
+            <input
+              id="staff-token"
+              type="text"
+              placeholder={t("login.tokenPlaceholder")}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              className="flex-1 border-0 bg-transparent text-base font-semibold tracking-[0.03em] text-white outline-none placeholder:text-white/30"
+            />
           </div>
+
+          {/* device PIN */}
+          <label
+            htmlFor="staff-pin"
+            className="mb-2 mt-4 block text-[12.5px] font-semibold tracking-[0.02em] text-white/60"
+          >
+            {t("login.pinLabel")}
+          </label>
+          <div
+            className="flex items-center gap-[11px] rounded-[13px] px-[15px] py-[14px]"
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.14)",
+            }}
+          >
+            <Shield className="size-[18px] shrink-0 text-white/45" />
+            <input
+              id="staff-pin"
+              type="password"
+              placeholder="••••"
+              autoComplete="off"
+              className="flex-1 border-0 bg-transparent text-base font-semibold tracking-[0.03em] text-white outline-none placeholder:text-white/30"
+            />
+          </div>
+
+          {error && (
+            <p className="mt-3 text-sm text-danger">{error}</p>
+          )}
+
+          <Button
+            type="submit"
+            variant="gold"
+            size="xl"
+            disabled={isLoading}
+            className="mt-[26px] w-full"
+          >
+            {isLoading ? t("login.verifying") : t("login.button")}
+            {!isLoading && <ArrowRight className="size-[18px]" />}
+          </Button>
+        </form>
+
+        {/* security note */}
+        <div className="mt-5 flex items-center justify-center gap-[7px] text-xs text-white/50">
+          <ShieldCheck className="size-3.5 text-champagne" />
+          {t("login.securityNote")}
         </div>
       </div>
     </div>

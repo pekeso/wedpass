@@ -36,16 +36,12 @@ export default async function GuestGalleryPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-ivory">
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <GalleryPageHeader displayName={displayName} slug={slug} />
-
-        {/* Gallery */}
-        <GalleryView
-          slug={slug}
-          galleryEnabled={wedding.galleryEnabled}
-          coupleNames={wedding.coupleNames}
-        />
-      </div>
+      <GalleryPageHeader displayName={displayName} slug={slug} />
+      <GalleryView
+        slug={slug}
+        galleryEnabled={wedding.galleryEnabled}
+        coupleNames={wedding.coupleNames}
+      />
     </div>
   )
 }

@@ -53,6 +53,7 @@ export interface PublicGalleryMediaItemDTO {
   mediaType: "IMAGE" | "VIDEO"
   fileUrl: string
   thumbnailUrl: string | null
+  uploadedByName: string | null
   createdAt: string
 }
 

@@ -1,8 +1,9 @@
 "use client"
 
 import { use, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Users, Plus, Search, ChevronLeft, ChevronRight, Upload } from "lucide-react"
+import { Users, Plus, Search, ChevronLeft, ChevronRight, Upload, Filter } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
@@ -11,9 +12,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { GuestTable } from "@/components/guests/guest-table"
 import { GuestCard } from "@/components/guests/guest-card"
 import { GuestForm } from "@/components/guests/guest-form"
-import { CsvImportDialog } from "@/components/guests/csv-import-dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -29,8 +28,24 @@ import {
 } from "@/lib/api/guests-client"
 import type { GuestListItemDTO } from "@/modules/guests/guests.dto"
 import type { CreateGuestInput } from "@/modules/guests/guests.schemas"
+import type { ApiResponse } from "@/types/api"
 
 const PAGE_SIZE = 50
+
+interface WeddingStats {
+  totalGuests: number
+  checkedInGuests: number
+}
+
+async function getWeddingStats(
+  weddingId: string,
+  accessToken: string
+): Promise<ApiResponse<WeddingStats>> {
+  const res = await fetch(`/api/v1/weddings/${weddingId}/stats`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return res.json()
+}
 
 export default function GuestsPage({
   params,
@@ -38,6 +53,7 @@ export default function GuestsPage({
   params: Promise<{ weddingId: string }>
 }) {
   const { weddingId } = use(params)
+  const router = useRouter()
   const { accessToken } = useAuthStore()
   const queryClient = useQueryClient()
 
@@ -46,7 +62,6 @@ export default function GuestsPage({
   const [page, setPage] = useState(1)
 
   const [addOpen, setAddOpen] = useState(false)
-  const [csvImportOpen, setCsvImportOpen] = useState(false)
   const [editGuest, setEditGuest] = useState<GuestListItemDTO | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<GuestListItemDTO | null>(null)
 
@@ -67,6 +82,17 @@ export default function GuestsPage({
     enabled: !!accessToken,
   })
 
+  const { data: stats } = useQuery({
+    queryKey: ["wedding-stats", weddingId],
+    queryFn: async () => {
+      if (!accessToken) throw new Error("Not authenticated")
+      const res = await getWeddingStats(weddingId, accessToken)
+      if (!res.success) throw new Error("Failed to load stats")
+      return res.data
+    },
+    enabled: !!accessToken,
+  })
+
   const createMutation = useMutation({
     mutationFn: async (input: CreateGuestInput) => {
       if (!accessToken) throw new Error("Not authenticated")
@@ -77,6 +103,7 @@ export default function GuestsPage({
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["guests", weddingId] })
       void queryClient.invalidateQueries({ queryKey: ["wedding", weddingId] })
+      void queryClient.invalidateQueries({ queryKey: ["wedding-stats", weddingId] })
       setAddOpen(false)
     },
   })
@@ -104,6 +131,7 @@ export default function GuestsPage({
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["guests", weddingId] })
       void queryClient.invalidateQueries({ queryKey: ["wedding", weddingId] })
+      void queryClient.invalidateQueries({ queryKey: ["wedding-stats", weddingId] })
       setDeleteTarget(null)
     },
   })
@@ -120,6 +148,13 @@ export default function GuestsPage({
   const guests = data?.items ?? []
   const pagination = data?.pagination
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.pageSize) : 1
+  const hasGuests = (pagination?.total ?? 0) > 0 || debouncedSearch
+
+  const subtitle = stats
+    ? `${stats.totalGuests} guests · ${stats.checkedInGuests} checked in`
+    : pagination?.total
+    ? `${pagination.total} guests`
+    : undefined
 
   if (isLoading) return <LoadingState message="Loading guests..." />
   if (isError)
@@ -128,11 +163,11 @@ export default function GuestsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Guests"
-        description={pagination ? `${pagination.total} total` : undefined}
+        title="Guest List"
+        description={subtitle}
         primaryAction={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setCsvImportOpen(true)}>
+            <Button variant="outline" onClick={() => router.push(`/dashboard/wedding/${weddingId}/guests/import`)}>
               <Upload className="mr-2 size-4" />
               Import CSV
             </Button>
@@ -144,79 +179,133 @@ export default function GuestsPage({
         }
       />
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by name or phone…"
-          className="pl-9"
-          value={search}
-          onChange={(e) => handleSearchChange(e.target.value)}
-        />
-      </div>
-
-      {guests.length === 0 ? (
+      {!hasGuests ? (
         <EmptyState
-          title={debouncedSearch ? "No guests found" : "No guests yet"}
-          description={
-            debouncedSearch
-              ? "Try a different name or phone number."
-              : "Add your first guest to get started."
-          }
+          title="No guests yet"
+          description="Add your first guest to get started."
           icon={<Users className="size-6" />}
-          actionLabel={debouncedSearch ? undefined : "Add Guest"}
-          onAction={debouncedSearch ? undefined : () => setAddOpen(true)}
+          actionLabel="Add Guest"
+          onAction={() => setAddOpen(true)}
         />
       ) : (
         <>
-          {/* Desktop table */}
-          <div className="hidden sm:block">
-            <GuestTable
-              guests={guests}
-              onEdit={setEditGuest}
-              onDelete={setDeleteTarget}
-            />
-          </div>
+          {/* Desktop: Card wrapping search + table + pagination */}
+          <div className="hidden overflow-hidden rounded-lg border bg-card sm:block">
+            {/* Search + filter bar */}
+            <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+              <div className="flex flex-1 items-center gap-2.5 rounded-[10px] border border-border bg-muted/40 px-3 py-2.5">
+                <Search className="size-[18px] shrink-0 text-muted-foreground" />
+                <input
+                  placeholder="Search by name or phone…"
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+              <Button variant="outline" size="sm" className="shrink-0 bg-white">
+                <Filter className="mr-1.5 size-3.5" />
+                Filter
+              </Button>
+            </div>
 
-          {/* Mobile cards */}
-          <div className="space-y-3 sm:hidden">
-            {guests.map((guest) => (
-              <GuestCard
-                key={guest.id}
-                guest={guest}
+            {/* Table */}
+            {guests.length === 0 ? (
+              <div className="py-14 text-center text-sm text-muted-foreground">
+                No guests match your search.
+              </div>
+            ) : (
+              <GuestTable
+                guests={guests}
                 onEdit={setEditGuest}
                 onDelete={setDeleteTarget}
               />
-            ))}
+            )}
+
+            {/* Pagination footer */}
+            {pagination && totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-border px-[18px] py-3.5 text-sm text-muted-foreground">
+                <span>
+                  Showing {guests.length} of {pagination.total}
+                </span>
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white px-3"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    ‹
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white px-3"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    ›
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
-                  <ChevronLeft className="size-4" />
-                  Prev
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
+          {/* Mobile: Standalone search + cards + pagination */}
+          <div className="space-y-3 sm:hidden">
+            <div className="flex items-center gap-2.5 rounded-[10px] border border-border bg-muted/40 px-3 py-2.5">
+              <Search className="size-4 shrink-0 text-muted-foreground" />
+              <input
+                placeholder="Search by name or phone…"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
             </div>
-          )}
+
+            {guests.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No guests match your search.
+              </p>
+            ) : (
+              <div className="overflow-hidden rounded-lg border bg-card">
+                {guests.map((guest) => (
+                  <GuestCard
+                    key={guest.id}
+                    guest={guest}
+                    onEdit={setEditGuest}
+                    onDelete={setDeleteTarget}
+                  />
+                ))}
+              </div>
+            )}
+
+            {pagination && totalPages > 1 && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  Showing {guests.length} of {pagination.total}
+                </span>
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    <ChevronLeft className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -266,17 +355,6 @@ export default function GuestsPage({
           )}
         </DialogContent>
       </Dialog>
-
-      {/* CSV import dialog */}
-      <CsvImportDialog
-        weddingId={weddingId}
-        open={csvImportOpen}
-        onOpenChange={setCsvImportOpen}
-        onImported={() => {
-          void queryClient.invalidateQueries({ queryKey: ["guests", weddingId] })
-          void queryClient.invalidateQueries({ queryKey: ["wedding", weddingId] })
-        }}
-      />
 
       {/* Delete confirm dialog */}
       <ConfirmDialog

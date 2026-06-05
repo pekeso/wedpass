@@ -2,12 +2,14 @@ interface WedPassWordmarkProps {
   size?: number
   textColor?: string
   tagline?: boolean
+  markOnly?: boolean
 }
 
 export function WedPassWordmark({
   size = 28,
   textColor = "var(--color-navy)",
   tagline = false,
+  markOnly = false,
 }: WedPassWordmarkProps) {
   const path = "M10,27 L31,90 L50,7 L69,90 L90,27"
 
@@ -38,6 +40,8 @@ export function WedPassWordmark({
       </g>
     </svg>
   )
+
+  if (markOnly) return svg
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: `${Math.round(size * 0.4)}px` }}>

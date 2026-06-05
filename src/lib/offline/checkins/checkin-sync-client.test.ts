@@ -33,6 +33,7 @@ function makeGuest(guestId: string): LocalGuest {
     fullName: "Test Guest",
     qrToken: `qr-${guestId}`,
     allowedGuests: 2,
+    tableName: "Table 1",
     checkedIn: false,
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { ImageIcon, VideoIcon, LayoutGrid, Camera } from "lucide-react"
+import { ImageIcon, Camera } from "lucide-react"
 import { MediaGrid } from "./media-grid"
 import { MediaLightbox } from "./media-lightbox"
 import { useTranslations } from "@/lib/i18n/use-translations"
@@ -37,13 +37,13 @@ interface GalleryViewProps {
 
 export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewProps) {
   const [filter, setFilter] = useState<MediaTypeFilter>("ALL")
-  const [selectedItem, setSelectedItem] = useState<PublicGalleryMediaItemDTO | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const { t } = useTranslations()
 
-  const filterTabs: { label: string; value: MediaTypeFilter; icon: React.ReactNode }[] = [
-    { label: t("gallery.all"), value: "ALL", icon: <LayoutGrid className="h-4 w-4" aria-hidden="true" /> },
-    { label: t("gallery.photos"), value: "IMAGE", icon: <ImageIcon className="h-4 w-4" aria-hidden="true" /> },
-    { label: t("gallery.videos"), value: "VIDEO", icon: <VideoIcon className="h-4 w-4" aria-hidden="true" /> },
+  const filterTabs: { label: string; value: MediaTypeFilter }[] = [
+    { label: t("gallery.all"), value: "ALL" },
+    { label: t("gallery.photos"), value: "IMAGE" },
+    { label: t("gallery.videos"), value: "VIDEO" },
   ]
 
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
@@ -63,7 +63,7 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
 
   if (!galleryEnabled) {
     return (
-      <div className="flex flex-col items-center py-16 text-center">
+      <div className="flex flex-col items-center px-[18px] py-16 text-center">
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-navy/5">
           <ImageIcon className="h-7 w-7 text-navy/30" aria-hidden="true" />
         </div>
@@ -76,28 +76,32 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
   return (
     <div>
       {/* Filter tabs */}
-      <div className="mb-5 flex gap-2">
+      <div className="flex items-center gap-2 px-[18px] pb-3 pt-4">
         {filterTabs.map((tab) => (
           <button
             key={tab.value}
             type="button"
             onClick={() => setFilter(tab.value)}
             className={[
-              "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "rounded-full border px-3 py-[7px] text-[13px] font-medium transition-colors",
               filter === tab.value
-                ? "bg-navy text-white"
-                : "bg-navy/5 text-navy/70 hover:bg-navy/10",
+                ? "border-navy bg-navy text-white"
+                : "border-[#e7e1d6] bg-white text-[#45506b] hover:bg-ivory-dark",
             ].join(" ")}
           >
-            {tab.icon}
             {tab.label}
           </button>
         ))}
+        {!isLoading && (
+          <span className="ml-auto tabular-nums text-[12.5px] text-navy/40">
+            {allItems.length}
+          </span>
+        )}
       </div>
 
       {/* Grid or empty state */}
       {isEmpty ? (
-        <div className="flex flex-col items-center py-16 text-center">
+        <div className="flex flex-col items-center px-[18px] py-16 text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-champagne/10">
             <Camera className="h-7 w-7 text-champagne" aria-hidden="true" />
           </div>
@@ -110,10 +114,14 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
         </div>
       ) : (
         <>
-          <MediaGrid items={allItems} isLoading={isLoading} onSelect={setSelectedItem} />
+          <MediaGrid
+            items={allItems}
+            isLoading={isLoading}
+            onSelect={(_, index) => setSelectedIndex(index)}
+          />
 
           {hasNextPage && (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center px-[18px] pb-[18px]">
               <button
                 type="button"
                 onClick={() => void fetchNextPage()}
@@ -127,8 +135,12 @@ export function GalleryView({ slug, galleryEnabled, coupleNames }: GalleryViewPr
         </>
       )}
 
-      {selectedItem && (
-        <MediaLightbox item={selectedItem} onClose={() => setSelectedItem(null)} />
+      {selectedIndex !== null && allItems.length > 0 && (
+        <MediaLightbox
+          items={allItems}
+          initialIndex={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+        />
       )}
     </div>
   )

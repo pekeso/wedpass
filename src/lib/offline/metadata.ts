@@ -1,4 +1,5 @@
 import { offlineDb } from "./db"
+import { generateUUID } from "@/lib/utils/uuid"
 
 export async function getMetadata(key: string): Promise<string | undefined> {
   const record = await offlineDb.metadata.get(key)
@@ -21,7 +22,7 @@ export async function getOrCreateDeviceId(): Promise<string> {
   const existing = await getMetadata("deviceId")
   if (existing) return existing
 
-  const deviceId = crypto.randomUUID()
+  const deviceId = generateUUID()
   await setMetadata("deviceId", deviceId)
   return deviceId
 }

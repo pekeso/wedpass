@@ -132,6 +132,7 @@ export async function findPublicGalleryMedia(
         fileUrl: true,
         thumbnailKey: true,
         thumbnailUrl: true,
+        uploadedByName: true,
         createdAt: true,
       },
     }),

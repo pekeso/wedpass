@@ -150,6 +150,8 @@ export async function enableEventMode(weddingId: string, organizerId: string) {
       phoneNumber: true,
       email: true,
       numberOfAllowedGuests: true,
+      tableName: true,
+      seatNumber: true,
       qrToken: true,
     },
   })
@@ -170,6 +172,8 @@ export async function enableEventMode(weddingId: string, organizerId: string) {
       phoneNumber: g.phoneNumber,
       email: g.email,
       numberOfAllowedGuests: g.numberOfAllowedGuests,
+      tableName: g.tableName,
+      seatNumber: g.seatNumber,
       qrToken: g.qrToken,
     })),
     nextVersion
@@ -257,6 +261,7 @@ export async function getSnapshotForStaffDownload(weddingId: string, staffDevice
       id: wedding.id,
       name: wedding.name,
       coupleNames: wedding.coupleNames ?? null,
+      eventDate: wedding.eventDate ? wedding.eventDate.toISOString().split("T")[0] : null,
     },
     snapshot: {
       id: snapshot.id,
@@ -273,6 +278,8 @@ export async function getSnapshotForStaffDownload(weddingId: string, staffDevice
       email: sg.email ?? undefined,
       qrToken: sg.qrToken,
       allowedGuests: sg.numberOfAllowedGuests,
+      tableName: sg.tableName,
+      seatNumber: sg.seatNumber ?? undefined,
     })),
   }
 }

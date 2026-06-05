@@ -14,6 +14,8 @@ const guestFormSchema = z.object({
   phoneNumber: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   numberOfAllowedGuests: z.number().int().min(1).max(20),
+  tableName: z.string().min(1, "Table name is required"),
+  seatNumber: z.string().optional(),
 })
 
 type GuestFormValues = z.infer<typeof guestFormSchema>
@@ -96,6 +98,31 @@ export function GuestForm({
         {errors.numberOfAllowedGuests && (
           <p className="text-xs text-danger">{errors.numberOfAllowedGuests.message}</p>
         )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="tableName">Table *</Label>
+          <Input
+            id="tableName"
+            placeholder="e.g. Table 5 or A"
+            {...register("tableName")}
+          />
+          {errors.tableName && (
+            <p className="text-xs text-danger">{errors.tableName.message}</p>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="seatNumber">Seat</Label>
+          <Input
+            id="seatNumber"
+            placeholder="e.g. 3"
+            {...register("seatNumber")}
+          />
+          {errors.seatNumber && (
+            <p className="text-xs text-danger">{errors.seatNumber.message}</p>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

@@ -9,6 +9,8 @@ export async function createGuest(data: CreateGuestData) {
       phoneNumber: data.phoneNumber ?? null,
       email: data.email || null,
       numberOfAllowedGuests: data.numberOfAllowedGuests ?? 1,
+      tableName: data.tableName,
+      seatNumber: data.seatNumber ?? null,
       qrToken: data.qrToken,
     },
   })
@@ -60,6 +62,8 @@ export async function updateGuest(weddingId: string, guestId: string, data: Part
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
 }>) {
   return prisma.guest.update({
     where: { id: guestId, weddingId },

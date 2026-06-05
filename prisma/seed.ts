@@ -63,6 +63,7 @@ async function main() {
         fullName,
         qrToken,
         numberOfAllowedGuests: Math.floor(Math.random() * 3) + 1,
+        tableName: `Table ${Math.floor(Math.random() * 10) + 1}`,
       },
     });
   }

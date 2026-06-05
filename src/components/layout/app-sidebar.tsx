@@ -9,8 +9,10 @@ import {
   LayoutDashboard,
   QrCode,
   Radio,
+  RefreshCw,
   Settings,
   Shield,
+  ShieldCheck,
   Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -40,6 +42,11 @@ function getNavItems(weddingId?: string): NavItem[] {
       icon: <LayoutDashboard className="size-4" />,
     },
     {
+      label: "Readiness",
+      href: `${base}/readiness`,
+      icon: <ShieldCheck className="size-4" />,
+    },
+    {
       label: "Guests",
       href: `${base}/guests`,
       icon: <Users className="size-4" />,
@@ -63,6 +70,11 @@ function getNavItems(weddingId?: string): NavItem[] {
       label: "Check-Ins",
       href: `${base}/checkins`,
       icon: <BarChart2 className="size-4" />,
+    },
+    {
+      label: "Sync Closeout",
+      href: `${base}/sync-closeout`,
+      icon: <RefreshCw className="size-4" />,
     },
     {
       label: "Memories",

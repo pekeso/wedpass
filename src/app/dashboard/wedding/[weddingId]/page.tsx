@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { use } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Camera, CalendarDays, MapPin, Settings, CheckSquare, Users } from "lucide-react"
+import { Camera, Clock, ShieldCheck, Users, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatCard } from "@/components/shared/stat-card"
@@ -45,12 +45,27 @@ function weddingStatusBadge(status: WeddingStatus) {
     case "ACTIVE":
       return <StatusBadge label="Active" variant="info" />
     case "EVENT_MODE":
-      return <StatusBadge label="Event Mode" variant="warning" />
+      return <StatusBadge label="Event Mode active" variant="warning" />
     case "COMPLETED":
       return <StatusBadge label="Completed" variant="success" />
   }
 }
 
+function formatSubtitle(eventDate: string | null, location: string | null): string {
+  const parts: string[] = []
+  if (eventDate) {
+    const date = new Date(eventDate)
+    const weekday = date.toLocaleDateString("en-US", { weekday: "long" })
+    const formatted = date.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+    parts.push(`${weekday} · ${formatted}`)
+  }
+  if (location) parts.push(location)
+  return parts.join(" · ")
+}
 
 export default function WeddingOverviewPage({
   params,
@@ -87,63 +102,59 @@ export default function WeddingOverviewPage({
     return <ErrorState title="Failed to load wedding" description="Please refresh and try again." />
 
   const wedding = data?.wedding
-
   if (!wedding) return null
+
+  const checkinPct = statsData?.checkinPercentage ?? 0
+  const subtitle = formatSubtitle(wedding.eventDate ?? null, wedding.location ?? null)
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={wedding.name}
-        description={wedding.coupleNames ?? undefined}
+        title={wedding.coupleNames ?? wedding.name}
+        description={subtitle || undefined}
+        badge={weddingStatusBadge(wedding.status)}
         primaryAction={
-          <Link href={`/dashboard/wedding/${weddingId}/settings`}>
-            <Button variant="outline" size="sm">
-              <Settings className="mr-2 size-4" />
-              Settings
+          <Link href={`/dashboard/wedding/${weddingId}/event-mode`}>
+            <Button variant="navy">
+              <ShieldCheck className="mr-2 size-4" />
+              Prepare Event Mode
             </Button>
           </Link>
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        {weddingStatusBadge(wedding.status)}
-        {wedding.eventDate && (
-          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-            <CalendarDays className="size-3.5" />
-            {new Date(wedding.eventDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </span>
-        )}
-        {wedding.location && (
-          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="size-3.5" />
-            {wedding.location}
-          </span>
-        )}
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Guests" value={statsData?.totalGuests ?? 0} icon={<Users className="size-4" />} />
-        <StatCard title="Checked In" value={statsData?.checkedInGuests ?? 0} variant="success" icon={<CheckSquare className="size-4" />} />
         <StatCard
-          title="Check-in Rate"
-          value={`${statsData?.checkinPercentage ?? 0}%`}
-          icon={<CheckSquare className="size-4" />}
+          icon={<Users className="size-5" />}
+          label="Total guests"
+          value={statsData?.totalGuests ?? 0}
+          tone="default"
         />
-        <StatCard title="Media Uploads" value={statsData?.totalMediaUploads ?? 0} icon={<Camera className="size-4" />} />
+        <StatCard
+          icon={<CheckCircle2 className="size-5" />}
+          label="Checked in"
+          value={statsData?.checkedInGuests ?? 0}
+          sub={checkinPct > 0 ? `${checkinPct}% arrived` : undefined}
+          accent={
+            checkinPct > 0 ? (
+              <StatusBadge label={`${checkinPct}%`} variant="success" />
+            ) : undefined
+          }
+          tone="success"
+        />
+        <StatCard
+          icon={<Clock className="size-5" />}
+          label="Not yet arrived"
+          value={statsData?.pendingGuests ?? 0}
+          tone="warning"
+        />
+        <StatCard
+          icon={<Camera className="size-5" />}
+          label="Memories uploaded"
+          value={statsData?.totalMediaUploads ?? 0}
+          tone="gold"
+        />
       </div>
-      {statsData?.lastSyncAt && (
-        <p className="text-xs text-muted-foreground">
-          Last sync:{" "}
-          {new Date(statsData.lastSyncAt).toLocaleString("en-US", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })}
-        </p>
-      )}
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">

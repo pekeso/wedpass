@@ -7,6 +7,8 @@ export type SnapshotGuestData = {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
   qrToken: string
 }
 
@@ -58,6 +60,8 @@ export async function createSnapshotWithGuests(
         phoneNumber: g.phoneNumber,
         email: g.email,
         numberOfAllowedGuests: g.numberOfAllowedGuests,
+        tableName: g.tableName,
+        seatNumber: g.seatNumber,
         qrToken: g.qrToken,
       })),
     })

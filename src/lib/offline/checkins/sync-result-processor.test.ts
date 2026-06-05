@@ -15,6 +15,7 @@ function makeGuest(guestId: string): LocalGuest {
     fullName: "Test Guest",
     qrToken: `qr-${guestId}`,
     allowedGuests: 2,
+    tableName: "Table 1",
     checkedIn: true,
     checkedInAt: "2026-08-14T14:00:00.000Z",
   }

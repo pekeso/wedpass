@@ -3,11 +3,8 @@
 import { use, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { SyncStatusBar } from "@/components/staff/sync-status-bar"
 import type { SyncState } from "@/components/staff/sync-status-bar"
-import { OfflineWarningBanner } from "@/components/staff/offline-warning-banner"
 import { ManualSearchResults } from "@/components/staff/manual-search-results"
 import { useLocalGuestSearch } from "@/hooks/use-local-guest-search"
 import { useNetworkStatus } from "@/hooks/use-network-status"
@@ -49,57 +46,106 @@ export default function StaffSearchPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="min-h-screen bg-ivory">
       <SyncStatusBar
         isOnline={isOnline}
         pendingCount={pendingCount}
         syncState={syncState}
       />
 
-      {!isOnline && <OfflineWarningBanner />}
-
-      <div className="mx-auto w-full max-w-lg flex-1 space-y-4 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
+      <div style={{ padding: "14px 18px 0" }}>
+        {/* Header row */}
+        <div className="flex items-center gap-[10px] mb-[14px]">
+          <button
             onClick={() => router.back()}
             aria-label="Go back"
-            className="shrink-0"
+            style={{
+              background: "#fff",
+              border: "1px solid #e7e1d6",
+              borderRadius: 10,
+              width: 38,
+              height: 38,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
           >
-            <ArrowLeft className="size-5" />
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">{t("search.title")}</h1>
+            <ArrowLeft size={18} color="#172033" />
+          </button>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#172033" }}>
+            {t("search.title")}
+          </h1>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
+        {/* Search input */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: "#fff",
+            border: "2px solid #172033",
+            borderRadius: 13,
+            padding: "13px 15px",
+          }}
+        >
+          <Search size={20} color="#172033" strokeWidth={2} />
+          <input
             ref={inputRef}
             type="search"
             placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-12 pl-9 text-base"
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            style={{
+              border: 0,
+              outline: 0,
+              fontSize: 16,
+              flex: 1,
+              background: "transparent",
+              color: "#172033",
+            }}
           />
         </div>
+      </div>
 
+      <div style={{ padding: "18px 18px 0" }}>
         {isSearching ? (
-          <div className="space-y-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-14 animate-pulse rounded-xl bg-muted" />
+              <div
+                key={i}
+                className="animate-pulse"
+                style={{ height: 70, borderRadius: 13, background: "#F2ECE0" }}
+              />
             ))}
           </div>
         ) : (
-          <ManualSearchResults
-            query={query}
-            results={results}
-            onSelect={handleSelect}
-          />
+          <>
+            {results.length > 0 && query.trim() && (
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "#97a0b2",
+                  marginBottom: 10,
+                }}
+              >
+                {t("search.resultCount", { count: String(results.length) })}
+              </div>
+            )}
+            <ManualSearchResults
+              query={query}
+              results={results}
+              onSelect={handleSelect}
+            />
+          </>
         )}
       </div>
     </div>

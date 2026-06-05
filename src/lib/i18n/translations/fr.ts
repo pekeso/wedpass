@@ -14,12 +14,16 @@ export const fr: Record<TranslationKey, string> = {
   "scan.searchManually": "Rechercher un invité manuellement",
 
   // ── Search page ───────────────────────────────────────────────────────────
-  "search.title": "Trouver un invité",
-  "search.placeholder": "Nom ou numéro de téléphone...",
+  "search.title": "Rechercher un invité",
+  "search.placeholder": "Nom ou téléphone…",
   "search.noGuestsFound": "Aucun invité trouvé",
   "search.noResultsFor": 'Aucun résultat pour "{query}"',
   "search.checkedIn": "Enregistré",
-  "search.notIn": "Non enregistré",
+  "search.notIn": "Pas enregistré",
+  "search.allowed": "autorisés",
+  "search.resultCount": "{count} résultats",
+  "search.notRightGuest": "Pas le bon invité ?",
+  "search.tryAnotherSpelling": "Essayez une autre orthographe ou envoyez l'invité au bureau manuel.",
 
   // ── Check-in page & guest card ────────────────────────────────────────────
   "checkin.title": "Enregistrement",
@@ -39,6 +43,20 @@ export const fr: Record<TranslationKey, string> = {
   "checkin.recentCheckins": "Enregistrements récents",
   "checkin.loading": "Chargement...",
   "checkin.unknownGuest": "Invité inconnu",
+  "checkin.eventMode": "Mode Événement",
+  "checkin.searchPlaceholder": "Rechercher par nom ou téléphone",
+  "checkin.syncStatus": "État de synchro",
+  "checkin.checkedInLabel": "Enregistrés",
+  "checkin.synced": "Synchronisé",
+  "checkin.pending": "En attente",
+  "checkin.qrVerified": "QR vérifié",
+  "checkin.phoneEnding": "Tél.",
+  "checkin.peopleAllowed": "personnes autorisées",
+  "checkin.notYetCheckedIn": "Pas encore enregistré",
+  "checkin.isIn": "{firstName} est entré·e !",
+  "checkin.savedLocally": "Enregistré sur cet appareil. La synchronisation se fera quand Internet reviendra.",
+  "checkin.continueScan": "Continuer à scanner",
+  "checkin.guests": "invités",
 
   // ── Guest card ────────────────────────────────────────────────────────────
   "guestCard.label": "Invité",
@@ -50,20 +68,24 @@ export const fr: Record<TranslationKey, string> = {
   "guestCard.checkingIn": "Enregistrement en cours...",
 
   // ── Download page ─────────────────────────────────────────────────────────
-  "download.title": "Pack hors ligne",
+  "download.title": "Télécharger le pack hors ligne",
   "download.prepareDevice": "Préparez cet appareil pour l'enregistrement le jour J.",
-  "download.downloadBefore":
-    "Téléchargez ce pack hors ligne avant l'arrivée des invités.",
+  "download.eventMode": "Mode Événement",
+  "download.step": "Étape 1 sur 2 · Préparer l'appareil",
+  "download.weddingLabel": "Mariage",
+  "download.dateLabel": "Date",
+  "download.guestsLabel": "Invités",
+  "download.downloadBefore": "Faites ceci avant l'arrivée des invités.",
   "download.readyForEventDay": "Prêt pour le jour J",
   "download.devicePrepared":
     "Cet appareil est prêt pour l'enregistrement hors ligne.",
   "download.offlinePackDownloaded": "Pack hors ligne téléchargé",
   "download.guestsLoaded": "Invités chargés",
   "download.lastDownloaded": "Dernier téléchargement",
-  "download.snapshotVersion": "Version de l'instantané",
+  "download.snapshotVersion": "Version",
   "download.unknown": "Inconnu",
   "download.startCheckin": "Commencer l'enregistrement",
-  "download.redownloadPack": "Re-télécharger le pack",
+  "download.redownloadPack": "Retélécharger le pack",
   "download.downloading": "Téléchargement en cours...",
   "download.retryDownload": "Réessayer le téléchargement",
   "download.downloadOfflinePack": "Télécharger le pack hors ligne",
@@ -72,6 +94,9 @@ export const fr: Record<TranslationKey, string> = {
     "Les données des invités sont stockées uniquement sur cet appareil. Gardez cet onglet ouvert pendant l'événement.",
   "download.guestCount": "{count} invités",
   "download.zeroGuests": "0 invités",
+  "download.canCheckinOffline": "Cet appareil peut enregistrer les invités même sans Internet.",
+  "download.downloadingPack": "Téléchargement du pack hors ligne…",
+  "download.savingGuestList": "Sauvegarde de la liste des invités sur cet appareil. Ne fermez pas cet onglet.",
 
   // ── Offline pack status card ──────────────────────────────────────────────
   "offlinePack.ready": "Pack hors ligne prêt",
@@ -125,92 +150,53 @@ export const fr: Record<TranslationKey, string> = {
   "sync.keepData": "Conserver les données",
   "sync.snapshotMismatch":
     "Cet appareil utilise un instantané d'événement obsolète. Veuillez rafraîchir le pack hors ligne avant de continuer.",
+  "sync.savedLocally": "Enregistrées",
+  "sync.syncedToCloud": "Synchronisées",
+  "sync.pendingStat": "En attente",
+  "sync.failedStat": "Échecs",
+  "sync.pendingSafeMessage": "Les présences en attente sont enregistrées en sécurité sur cet appareil.",
+  "sync.doNotClearWarning":
+    "N'effacez pas les données du navigateur et ne partez pas avec cet appareil tant que les éléments en attente ne sont pas à 0.",
+  "sync.lastSuccessfulSync": "Dernière synchro réussie",
+  "sync.back": "Retour",
 
   // ── Offline warning banner ────────────────────────────────────────────────
   "offlineBanner.message":
     "Mode hors ligne actif. Les présences sont enregistrées sur cet appareil et seront synchronisées quand Internet reviendra.",
 
   // ── Login page ────────────────────────────────────────────────────────────
-  "login.title": "Accès du personnel",
+  "login.title": "Mode événement",
   "login.description":
-    "Entrez le code d'accès du personnel fourni par l'organisateur du mariage.",
-  "login.tokenLabel": "Code d'accès du personnel",
-  "login.tokenPlaceholder": "Collez votre code d'accès ici",
+    "Entrez votre accès personnel pour commencer à enregistrer les invités.",
+  "login.tokenLabel": "Code d'accès",
+  "login.tokenPlaceholder": "Entrez votre code d'accès",
+  "login.pinLabel": "Code PIN (facultatif)",
   "login.tokenRequired": "Veuillez entrer un code d'accès du personnel.",
   "login.tokenInvalid":
     "Code d'accès invalide ou expiré. Veuillez vérifier et réessayer.",
   "login.verifying": "Vérification...",
-  "login.button": "Accéder au Mode événement",
+  "login.button": "Entrer en mode événement",
+  "login.securityNote": "Accès limité et sécurisé",
   "login.deviceNote":
     "Cet appareil stockera temporairement les données d'enregistrement des invités.",
 
   // ── Help page ─────────────────────────────────────────────────────────────
-  "help.title": "Guide d'aide du personnel",
-  "help.description": "Procédures d'urgence et dépannage",
-  "help.goldenRule": "La règle d'or",
-  "help.goldenStep1": "Scanner ou rechercher l'invité.",
-  "help.goldenStep2": "Confirmer le nom.",
-  "help.goldenStep3": "Appuyer sur Enregistrer l'arrivée.",
-  "help.goldenStep4": "Passer à l'invité suivant.",
-  "help.goldenStep5":
-    "Si hors ligne, continuer — les présences sont sauvegardées.",
-  "help.goldenStep6":
-    "Avant de partir, vérifiez que les éléments en attente sont à 0.",
-  "help.ifSomethingWrong": "En cas de problème",
-  "help.qrDoesntWork": "Le scan QR ne fonctionne pas",
-  "help.qrIssues": "Problème de caméra, QR flou, mauvaise lumière",
-  "help.qrFix1": "Appuyez sur Rechercher un invité.",
-  "help.qrFix2": "Tapez le nom ou le numéro de téléphone.",
-  "help.qrFix3": "Sélectionnez le bon invité dans la liste.",
-  "help.qrFix4": "Appuyez sur Enregistrer l'arrivée.",
-  "help.internetOff": "Internet ne fonctionne plus",
-  "help.internetOff1":
-    "Vous verrez une barre orange « Hors ligne » en haut",
-  "help.internetOff2": "Ne vous arrêtez pas. Continuez à enregistrer les invités.",
-  "help.internetOff3": "Les présences sont sauvegardées sur cet appareil.",
-  "help.internetOff4":
-    "La synchronisation se fait automatiquement quand Internet revient.",
-  "help.internetOff5":
-    "Appuyez sur Synchroniser maintenant pour forcer la synchronisation.",
-  "help.guestNotInList": "L'invité n'est pas dans la liste",
-  "help.notFoundSearch": "Introuvable après recherche par nom",
-  "help.notFoundFix1": "Essayez un nom plus court ou une autre orthographe.",
-  "help.notFoundFix2": "Recherchez par numéro de téléphone si disponible.",
-  "help.notFoundFix3":
-    "Si toujours introuvable, envoyez l'invité au bureau de l'organisateur.",
-  "help.notFoundFix4": "Ne bloquez pas l'entrée — gardez la file fluide.",
-  "help.deviceCrash": "L'appareil tombe en panne ou la batterie est vide",
-  "help.deviceCrashRecovery": "Vous pouvez récupérer avec un autre appareil",
-  "help.deviceCrashFix1": "Demandez un autre téléphone ou appareil à l'organisateur.",
-  "help.deviceCrashFix2": "Connectez-vous avec le même code d'accès.",
-  "help.deviceCrashFix3": "Téléchargez le pack hors ligne sur le nouvel appareil.",
-  "help.deviceCrashFix4": "Continuez à enregistrer les invités normalement.",
-  "help.deviceCrashFix5":
-    "Récupérez l'appareil d'origine plus tard pour synchroniser ses présences.",
-  "help.importantRules": "Règles très importantes",
-  "help.doLabel": "À faire :",
-  "help.dontLabel": "À ne pas faire :",
-  "help.do1": "Garder l'entrée fluide.",
-  "help.do2": "Utiliser la recherche manuelle si le QR échoue.",
-  "help.do3": "Continuer si le mode hors ligne est actif.",
-  "help.do4": "Vérifier la synchronisation avant de partir.",
-  "help.do5": "Demander à l'organisateur pour les cas exceptionnels.",
-  "help.dont1": "Effacer les données du navigateur.",
-  "help.dont2": "Utiliser le mode navigation privée.",
-  "help.dont3": "Partir avec des synchronisations en attente.",
-  "help.dont4": "Créer de nouveaux invités pendant le Mode événement.",
-  "help.dont5": "Paniquer si Internet se coupe.",
-  "help.dont6": "Passer trop de temps sur un invité problématique.",
-  "help.beforeLeave": "Avant de quitter le mariage",
-  "help.beforeLeave1": "Ouvrez l'écran de synchronisation.",
-  "help.beforeLeave2":
-    "Appuyez sur Synchroniser maintenant et attendez la fin.",
-  "help.beforeLeave3": "Confirmez que les éléments en attente sont à 0.",
-  "help.beforeLeave4":
-    "S'ils ne sont pas à 0, ne fermez pas l'application — informez l'organisateur.",
-  "help.beforeLeave5": "Une fois à 0, vous pouvez partir.",
+  "help.title": "Aide & urgence",
+  "help.subtitle": "Solutions rapides en cas de problème à l'entrée.",
+  "help.qrScannerQ": "Scanner en panne ?",
+  "help.qrScannerA": "Utilisez la recherche par nom ou téléphone.",
+  "help.noQrQ": "L'invité n'a pas de QR ?",
+  "help.noQrA": "Recherchez leur nom, puis enregistrez-les.",
+  "help.notFoundQ": "Invité introuvable ?",
+  "help.notFoundA": "Essayez une autre orthographe ou envoyez-le au bureau manuel.",
+  "help.alreadyCheckedInQ": "Déjà enregistré ?",
+  "help.alreadyCheckedInA": "Vérifiez l'heure. En cas de doute, laissez entrer.",
+  "help.offlineQ": "Hors ligne ?",
+  "help.offlineA": "Continuez. Les présences sont enregistrées et synchronisées plus tard.",
+  "help.tooManyQ": "Trop de personnes sur un pass ?",
+  "help.tooManyA": "Autorisez le nombre indiqué. Envoyez les autres au bureau manuel.",
   "help.back": "Retour",
-  "help.goToCheckin": "Aller à l'enregistrement",
+  "help.helpButton": "Aide",
 
   // ── Staff help FAQ (inline accordion) ────────────────────────────────────
   "helpFAQ.q1": "Que faire si le scan QR ne fonctionne pas ?",
@@ -250,27 +236,47 @@ export const fr: Record<TranslationKey, string> = {
   "helpFAQ.title": "Aide & Dépannage",
 
   // ── Guest-facing pages ────────────────────────────────────────────────────
-  "guest.sharePhotos": "Partagez vos photos et vidéos",
+  "guest.wereGettingMarried": "Nous nous marions",
+  "guest.poweredBy": "Propulsé par WedPass",
+  "guest.sharePhotos": "Ajouter des photos / vidéos",
   "guest.viewGallery": "Voir la galerie",
   "guest.privacyNote":
-    "Vos photos et vidéos sont partagées uniquement avec les mariés et leurs invités.",
+    "Vos ajouts sont partagés uniquement avec les mariés et leurs invités.",
   "guest.upcomingMessage":
     "Nous avons hâte de célébrer avec vous. À très bientôt !",
   "guest.pastMessage":
-    "Merci d'avoir célébré avec nous. Partagez vos meilleurs moments de la journée.",
+    '« Merci de célébrer avec nous. Aidez-nous à garder chaque instant — partagez vos photos et vidéos. »',
 
   // ── Upload page ───────────────────────────────────────────────────────────
-  "upload.pageTitle": "Partagez vos moments",
-  "upload.pageSubtitle": "Téléchargez photos et vidéos de {weddingName}",
+  "upload.pageTitle": "Partagez vos souvenirs",
+  "upload.pageSubtitle": "Aucun compte requis. Ajoutez-en autant que vous voulez.",
   "upload.privacyNote":
     "Photos et vidéos partagées uniquement avec les mariés et leurs invités.",
+  "upload.fromGallery": "Depuis la galerie",
+  "upload.takePhotoVideo": "Prendre une photo",
+  "upload.yourName": "Votre nom (facultatif)",
+  "upload.guidelinePhotosVideos": "Photos et courtes vidéos uniquement",
+  "upload.guidelineVideosSlower": "Les vidéos peuvent être plus longues",
+  "upload.guidelineLargeRejected": "Les très grandes vidéos peuvent être refusées",
+  "upload.yourUploads": "Vos ajouts",
+  "upload.statusUploaded": "Ajouté",
+  "upload.statusUploading": "Téléversement…",
+  "upload.statusPaused": "En pause · réessai",
+  "upload.statusQueued": "En file hors ligne",
+  "upload.statusFailed": "Échec · réessayer",
+  "upload.statusTooLarge": "Trop volumineux",
+  "upload.addMore": "Ajouter",
+  "upload.viewGallery": "Galerie",
   "upload.selectFile": "Sélectionnez une photo ou une vidéo",
   "upload.unsupportedType":
     "Type de fichier non pris en charge. Veuillez télécharger un fichier JPEG, PNG ou MP4.",
   "upload.photoTooLarge": "Image trop grande. Taille maximale : 10 Mo.",
-  "upload.videoTooLarge": "Vidéo trop grande. Taille maximale : 100 Mo.",
+  "upload.videoTooLarge":
+    "Cette vidéo est trop volumineuse. Veuillez ajouter une vidéo plus courte.",
   "upload.tapToChoose": "Appuyez pour choisir un fichier",
   "upload.hint": "JPEG, PNG ou MP4 · Photos jusqu'à 10 Mo · Vidéos jusqu'à 100 Mo",
+  "upload.offlinePaused":
+    "Téléversement en pause. Nous réessayerons lorsque la connexion s'améliorera.",
   "upload.offlineQueue":
     "Vous êtes hors ligne. Votre fichier sera sauvegardé et téléchargé quand vous vous reconnecterez.",
   "upload.uploadingPhoto": "Téléchargement de la photo...",
@@ -287,7 +293,8 @@ export const fr: Record<TranslationKey, string> = {
   "upload.progress": "Téléchargement...",
 
   // ── Gallery page ──────────────────────────────────────────────────────────
-  "gallery.title": "Galerie du mariage",
+  "gallery.title": "Galerie",
+  "gallery.add": "Ajouter",
   "gallery.addPhotos": "Ajouter vos photos",
   "gallery.all": "Tout",
   "gallery.photos": "Photos",
@@ -304,7 +311,13 @@ export const fr: Record<TranslationKey, string> = {
   "gallery.playVideo": "Lire la vidéo",
   "gallery.viewPhoto": "Voir la photo",
   "gallery.close": "Fermer",
+  "gallery.download": "Télécharger",
+  "gallery.tapToPlay": "Toucher pour lire",
+  "gallery.previous": "Précédent",
+  "gallery.next": "Suivant",
+  "gallery.sharedBy": "Partagé par {name}",
 
   // ── Common ────────────────────────────────────────────────────────────────
+  "common.back": "Retour",
   "common.cancel": "Annuler",
 }

@@ -5,6 +5,8 @@ export interface GuestDTO {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean
   checkedInAt: string | null
@@ -18,6 +20,8 @@ export interface GuestListItemDTO {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean
   checkedInAt: string | null

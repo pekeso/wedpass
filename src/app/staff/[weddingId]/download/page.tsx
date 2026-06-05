@@ -3,58 +3,32 @@
 import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
+  AlertTriangle,
   ArrowRight,
   CheckCircle2,
   Download,
-  HelpCircle,
+  Loader2,
   RefreshCw,
-  XCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  OfflinePackStatusCard,
-  type PackDownloadState,
-} from "@/components/staff/offline-pack-status-card"
-import { StaffHelpMessages } from "@/components/staff/staff-help-messages"
+import { Badge } from "@/components/ui/badge"
+import { WMark } from "@/components/shared/wmark"
 import { useOfflinePackStatus } from "@/hooks/use-offline-pack-status"
 import { downloadAndSaveSnapshot } from "@/lib/offline/checkins/snapshot-download"
 import { useTranslations } from "@/lib/i18n/use-translations"
 
-function formatDownloadedAt(iso: string): string {
-  const date = new Date(iso)
-  const now = new Date()
-  const isToday =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
-  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  return isToday
-    ? `Today at ${time}`
-    : date.toLocaleDateString([], { month: "short", day: "numeric" }) + ` at ${time}`
+function formatEventDate(iso: string): string {
+  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" })
 }
 
-type ChecklistItemProps = {
-  label: string
-  value: string | null
-  isReady: boolean
-}
-
-function ChecklistItem({ label, value, isReady }: ChecklistItemProps) {
-  return (
-    <div className="flex items-start justify-between gap-3 py-2.5 border-b border-border last:border-0">
-      <div className="flex items-center gap-2 min-w-0">
-        {isReady ? (
-          <CheckCircle2 className="size-5 text-success shrink-0" />
-        ) : (
-          <XCircle className="size-5 text-danger shrink-0" />
-        )}
-        <span className="text-sm font-medium text-foreground">{label}</span>
-      </div>
-      {value && (
-        <span className="text-sm text-muted-foreground text-right shrink-0">{value}</span>
-      )}
-    </div>
-  )
+function formatRelativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  if (diffMins < 1) return "just now"
+  if (diffMins < 60) return `${diffMins} min ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" })
 }
 
 export default function StaffDownloadPage({
@@ -65,17 +39,18 @@ export default function StaffDownloadPage({
   const { weddingId } = use(params)
   const router = useRouter()
   const status = useOfflinePackStatus(weddingId)
-
   const [isDownloading, setIsDownloading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { t } = useTranslations()
 
-  function getCardState(): PackDownloadState {
-    if (isDownloading) return "downloading"
-    if (errorMessage) return "failed"
-    if (!status.isLoading && status.isReady) return "ready"
-    return "not-prepared"
-  }
+  const isReady = !isDownloading && !errorMessage && !status.isLoading && status.isReady
+
+  const weddingDisplay =
+    status.weddingCoupleNames || status.weddingName || "—"
+  const dateDisplay = status.weddingEventDate
+    ? formatEventDate(status.weddingEventDate)
+    : "—"
+  const guestDisplay = status.isLoading ? "—" : String(status.guestCount)
 
   async function handleDownload() {
     setIsDownloading(true)
@@ -92,84 +67,113 @@ export default function StaffDownloadPage({
     }
   }
 
-  const cardState = getCardState()
-  const isReady = cardState === "ready"
-
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">{t("download.title")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t("download.prepareDevice")}
-          </p>
+    <div className="flex min-h-screen flex-col bg-ivory">
+      {/* Navy header */}
+      <div className="bg-navy text-white px-5 pt-5 pb-7">
+        <div className="flex items-center gap-2.5 mb-5">
+          <WMark size={24} variant="mono-ivory" />
+          <span className="font-bold text-[15px]">{t("download.eventMode")}</span>
+        </div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-champagne mb-2">
+          {t("download.step")}
+        </p>
+        <h1 className="text-[22px] font-bold leading-tight">{t("download.title")}</h1>
+      </div>
+
+      {/* Content area — overlaps header slightly */}
+      <div className="flex-1 px-[18px] -mt-3.5 space-y-3.5 pb-10">
+        {/* Wedding info card */}
+        <div className="rounded-2xl bg-white border border-border shadow-sm p-4">
+          {status.isLoading ? (
+            <div className="animate-pulse space-y-3">
+              <div className="h-4 bg-muted rounded w-3/4" />
+              <div className="h-3 bg-muted rounded w-1/2" />
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between mb-4">
+                {[
+                  [t("download.weddingLabel"), weddingDisplay],
+                  [t("download.dateLabel"), dateDisplay],
+                  [t("download.guestsLabel"), guestDisplay],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      {label}
+                    </div>
+                    <div className="font-bold text-navy text-[16px] mt-0.5 tabular-nums">
+                      {value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-border my-1" />
+              <div className="flex items-center gap-2.5 mt-3">
+                <span className="text-[13px] text-muted-foreground">
+                  {t("download.snapshotVersion")}
+                </span>
+                <Badge variant="outline" className="text-navy border-navy/20 bg-navy/5 font-semibold px-2 py-0.5 text-[12px]">
+                  {status.snapshotVersion != null ? `v${status.snapshotVersion}` : "—"}
+                </Badge>
+              </div>
+            </>
+          )}
         </div>
 
-        {!isReady && (
-          <div className="rounded-xl border border-warning bg-warning-light px-4 py-3">
-            <p className="text-sm font-medium text-warning">
+        {/* Warning banner — shown when not yet ready */}
+        {!isReady && !isDownloading && (
+          <div className="flex items-start gap-3 px-3.5 py-3.5 bg-warning-light rounded-xl">
+            <AlertTriangle className="size-5 text-warning shrink-0 mt-0.5" />
+            <p className="text-[13.5px] font-semibold text-warning leading-snug">
               {t("download.downloadBefore")}
             </p>
           </div>
         )}
 
-        {status.isLoading ? (
-          <div className="rounded-xl border border-border bg-muted p-5 animate-pulse h-20" />
-        ) : (
-          <OfflinePackStatusCard
-            state={cardState}
-            guestCount={status.guestCount}
-            lastDownloadedAt={status.lastDownloadedAt}
-            errorMessage={errorMessage ?? undefined}
-          />
+        {/* Error banner */}
+        {errorMessage && (
+          <div className="rounded-xl border border-danger bg-danger-light px-4 py-3">
+            <p className="text-sm font-medium text-danger">{errorMessage}</p>
+          </div>
         )}
 
-        {isReady && !status.isLoading && (
-          <>
-            <div className="rounded-xl border border-success bg-success-light px-5 py-4">
-              <p className="text-lg font-bold text-success">{t("download.readyForEventDay")}</p>
-              <p className="text-sm text-success/80 mt-0.5">
-                {t("download.devicePrepared")}
-              </p>
+        {/* Downloading state */}
+        {isDownloading && (
+          <div className="rounded-2xl border border-sync bg-sync-light p-5 text-center space-y-1.5">
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="size-5 text-sync animate-spin" />
+              <p className="font-semibold text-sync">{t("download.downloadingPack")}</p>
             </div>
-
-            <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
-              <ChecklistItem
-                label={t("download.offlinePackDownloaded")}
-                value={null}
-                isReady={true}
-              />
-              <ChecklistItem
-                label={t("download.guestsLoaded")}
-                value={
-                  status.guestCount > 0
-                    ? t("download.guestCount", { count: status.guestCount })
-                    : t("download.zeroGuests")
-                }
-                isReady={status.guestCount > 0}
-              />
-              <ChecklistItem
-                label={t("download.lastDownloaded")}
-                value={
-                  status.lastDownloadedAt
-                    ? formatDownloadedAt(status.lastDownloadedAt)
-                    : t("download.unknown")
-                }
-                isReady={!!status.lastDownloadedAt}
-              />
-              <ChecklistItem
-                label={t("download.snapshotVersion")}
-                value={
-                  status.snapshotVersion != null ? `v${status.snapshotVersion}` : t("download.unknown")
-                }
-                isReady={status.snapshotVersion != null}
-              />
-            </div>
-          </>
+            <p className="text-sm text-sync/80">{t("download.savingGuestList")}</p>
+          </div>
         )}
 
+        {/* Success state */}
+        {isReady && (
+          <div className="rounded-2xl bg-white border border-success/30 p-5 text-center">
+            <div className="w-14 h-14 rounded-full bg-success-light flex items-center justify-center mx-auto mb-3">
+              <CheckCircle2 className="size-7 text-success" />
+            </div>
+            <p className="font-bold text-[16px] text-navy">{t("offlinePack.ready")}</p>
+            <p className="text-[13px] text-muted-foreground mx-4 mt-1.5 leading-snug">
+              {t("download.canCheckinOffline")}
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-3.5 text-[12px] text-muted-foreground">
+              <span>{t("download.guestCount", { count: status.guestCount })}</span>
+              <span>·</span>
+              <span>
+                {status.lastDownloadedAt
+                  ? formatRelativeTime(status.lastDownloadedAt)
+                  : t("download.unknown")}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Buttons */}
         {isReady ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5 pt-1">
             <Button
               variant="navy"
               size="xl"
@@ -180,8 +184,8 @@ export default function StaffDownloadPage({
               <ArrowRight className="size-5" />
             </Button>
             <Button
-              variant="outline"
-              className="h-12 w-full gap-2"
+              variant="ghost"
+              className="h-12 w-full gap-2 text-muted-foreground"
               onClick={handleDownload}
               disabled={isDownloading}
             >
@@ -199,10 +203,10 @@ export default function StaffDownloadPage({
           >
             {isDownloading ? (
               <>
-                <RefreshCw className="size-5 animate-spin" />
+                <Loader2 className="size-5 animate-spin" />
                 {t("download.downloading")}
               </>
-            ) : cardState === "failed" ? (
+            ) : errorMessage ? (
               <>
                 <RefreshCw className="size-5" />
                 {t("download.retryDownload")}
@@ -215,20 +219,6 @@ export default function StaffDownloadPage({
             )}
           </Button>
         )}
-
-        <button
-          onClick={() => router.push(`/staff/${weddingId}/help`)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto"
-        >
-          <HelpCircle className="size-4 shrink-0" />
-          {t("download.viewHelpGuide")}
-        </button>
-
-        <StaffHelpMessages />
-
-        <p className="text-xs text-center text-muted-foreground">
-          {t("download.guestDataNote")}
-        </p>
       </div>
     </div>
   )

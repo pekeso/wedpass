@@ -63,6 +63,8 @@ function toGuestDTO(guest: {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean
   checkedInAt: Date | null
@@ -76,6 +78,8 @@ function toGuestDTO(guest: {
     phoneNumber: guest.phoneNumber,
     email: guest.email,
     numberOfAllowedGuests: guest.numberOfAllowedGuests,
+    tableName: guest.tableName,
+    seatNumber: guest.seatNumber,
     qrToken: guest.qrToken,
     isCheckedIn: guest.isCheckedIn,
     checkedInAt: guest.checkedInAt ? guest.checkedInAt.toISOString() : null,
@@ -90,6 +94,8 @@ function toGuestListItemDTO(guest: {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
+  tableName: string
+  seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean
   checkedInAt: Date | null
@@ -100,6 +106,8 @@ function toGuestListItemDTO(guest: {
     phoneNumber: guest.phoneNumber,
     email: guest.email,
     numberOfAllowedGuests: guest.numberOfAllowedGuests,
+    tableName: guest.tableName,
+    seatNumber: guest.seatNumber,
     qrToken: guest.qrToken,
     isCheckedIn: guest.isCheckedIn,
     checkedInAt: guest.checkedInAt ? guest.checkedInAt.toISOString() : null,
@@ -138,6 +146,8 @@ export async function addGuest(
     phoneNumber: input.phoneNumber,
     email: input.email,
     numberOfAllowedGuests: input.numberOfAllowedGuests ?? 1,
+    tableName: input.tableName,
+    seatNumber: input.seatNumber,
     qrToken,
   })
   return { guest: toGuestDTO(guest) }
@@ -185,6 +195,8 @@ export async function updateGuest(
     phoneNumber: input.phoneNumber !== undefined ? (input.phoneNumber ?? null) : undefined,
     email: input.email !== undefined ? (input.email || null) : undefined,
     numberOfAllowedGuests: input.numberOfAllowedGuests,
+    tableName: input.tableName,
+    seatNumber: input.seatNumber !== undefined ? (input.seatNumber ?? null) : undefined,
   })
   return { guest: toGuestDTO(updated) }
 }
@@ -245,6 +257,8 @@ export async function importGuests(
       phoneNumber: input.phoneNumber,
       email: input.email,
       numberOfAllowedGuests: input.numberOfAllowedGuests ?? 1,
+      tableName: input.tableName,
+      seatNumber: input.seatNumber,
       qrToken,
     })
 

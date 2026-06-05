@@ -1,5 +1,6 @@
 import { offlineDb } from "../db"
 import { getMetadata } from "../metadata"
+import { generateUUID } from "@/lib/utils/uuid"
 
 export type CheckInLocalResult =
   | { status: "checked_in_locally"; checkedInAt: string; queueId: string }
@@ -28,7 +29,7 @@ export async function checkInGuestLocally(
   }
 
   const checkedInAt = new Date().toISOString()
-  const queueId = crypto.randomUUID()
+  const queueId = generateUUID()
 
   await offlineDb.transaction(
     "rw",

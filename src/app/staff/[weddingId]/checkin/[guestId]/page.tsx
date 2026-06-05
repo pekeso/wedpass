@@ -2,10 +2,8 @@
 
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle, Check, ScanLine, Users } from "lucide-react"
 import { SyncStatusBar } from "@/components/staff/sync-status-bar"
-import { GuestCheckinCard } from "@/components/staff/guest-checkin-card"
 import { findGuestById } from "@/lib/offline/guests/guest-local-repository"
 import { checkInGuestLocally } from "@/lib/offline/checkins/checkin-local-service"
 import type { CheckInLocalResult } from "@/lib/offline/checkins/checkin-local-service"
@@ -22,6 +20,12 @@ function formatTime(isoString: string): string {
   })
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+}
+
 export default function StaffCheckinGuestPage({
   params,
 }: {
@@ -29,8 +33,7 @@ export default function StaffCheckinGuestPage({
 }) {
   const { weddingId, guestId } = use(params)
   const router = useRouter()
-  const { isOnline, pendingCount, lastSyncedAt, syncState } =
-    useSyncStatus(weddingId)
+  const { isOnline, pendingCount, lastSyncedAt, syncState } = useSyncStatus(weddingId)
   const { t } = useTranslations()
 
   const [guest, setGuest] = useState<LocalGuest | null>(null)
@@ -58,13 +61,7 @@ export default function StaffCheckinGuestPage({
       const checkInResult = await checkInGuestLocally(guestId)
       if (checkInResult.status === "checked_in_locally") {
         setGuest((prev) =>
-          prev
-            ? {
-                ...prev,
-                checkedIn: true,
-                checkedInAt: checkInResult.checkedInAt,
-              }
-            : prev
+          prev ? { ...prev, checkedIn: true, checkedInAt: checkInResult.checkedInAt } : prev
         )
       }
       setResult(checkInResult)
@@ -74,8 +71,10 @@ export default function StaffCheckinGuestPage({
     }
   }
 
+  const maskedPhone = guest?.phoneNumber ? `•••• ${guest.phoneNumber.slice(-4)}` : null
+
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div style={{ background: "#FAF7F1", minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
       <SyncStatusBar
         isOnline={isOnline}
         pendingCount={pendingCount}
@@ -83,125 +82,248 @@ export default function StaffCheckinGuestPage({
         syncState={syncState}
       />
 
-      <div className="mx-auto w-full max-w-lg flex-1 px-4 py-4">
-        {view !== "result" && (
-          <div className="mb-4 flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.back()}
-              aria-label="Go back"
-              className="shrink-0"
-            >
-              <ArrowLeft className="size-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-foreground">
-              {t("checkin.guestCheckinTitle")}
-            </h1>
-          </div>
-        )}
+      {/* Loading */}
+      {view === "loading" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 20 }}>
+          <div style={{ width: 82, height: 82, borderRadius: "50%", background: "#F2ECE0" }} className="animate-pulse" />
+          <div style={{ width: 180, height: 22, borderRadius: 8, background: "#F2ECE0" }} className="animate-pulse" />
+          <div style={{ width: 140, height: 16, borderRadius: 8, background: "#F2ECE0" }} className="animate-pulse" />
+        </div>
+      )}
 
-        {view === "loading" && (
-          <div className="space-y-4">
-            <div className="h-48 animate-pulse rounded-2xl bg-muted" />
-            <div className="h-16 animate-pulse rounded-2xl bg-muted" />
-          </div>
-        )}
-
-        {view === "not-found" && (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 text-center">
-            <AlertTriangle className="size-12 text-muted-foreground" />
-            <div className="space-y-1">
-              <p className="font-semibold text-foreground">{t("checkin.guestNotFound")}</p>
-              <p className="text-sm text-muted-foreground">
+      {/* Not found */}
+      {view === "not-found" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "24px 22px" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 16 }}>
+            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <AlertTriangle size={32} color="#97a0b2" />
+            </div>
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 17, color: "#172033", marginBottom: 6, marginTop: 0 }}>
+                {t("checkin.guestNotFound")}
+              </p>
+              <p style={{ fontSize: 13.5, color: "#6b7589", lineHeight: 1.5, margin: 0, maxWidth: 280 }}>
                 {t("checkin.guestNotFoundDesc")}
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push(`/staff/${weddingId}/checkin`)}
-              className="h-12 w-full"
-            >
-              {t("checkin.backToCheckin")}
-            </Button>
           </div>
-        )}
+          <button
+            onClick={() => router.push(`/staff/${weddingId}/checkin`)}
+            style={{ width: "100%", padding: "17px 24px", borderRadius: 16, background: "transparent", border: "1px solid #e7e1d6", color: "#172033", fontWeight: 600, fontSize: 15, cursor: "pointer" }}
+          >
+            {t("checkin.backToCheckin")}
+          </button>
+        </div>
+      )}
 
-        {view === "confirmation" && guest && (
-          <div className="space-y-4">
-            <GuestCheckinCard
-              guest={guest}
-              onCheckIn={handleCheckIn}
-              isLoading={isCheckingIn}
-            />
+      {/* Confirmation */}
+      {view === "confirmation" && guest && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "24px 22px" }}>
+          {/* QR verified badge */}
+          <div style={{ textAlign: "center", marginTop: 8 }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+              background: "#DCFCE7", color: "#15803d",
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "currentColor", flexShrink: 0 }} />
+              {t("checkin.qrVerified")}
+            </span>
+          </div>
+
+          {/* Guest hero — centered */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 6 }}>
+            {/* Avatar */}
+            <div style={{
+              width: 82, height: 82, borderRadius: "50%",
+              background: "#172033", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 700, fontSize: 28, flexShrink: 0,
+            }}>
+              {getInitials(guest.fullName)}
+            </div>
+
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#172033", margin: "14px 0 2px", letterSpacing: "-0.01em" }}>
+              {guest.fullName}
+            </h1>
+
+            {maskedPhone && (
+              <div style={{ fontSize: 14, color: "#6b7589" }}>
+                {t("checkin.phoneEnding")} {maskedPhone}
+              </div>
+            )}
+
+            {/* Allowed guests pill */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "#fff", border: "1px solid #e7e1d6", borderRadius: 999,
+              padding: "9px 16px", marginTop: 12,
+            }}>
+              <Users size={17} color="#A8843F" />
+              <span style={{ fontWeight: 600, color: "#172033", fontSize: 14 }}>
+                {guest.allowedGuests} {t("checkin.peopleAllowed")}
+              </span>
+            </div>
+
+            {/* Table and seat pill */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "#fff", border: "1px solid #e7e1d6", borderRadius: 999,
+              padding: "9px 16px", marginTop: 8,
+            }}>
+              <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#A8843F" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18" />
+              </svg>
+              <span style={{ fontWeight: 600, color: "#172033", fontSize: 14 }}>
+                {guest.tableName}{guest.seatNumber ? ` · Seat ${guest.seatNumber}` : ""}
+              </span>
+            </div>
+
+            {/* Status badge */}
+            <div style={{ marginTop: 10 }}>
+              {guest.checkedIn ? (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                  background: "#FEF3C7", color: "#b45309",
+                }}>
+                  {t("checkin.alreadyCheckedIn")}
+                </span>
+              ) : (
+                <span style={{
+                  display: "inline-flex", alignItems: "center",
+                  padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                  background: "rgba(23,32,51,.06)", color: "#172033",
+                }}>
+                  {t("checkin.notYetCheckedIn")}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div>
+            {guest.checkedIn ? (
+              <button
+                onClick={() => router.push(`/staff/${weddingId}/checkin`)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                  gap: 9, padding: "20px 24px", borderRadius: 16, background: "#172033",
+                  border: 0, color: "#fff", fontWeight: 700, fontSize: 18, minHeight: 60, cursor: "pointer",
+                }}
+              >
+                {t("checkin.nextGuest")}
+              </button>
+            ) : (
+              <button
+                onClick={handleCheckIn}
+                disabled={isCheckingIn}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                  gap: 9, padding: "20px 24px", borderRadius: 16, background: "#172033",
+                  border: 0, color: "#fff", fontWeight: 700, fontSize: 18, minHeight: 60,
+                  cursor: isCheckingIn ? "not-allowed" : "pointer",
+                  opacity: isCheckingIn ? 0.7 : 1,
+                }}
+              >
+                <Check size={22} strokeWidth={3} color="#C8A45D" />
+                {isCheckingIn ? t("guestCard.checkingIn") : t("guestCard.checkInGuest")}
+              </button>
+            )}
             <button
-              type="button"
               onClick={() => router.back()}
-              className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+              style={{
+                marginTop: 10, width: "100%", padding: "17px 24px", borderRadius: 16,
+                background: "transparent", border: "1px solid #e7e1d6", color: "#172033",
+                fontWeight: 600, fontSize: 15, cursor: "pointer",
+              }}
             >
-              {t("checkin.wrongGuest")}
+              {t("common.cancel")}
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {view === "result" && result && (
-          <div className="flex flex-col items-center gap-6 pt-6 text-center">
-            {result.status === "checked_in_locally" ? (
-              <>
-                <div className="mx-auto mb-4 flex size-24 items-center justify-center rounded-full bg-success-light text-success">
-                  <CheckCircle className="size-12" strokeWidth={2} />
+      {/* Result */}
+      {view === "result" && result && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "24px 22px" }}>
+          {result.status === "checked_in_locally" ? (
+            <>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+                <div style={{
+                  width: 96, height: 96, borderRadius: "50%", background: "#DCFCE7", color: "#15803d",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18,
+                }}>
+                  <Check size={52} strokeWidth={3} />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold text-navy">
-                    {guest?.fullName} is in!
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Saved on this device. Will sync when internet returns.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    at {formatTime(result.checkedInAt)}
-                  </p>
+                <h1 style={{ fontSize: 26, fontWeight: 700, color: "#172033", margin: "0 0 6px", letterSpacing: "-0.01em" }}>
+                  {t("checkin.isIn", { firstName: guest?.fullName.split(" ")[0] ?? "" })}
+                </h1>
+                <p style={{ fontSize: 14.5, color: "#45506b", margin: "0 28px", lineHeight: 1.5 }}>
+                  {t("checkin.savedLocally")}
+                </p>
+                <div style={{ marginTop: 14, fontSize: 13, color: "#97a0b2", fontVariantNumeric: "tabular-nums" }}>
+                  {formatTime(result.checkedInAt)} · {guest?.allowedGuests} {t("checkin.guests")}
                 </div>
-                <Button
-                  variant="gold"
-                  size="xl"
-                  onClick={() =>
-                    router.push(`/staff/${weddingId}/checkin`)
-                  }
-                  className="w-full"
+              </div>
+              <div>
+                <button
+                  onClick={() => router.push(`/staff/${weddingId}/scan`)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                    gap: 9, padding: "20px 24px", borderRadius: 16, background: "#C8A45D",
+                    border: 0, color: "#172033", fontWeight: 700, fontSize: 18, minHeight: 60, cursor: "pointer",
+                  }}
                 >
-                  Continue Scanning
-                </Button>
-              </>
-            ) : result.status === "already_checked_in" ? (
-              <>
-                <div className="flex size-20 items-center justify-center rounded-full bg-warning-light">
-                  <AlertTriangle className="size-10 text-warning" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold text-foreground">
-                    {guest?.fullName}
-                  </p>
-                  <p className="text-base font-semibold text-warning">
-                    {t("checkin.alreadyCheckedIn")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("checkin.originallyCheckedIn", { time: formatTime(result.checkedInAt) })}
-                  </p>
-                </div>
-                <Button
-                  onClick={() =>
-                    router.push(`/staff/${weddingId}/checkin`)
-                  }
-                  className="h-14 w-full rounded-2xl text-base font-semibold"
+                  <ScanLine size={20} />
+                  {t("checkin.continueScan")}
+                </button>
+                <button
+                  onClick={() => router.push(`/staff/${weddingId}/checkin`)}
+                  style={{
+                    marginTop: 10, width: "100%", padding: "17px 24px", borderRadius: 16,
+                    background: "transparent", border: "1px solid #e7e1d6", color: "#172033",
+                    fontWeight: 600, fontSize: 15, cursor: "pointer",
+                  }}
                 >
-                  {t("checkin.nextGuest")}
-                </Button>
-              </>
-            ) : null}
-          </div>
-        )}
-      </div>
+                  {t("checkin.backToCheckin")}
+                </button>
+              </div>
+            </>
+          ) : result.status === "already_checked_in" ? (
+            <>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+                <div style={{
+                  width: 80, height: 80, borderRadius: "50%", background: "#FEF3C7", color: "#b45309",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18,
+                }}>
+                  <AlertTriangle size={40} />
+                </div>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: "#172033", margin: "0 0 6px" }}>
+                  {guest?.fullName}
+                </h1>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#b45309", margin: 0 }}>
+                  {t("checkin.alreadyCheckedIn")}
+                </p>
+                <p style={{ fontSize: 13.5, color: "#6b7589", marginTop: 6 }}>
+                  {t("checkin.originallyCheckedIn", { time: formatTime(result.checkedInAt) })}
+                </p>
+              </div>
+              <button
+                onClick={() => router.push(`/staff/${weddingId}/checkin`)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                  gap: 9, padding: "20px 24px", borderRadius: 16, background: "#C8A45D",
+                  border: 0, color: "#172033", fontWeight: 700, fontSize: 18, minHeight: 60, cursor: "pointer",
+                }}
+              >
+                {t("checkin.nextGuest")}
+              </button>
+            </>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }
