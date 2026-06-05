@@ -2,7 +2,7 @@
 
 import { use, useRef } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Download, Info, Printer, QrCode } from "lucide-react"
+import { Download, Printer, QrCode } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
@@ -13,6 +13,11 @@ import { useAuthStore } from "@/stores/auth-store"
 import { listGuests } from "@/lib/api/guests-client"
 import { getWedding } from "@/lib/api/weddings-client"
 import type { GuestListItemDTO } from "@/modules/guests/guests.dto"
+
+// W mark split at x=50 — avoids clip paths that break in SVG data URLs
+const W_MARK_DATA_URL = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 96"><rect width="100" height="96" fill="white" rx="10"/><g fill="none" stroke-width="13" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="20"><path d="M10,27 L31,90 L50,7" stroke="#172033"/><path d="M50,7 L69,90 L90,27" stroke="#C8A45D"/></g></svg>`
+)}`
 
 interface PassCardProps {
   guestName: string
@@ -148,6 +153,11 @@ function GuestPassCard({
           >
             {guestName}
           </div>
+          {tableName && (
+            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.6)" }}>
+              {tableName}{seatNumber ? ` · Seat ${seatNumber}` : ""}
+            </div>
+          )}
           <div
             style={{
               display: "inline-flex",
@@ -179,38 +189,6 @@ function GuestPassCard({
               {allowedCount} allowed
             </span>
           </div>
-
-          {tableName && (
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                marginTop: 6,
-                background: "rgba(255,255,255,.1)",
-                borderRadius: 999,
-                padding: "5px 11px",
-              }}
-            >
-              <svg
-                width={13}
-                height={13}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#C8A45D"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M3 9h18" />
-              </svg>
-              <span style={{ fontSize: 12, fontWeight: 600 }}>
-                {tableName}{seatNumber ? ` · Seat ${seatNumber}` : ""}
-              </span>
-            </div>
-          )}
         </div>
         <div
           style={{
@@ -220,7 +198,19 @@ function GuestPassCard({
             flexShrink: 0,
           }}
         >
-          <QRCodeSVG value={qrValue} size={92} fgColor="#172033" bgColor="#ffffff" />
+          <QRCodeSVG
+            value={qrValue}
+            size={92}
+            level="H"
+            fgColor="#172033"
+            bgColor="#ffffff"
+            imageSettings={{
+              src: W_MARK_DATA_URL,
+              width: 22,
+              height: 21,
+              excavate: true,
+            }}
+          />
         </div>
       </div>
 
@@ -236,7 +226,7 @@ function GuestPassCard({
           alignItems: "center",
         }}
       >
-        <span style={{ fontStyle: "italic" }}>
+        <span style={{ fontFamily: "var(--font-playfair, 'Playfair Display', Georgia, serif)", fontStyle: "italic" }}>
           {coupleNames ?? "Wedding"}
           {formattedDate ? ` · ${formattedDate}` : ""}
         </span>
@@ -440,8 +430,8 @@ export default function QrCodesPage({
               </Button>
             </div>
             <div className="mt-[18px] flex gap-2.5 rounded-xl bg-sync-light p-3.5">
-              <Info className="mt-0.5 size-[18px] shrink-0 text-sync" />
-              <p className="text-[13px] leading-[1.45] text-sync">
+              <QrCode className="mt-0.5 size-[18px] shrink-0" style={{ color: "#1d4ed8" }} />
+              <p className="text-[13px] leading-[1.45]" style={{ color: "#1e40af" }}>
                 QR codes are passes, not ID. They show the guest name and how many
                 people are allowed — nothing more.
               </p>
