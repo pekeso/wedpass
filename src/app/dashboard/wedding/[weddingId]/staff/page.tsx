@@ -160,9 +160,16 @@ function DeviceCard({
 
       {/* Stat chips */}
       <div className="grid grid-cols-3 gap-2">
-        <StatChip label="Snapshot" value="—" />
-        <StatChip label="Guests" value="—" />
-        <StatChip label="Pending" value={0} highlight={false} />
+        <StatChip
+          label="Snapshot"
+          value={device.snapshotVersion != null ? `v${device.snapshotVersion}` : "—"}
+        />
+        <StatChip label="Guests" value={device.guestCount ?? "—"} />
+        <StatChip
+          label="Pending"
+          value={device.checkinCount}
+          highlight={device.checkinCount > 0}
+        />
       </div>
 
       {/* Footer */}

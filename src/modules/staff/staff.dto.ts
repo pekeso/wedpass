@@ -14,6 +14,9 @@ export interface StaffDeviceListItemDTO {
   status: "ACTIVE" | "REVOKED"
   lastSeenAt: string | null
   createdAt: string
+  snapshotVersion: number | null
+  guestCount: number | null
+  checkinCount: number
 }
 
 export interface CreateStaffDeviceResponseDTO {

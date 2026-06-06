@@ -1,5 +1,6 @@
 import { signStaffToken } from "@/lib/auth/staff-jwt"
 import { findWeddingById } from "@/modules/weddings/weddings.repository"
+import { findActiveSnapshot } from "@/modules/weddings/snapshot.repository"
 import {
   createStaffDevice as repoCreate,
   findStaffDevicesByWedding,
@@ -59,19 +60,26 @@ function toStaffDeviceDTO(device: {
   }
 }
 
-function toStaffDeviceListItemDTO(device: {
-  id: string
-  label: string | null
-  status: "ACTIVE" | "REVOKED"
-  lastSeenAt: Date | null
-  createdAt: Date
-}): StaffDeviceListItemDTO {
+function toStaffDeviceListItemDTO(
+  device: {
+    id: string
+    label: string | null
+    status: "ACTIVE" | "REVOKED"
+    lastSeenAt: Date | null
+    createdAt: Date
+    _count: { checkIns: number }
+  },
+  activeSnapshot: { version: number; guestCount: number } | null
+): StaffDeviceListItemDTO {
   return {
     id: device.id,
     label: device.label,
     status: device.status,
     lastSeenAt: device.lastSeenAt ? device.lastSeenAt.toISOString() : null,
     createdAt: device.createdAt.toISOString(),
+    snapshotVersion: activeSnapshot?.version ?? null,
+    guestCount: activeSnapshot?.guestCount ?? null,
+    checkinCount: device._count.checkIns,
   }
 }
 
@@ -101,8 +109,12 @@ export async function listStaffDevices(
 ): Promise<ListStaffDevicesResponseDTO> {
   await ensureWeddingOwner(weddingId, organizerId)
 
-  const devices = await findStaffDevicesByWedding(weddingId)
-  return { items: devices.map(toStaffDeviceListItemDTO) }
+  const [devices, activeSnapshot] = await Promise.all([
+    findStaffDevicesByWedding(weddingId),
+    findActiveSnapshot(weddingId),
+  ])
+
+  return { items: devices.map((d) => toStaffDeviceListItemDTO(d, activeSnapshot)) }
 }
 
 export async function reissueStaffToken(
