@@ -20,7 +20,7 @@ export interface LocalGuest {
   email?: string
   qrToken: string
   allowedGuests: number
-  tableName: string
+  tableName?: string
   seatNumber?: string
   checkedIn: boolean
   checkedInAt?: string

@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useRef } from "react"
+import { use, useRef, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Download, Printer, QrCode } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
@@ -14,10 +14,48 @@ import { listGuests } from "@/lib/api/guests-client"
 import { getWedding } from "@/lib/api/weddings-client"
 import type { GuestListItemDTO } from "@/modules/guests/guests.dto"
 
-// W mark split at x=50 — avoids clip paths that break in SVG data URLs
-const W_MARK_DATA_URL = `data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 96"><rect width="100" height="96" fill="white" rx="10"/><g fill="none" stroke-width="13" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="20"><path d="M10,27 L31,90 L50,7" stroke="#172033"/><path d="M50,7 L69,90 L90,27" stroke="#C8A45D"/></g></svg>`
-)}`
+interface PassColors {
+  cardBg: string
+  accentColor: string
+  textColor: string
+  qrColor: string
+}
+
+const PASS_PRESETS: Array<{ label: string } & PassColors> = [
+  { label: "Classic Navy", cardBg: "#172033", accentColor: "#C8A45D", textColor: "#ffffff", qrColor: "#172033" },
+  { label: "Ivory", cardBg: "#F9F5ED", accentColor: "#9C7A2E", textColor: "#1C1410", qrColor: "#1C1410" },
+  { label: "Rose Dusk", cardBg: "#2D1215", accentColor: "#E8A098", textColor: "#FDF0EE", qrColor: "#2D1215" },
+  { label: "Sage", cardBg: "#1A2820", accentColor: "#8FC49A", textColor: "#EEF6EF", qrColor: "#1A2820" },
+]
+
+const COLOR_FIELDS: { key: keyof PassColors; label: string }[] = [
+  { key: "cardBg", label: "Background" },
+  { key: "accentColor", label: "Accent" },
+  { key: "textColor", label: "Text" },
+  { key: "qrColor", label: "QR Code" },
+]
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function isLightColor(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return (r * 299 + g * 587 + b * 114) / 1000 > 128
+}
+
+// The W mark sits on a white QR background — pick the darker of cardBg/textColor
+function makeWMarkDataUrl(cardBg: string, accentColor: string, textColor: string): string {
+  const leftColor = isLightColor(cardBg) ? textColor : cardBg
+  return `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 96"><rect width="100" height="96" fill="white" rx="10"/><g fill="none" stroke-width="13" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="20"><path d="M10,27 L31,90 L50,7" stroke="${leftColor}"/><path d="M50,7 L69,90 L90,27" stroke="${accentColor}"/></g></svg>`
+  )}`
+}
 
 interface PassCardProps {
   guestName: string
@@ -28,6 +66,7 @@ interface PassCardProps {
   coupleNames?: string | null
   eventDate?: string | null
   qrValue: string
+  colors: PassColors
 }
 
 function GuestPassCard({
@@ -39,6 +78,7 @@ function GuestPassCard({
   coupleNames,
   eventDate,
   qrValue,
+  colors,
 }: PassCardProps) {
   const formattedDate = eventDate
     ? new Date(eventDate).toLocaleDateString("en-US", {
@@ -48,15 +88,17 @@ function GuestPassCard({
       })
     : null
 
+  const wMarkDataUrl = makeWMarkDataUrl(colors.cardBg, colors.accentColor, colors.textColor)
+
   return (
     <div
       style={{
         width: 320,
-        background: "#172033",
+        background: colors.cardBg,
         borderRadius: 18,
         overflow: "hidden",
         boxShadow: "0 12px 40px rgba(23,32,51,0.35)",
-        color: "#fff",
+        color: colors.textColor,
         fontSize: 14,
       }}
     >
@@ -67,7 +109,7 @@ function GuestPassCard({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px dashed rgba(255,255,255,.18)",
+          borderBottom: `1px dashed ${hexToRgba(colors.textColor, 0.18)}`,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -89,18 +131,18 @@ function GuestPassCard({
             >
               <path
                 d="M10,27 L31,90 L50,7 L69,90 L90,27"
-                stroke="#fff"
+                stroke={colors.textColor}
                 clipPath="url(#pass-mark-l)"
               />
               <path
                 d="M10,27 L31,90 L50,7 L69,90 L90,27"
-                stroke="#C8A45D"
+                stroke={colors.accentColor}
                 clipPath="url(#pass-mark-r)"
               />
             </g>
           </svg>
           <span style={{ fontWeight: 800, fontSize: 15 }}>
-            Wed<span style={{ color: "#C8A45D" }}>Pass</span>
+            Wed<span style={{ color: colors.accentColor }}>Pass</span>
           </span>
         </div>
         {isVip && (
@@ -110,8 +152,8 @@ function GuestPassCard({
               fontWeight: 700,
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              background: "#C8A45D",
-              color: "#172033",
+              background: colors.accentColor,
+              color: colors.cardBg,
               padding: "4px 9px",
               borderRadius: 999,
             }}
@@ -136,7 +178,7 @@ function GuestPassCard({
               fontSize: 10,
               letterSpacing: ".16em",
               textTransform: "uppercase",
-              color: "rgba(200,164,93,0.65)",
+              color: hexToRgba(colors.accentColor, 0.75),
               fontWeight: 600,
             }}
           >
@@ -149,12 +191,13 @@ function GuestPassCard({
               margin: "3px 0",
               lineHeight: 1.2,
               wordBreak: "break-word",
+              color: colors.textColor,
             }}
           >
             {guestName}
           </div>
           {tableName && (
-            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.6)" }}>
+            <div style={{ fontSize: 12.5, color: hexToRgba(colors.textColor, 0.6) }}>
               {tableName}{seatNumber ? ` · Seat ${seatNumber}` : ""}
             </div>
           )}
@@ -164,7 +207,7 @@ function GuestPassCard({
               alignItems: "center",
               gap: 6,
               marginTop: 10,
-              background: "rgba(255,255,255,.1)",
+              background: hexToRgba(colors.textColor, 0.1),
               borderRadius: 999,
               padding: "5px 11px",
             }}
@@ -174,7 +217,7 @@ function GuestPassCard({
               height={13}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#C8A45D"
+              stroke={colors.accentColor}
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -185,7 +228,7 @@ function GuestPassCard({
               <path d="M22 21v-2a4 4 0 0 0-3-3.9" />
               <path d="M16 3.1a4 4 0 0 1 0 7.8" />
             </svg>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: colors.textColor }}>
               {allowedCount} allowed
             </span>
           </div>
@@ -202,10 +245,10 @@ function GuestPassCard({
             value={qrValue}
             size={92}
             level="H"
-            fgColor="#172033"
+            fgColor={colors.qrColor}
             bgColor="#ffffff"
             imageSettings={{
-              src: W_MARK_DATA_URL,
+              src: wMarkDataUrl,
               width: 22,
               height: 21,
               excavate: true,
@@ -220,7 +263,7 @@ function GuestPassCard({
           padding: "10px 20px",
           background: "rgba(0,0,0,.2)",
           fontSize: 11,
-          color: "rgba(255,255,255,.55)",
+          color: hexToRgba(colors.textColor, 0.6),
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -241,11 +284,13 @@ function GuestQrRow({
   isLast,
   coupleNames,
   eventDate,
+  passColors,
 }: {
   guest: GuestListItemDTO
   isLast: boolean
   coupleNames?: string | null
   eventDate?: string | null
+  passColors: PassColors
 }) {
   async function handleDownload() {
     const { toPng } = await import("html-to-image")
@@ -267,6 +312,7 @@ function GuestQrRow({
           coupleNames={coupleNames}
           eventDate={eventDate ?? null}
           qrValue={guest.qrToken}
+          colors={passColors}
         />,
       )
     })
@@ -318,6 +364,7 @@ export default function QrCodesPage({
   const { weddingId } = use(params)
   const { accessToken } = useAuthStore()
   const previewPassCardRef = useRef<HTMLDivElement>(null)
+  const [passColors, setPassColors] = useState<PassColors>(PASS_PRESETS[0])
 
   const { data: weddingData } = useQuery({
     queryKey: ["wedding", weddingId],
@@ -393,7 +440,7 @@ export default function QrCodesPage({
         />
       ) : (
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
-          {/* Left — Pass preview */}
+          {/* Left — Pass preview + customization */}
           <div>
             <p className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Pass preview
@@ -407,6 +454,7 @@ export default function QrCodesPage({
                 coupleNames={wedding?.coupleNames}
                 eventDate={wedding?.eventDate ?? null}
                 qrValue={previewGuest?.qrToken ?? "wedpass-preview"}
+                colors={passColors}
               />
             </div>
             <div className="flex gap-2.5">
@@ -429,7 +477,72 @@ export default function QrCodesPage({
                 Download this pass
               </Button>
             </div>
-            <div className="mt-[18px] flex gap-2.5 rounded-xl bg-sync-light p-3.5">
+
+            {/* Color customization */}
+            <div className="mt-4 rounded-xl border border-border bg-card p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Customize pass style
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PASS_PRESETS.map((preset) => {
+                  const isActive =
+                    passColors.cardBg === preset.cardBg &&
+                    passColors.accentColor === preset.accentColor &&
+                    passColors.textColor === preset.textColor
+                  return (
+                    <button
+                      key={preset.label}
+                      onClick={() => setPassColors(preset)}
+                      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                        isActive
+                          ? "border-navy bg-navy text-white"
+                          : "border-border bg-white text-navy hover:border-navy/40"
+                      }`}
+                    >
+                      <span className="flex gap-0.5">
+                        <span
+                          className="size-3 rounded-full border border-black/10"
+                          style={{ background: preset.cardBg }}
+                        />
+                        <span
+                          className="size-3 rounded-full border border-black/10"
+                          style={{ background: preset.accentColor }}
+                        />
+                      </span>
+                      {preset.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="flex flex-wrap gap-5 pt-0.5">
+                {COLOR_FIELDS.map(({ key, label }) => (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer flex-col items-center gap-1.5"
+                    title={`Change ${label.toLowerCase()} color`}
+                  >
+                    <div
+                      className="relative size-8 overflow-hidden rounded-full border-2 border-border shadow-sm"
+                      style={{ background: passColors[key] }}
+                    >
+                      <input
+                        type="color"
+                        value={passColors[key]}
+                        onChange={(e) =>
+                          setPassColors((c) => ({ ...c, [key]: e.target.value }))
+                        }
+                        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                      />
+                    </div>
+                    <span className="text-[10px] leading-none text-muted-foreground">
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 flex gap-2.5 rounded-xl bg-sync-light p-3.5">
               <QrCode className="mt-0.5 size-[18px] shrink-0" style={{ color: "#1d4ed8" }} />
               <p className="text-[13px] leading-[1.45]" style={{ color: "#1e40af" }}>
                 QR codes are passes, not ID. They show the guest name and how many
@@ -451,6 +564,7 @@ export default function QrCodesPage({
                   isLast={i === guests.length - 1}
                   coupleNames={wedding?.coupleNames}
                   eventDate={wedding?.eventDate ?? null}
+                  passColors={passColors}
                 />
               ))}
             </div>

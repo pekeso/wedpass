@@ -7,7 +7,7 @@ export type SnapshotGuestData = {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
-  tableName: string
+  tableName: string | null
   seatNumber: string | null
   qrToken: string
 }

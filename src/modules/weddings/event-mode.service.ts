@@ -278,7 +278,7 @@ export async function getSnapshotForStaffDownload(weddingId: string, staffDevice
       email: sg.email ?? undefined,
       qrToken: sg.qrToken,
       allowedGuests: sg.numberOfAllowedGuests,
-      tableName: sg.tableName,
+      tableName: sg.tableName ?? undefined,
       seatNumber: sg.seatNumber ?? undefined,
     })),
   }

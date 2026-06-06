@@ -8,7 +8,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, weddingId }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-ivory">
       <div className="hidden md:flex">
         <AppSidebar weddingId={weddingId} />
       </div>

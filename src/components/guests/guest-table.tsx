@@ -50,6 +50,12 @@ export function GuestTable({ guests, onEdit, onDelete }: GuestTableProps) {
           <TableHead className="px-[18px] py-[11px] text-[11.5px] font-bold uppercase tracking-[.06em] text-muted-foreground">
             Phone
           </TableHead>
+          <TableHead className="px-[18px] py-[11px] text-[11.5px] font-bold uppercase tracking-[.06em] text-muted-foreground">
+            Table
+          </TableHead>
+          <TableHead className="px-[18px] py-[11px] text-[11.5px] font-bold uppercase tracking-[.06em] text-muted-foreground">
+            Seat
+          </TableHead>
           <TableHead className="px-[18px] py-[11px] text-center text-[11.5px] font-bold uppercase tracking-[.06em] text-muted-foreground">
             Allowed
           </TableHead>
@@ -75,6 +81,12 @@ export function GuestTable({ guests, onEdit, onDelete }: GuestTableProps) {
             </TableCell>
             <TableCell className="px-[18px] py-[13px] font-mono text-[13.5px] text-muted-foreground">
               {guest.phoneNumber ?? "—"}
+            </TableCell>
+            <TableCell className="px-[18px] py-[13px] text-sm text-muted-foreground">
+              {guest.tableName ?? "—"}
+            </TableCell>
+            <TableCell className="px-[18px] py-[13px] text-sm text-muted-foreground">
+              {guest.seatNumber ?? "—"}
             </TableCell>
             <TableCell className="px-[18px] py-[13px] text-center font-mono font-semibold text-navy">
               {guest.numberOfAllowedGuests}

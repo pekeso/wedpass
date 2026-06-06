@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useState } from "react"
-import { useRouter } from "next/navigation"
+import { use, useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Lock, Shield, ShieldCheck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WMark } from "@/components/shared/wmark"
@@ -11,17 +11,19 @@ import { useLanguage } from "@/lib/i18n/language-context"
 
 const STAFF_TOKEN_KEY = (weddingId: string) => `wedpass-staff-token-${weddingId}`
 
-export default function StaffLoginPage({
-  params,
-}: {
-  params: Promise<{ weddingId: string }>
-}) {
-  const { weddingId } = use(params)
+function StaffLoginForm({ weddingId }: { weddingId: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { language, setLanguage } = useLanguage()
 
   const [token, setToken] = useState("")
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    const urlToken = searchParams.get("token")
+    if (urlToken) setToken(urlToken)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [isLoading, setIsLoading] = useState(false)
   const { t } = useTranslations()
 
@@ -166,5 +168,19 @@ export default function StaffLoginPage({
         </div>
       </div>
     </div>
+  )
+}
+
+export default function StaffLoginPage({
+  params,
+}: {
+  params: Promise<{ weddingId: string }>
+}) {
+  const { weddingId } = use(params)
+
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-navy" />}>
+      <StaffLoginForm weddingId={weddingId} />
+    </Suspense>
   )
 }

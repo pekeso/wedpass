@@ -12,7 +12,7 @@ type SnapshotGuestFromAPI = {
   email?: string
   qrToken: string
   allowedGuests: number
-  tableName: string
+  tableName?: string
   seatNumber?: string
 }
 

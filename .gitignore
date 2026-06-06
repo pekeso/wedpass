@@ -46,3 +46,5 @@ next-env.d.ts
 # Sentry example/demo boilerplate
 /src/app/api/sentry-example-api/
 /src/app/sentry-example-page/
+
+sample-guests.csv
