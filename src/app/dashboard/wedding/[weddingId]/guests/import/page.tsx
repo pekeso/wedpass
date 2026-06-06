@@ -16,6 +16,8 @@ interface ParsedRow {
   phoneNumber?: string
   email?: string
   numberOfAllowedGuests: number
+  tableName?: string
+  seatNumber?: string
 }
 
 type RowStatus = "ok" | "dup" | "err"
@@ -25,9 +27,9 @@ interface ValidatedRow extends ParsedRow {
 }
 
 const SAMPLE_CSV =
-  "fullName,phoneNumber,email,numberOfAllowedGuests\n" +
-  "Michael Okoro,+2348012345678,michael@example.com,2\n" +
-  "Sarah Adebayo,+2348099876543,,1\n"
+  "fullName,phoneNumber,email,numberOfAllowedGuests,tableName,seatNumber\n" +
+  "Michael Okoro,+2348012345678,michael@example.com,2,Table 1,3\n" +
+  "Sarah Adebayo,+2348099876543,,1,Table 2,\n"
 
 function normalizeKey(key: string): string {
   return key.trim().toLowerCase().replace(/[\s_-]/g, "")
@@ -43,11 +45,16 @@ function parseAndValidate(raw: Record<string, string>[]): ValidatedRow[] {
     const allowedRaw = n["numberofallowedguests"] ?? n["allowedguests"] ?? n["guests"] ?? ""
     const numberOfAllowedGuests = Math.max(1, parseInt(allowedRaw) || 1)
 
+    const tableNameRaw = n["tablename"] ?? n["table"] ?? ""
+    const seatNumberRaw = n["seatnumber"] ?? n["seat"] ?? ""
+
     const row: ParsedRow = {
       fullName,
       phoneNumber: phoneNumber || undefined,
       email: email || undefined,
       numberOfAllowedGuests,
+      tableName: tableNameRaw || undefined,
+      seatNumber: seatNumberRaw || undefined,
     }
 
     if (!fullName) return { ...row, status: "err" }
@@ -254,7 +261,7 @@ export default function ImportGuestsPage({
                 <table className="w-full text-[13px]">
                   <thead>
                     <tr className="bg-muted/40">
-                      {(["Name", "Phone", "Allowed", ""] as const).map((h, i) => (
+                      {(["Name", "Table", "Seat", "Allowed", ""] as const).map((h, i) => (
                         <th
                           key={i}
                           className="px-4 py-[9px] text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground"
@@ -280,7 +287,10 @@ export default function ImportGuestsPage({
                           {row.fullName || <span className="text-muted-foreground">—</span>}
                         </td>
                         <td className="px-4 py-[9px] tabular-nums text-muted-foreground">
-                          {row.phoneNumber ?? "—"}
+                          {row.tableName ?? "—"}
+                        </td>
+                        <td className="px-4 py-[9px] tabular-nums text-muted-foreground">
+                          {row.seatNumber ?? "—"}
                         </td>
                         <td className="px-4 py-[9px] tabular-nums">{row.numberOfAllowedGuests}</td>
                         <td className="px-4 py-[9px] text-right">
