@@ -74,7 +74,6 @@ export default function StaffScanPage({
         if (guest) {
           isNavigatingRef.current = true
           setStatus("found")
-          await scannerRef.current?.stop()
           router.push(`/staff/${weddingId}/checkin/${guest.guestId}`)
         } else {
           setStatus("not-found")
@@ -118,16 +117,16 @@ export default function StaffScanPage({
     return () => {
       isMounted = false
       if (hasStarted) {
-        scanner
-          .stop()
-          .catch(() => {})
-          .finally(() => {
-            try {
-              scanner.clear()
-            } catch {
-              /* element already removed */
-            }
-          })
+        try {
+          scanner
+            .stop()
+            .catch(() => {})
+            .finally(() => {
+              try { scanner.clear() } catch { /* element already removed */ }
+            })
+        } catch {
+          try { scanner.clear() } catch { /* ignore */ }
+        }
       } else {
         try {
           scanner.clear()
