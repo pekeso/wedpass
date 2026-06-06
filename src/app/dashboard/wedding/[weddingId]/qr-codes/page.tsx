@@ -42,6 +42,19 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
+function isLightColor(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return (r * 299 + g * 587 + b * 114) / 1000 > 128
+}
+
+function makeWMarkDataUrl(cardBg: string, accentColor: string, textColor: string): string {
+  const leftColor = isLightColor(cardBg) ? textColor : cardBg
+  return `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 96"><rect width="100" height="96" fill="white" rx="10"/><g fill="none" stroke-width="13" stroke-linejoin="miter" stroke-linecap="butt" stroke-miterlimit="20"><path d="M10,27 L31,90 L50,7" stroke="${leftColor}"/><path d="M50,7 L69,90 L90,27" stroke="${accentColor}"/></g></svg>`
+  )}`
+}
 
 interface PassCardProps {
   guestName: string
@@ -73,6 +86,8 @@ function GuestPassCard({
         year: "numeric",
       })
     : null
+
+  const wMarkDataUrl = makeWMarkDataUrl(colors.cardBg, colors.accentColor, colors.textColor)
 
   return (
     <div
@@ -228,9 +243,15 @@ function GuestPassCard({
           <QRCodeSVG
             value={qrValue}
             size={120}
-            level="L"
+            level="H"
             fgColor={colors.qrColor}
             bgColor="#ffffff"
+            imageSettings={{
+              src: wMarkDataUrl,
+              width: 16,
+              height: 15,
+              excavate: true,
+            }}
           />
         </div>
       </div>
