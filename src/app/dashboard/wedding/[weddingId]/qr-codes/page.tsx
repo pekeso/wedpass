@@ -289,7 +289,7 @@ function GuestQrRow({
           seatNumber={guest.seatNumber}
           coupleNames={coupleNames}
           eventDate={eventDate ?? null}
-          qrValue={guest.qrToken}
+          qrValue={`wedpass://checkin/${guest.qrToken}`}
           colors={passColors}
         />,
       )
@@ -315,7 +315,7 @@ function GuestQrRow({
       className={`flex items-center gap-3 px-4 py-3 ${!isLast ? "border-b border-border" : ""}`}
     >
       <div className="shrink-0 rounded-[7px] border border-border bg-white p-[3px]">
-        <QRCodeSVG value={guest.qrToken} size={36} fgColor="#172033" bgColor="#ffffff" />
+        <QRCodeSVG value={`wedpass://checkin/${guest.qrToken}`} size={36} fgColor="#172033" bgColor="#ffffff" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold text-navy">{guest.fullName}</div>
@@ -431,7 +431,7 @@ export default function QrCodesPage({
                 seatNumber={previewGuest?.seatNumber}
                 coupleNames={wedding?.coupleNames}
                 eventDate={wedding?.eventDate ?? null}
-                qrValue={previewGuest?.qrToken ?? "wedpass-preview"}
+                qrValue={previewGuest ? `wedpass://checkin/${previewGuest.qrToken}` : "wedpass-preview"}
                 colors={passColors}
               />
             </div>
