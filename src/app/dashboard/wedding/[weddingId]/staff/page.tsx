@@ -266,9 +266,13 @@ export default function StaffPage({
     createMutation.mutate()
   }
 
+  function getStaffLoginUrl(token: string) {
+    return `https://wedpass.net/staff/${weddingId}/login?token=${token}`
+  }
+
   async function handleCopyToken() {
     if (!createdToken) return
-    await navigator.clipboard.writeText(createdToken)
+    await navigator.clipboard.writeText(getStaffLoginUrl(createdToken))
     setTokenCopied(true)
     setTimeout(() => setTokenCopied(false), 2000)
   }
@@ -397,17 +401,17 @@ export default function StaffPage({
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">
-              Copy or scan this token. It will not be shown again.
+              Scan the QR code or copy the link. It will not be shown again.
             </p>
             {createdToken && (
               <div className="flex justify-center py-2">
-                <QRCodeCanvas value={createdToken} size={180} />
+                <QRCodeCanvas value={getStaffLoginUrl(createdToken)} size={180} />
               </div>
             )}
             <div className="flex gap-2">
               <Input
                 readOnly
-                value={createdToken ?? ""}
+                value={createdToken ? getStaffLoginUrl(createdToken) : ""}
                 className="font-mono text-xs"
               />
               <Button variant="outline" size="icon" onClick={handleCopyToken}>
