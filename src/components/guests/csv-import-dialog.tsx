@@ -22,7 +22,7 @@ interface ParsedRow {
   phoneNumber?: string
   email?: string
   numberOfAllowedGuests: number
-  tableName: string
+  tableName?: string
   seatNumber?: string
 }
 
@@ -43,15 +43,15 @@ function parseRows(raw: Record<string, string>[]): ParsedRow[] {
     const email = n["email"] ?? ""
     const allowedRaw = n["numberofallowedguests"] ?? n["allowedguests"] ?? n["guests"] ?? ""
     const numberOfAllowedGuests = Math.max(1, parseInt(allowedRaw) || 1)
-    const tableName = n["tablename"] ?? n["table"] ?? ""
-    const seatNumber = n["seatnumber"] ?? n["seat"] ?? ""
+    const tableNameRaw = n["tablename"] ?? n["table"] ?? ""
+    const seatNumberRaw = n["seatnumber"] ?? n["seat"] ?? ""
     return {
       fullName,
       phoneNumber: phoneNumber || undefined,
       email: email || undefined,
       numberOfAllowedGuests,
-      tableName,
-      seatNumber: seatNumber || undefined,
+      tableName: tableNameRaw || undefined,
+      seatNumber: seatNumberRaw || undefined,
     }
   })
 }
@@ -114,12 +114,6 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
         const hasAnyName = rows.some((r) => r.fullName.length > 0)
         if (!hasAnyName) {
           setParseError('Required column "fullName" was not found. Check that your CSV headers match the template.')
-          setParsedRows([])
-          return
-        }
-        const hasAnyTable = rows.some((r) => r.tableName.length > 0)
-        if (!hasAnyTable) {
-          setParseError('Required column "tableName" was not found. Check that your CSV headers match the template.')
           setParsedRows([])
           return
         }
@@ -242,7 +236,7 @@ export function CsvImportDialog({ weddingId, open, onOpenChange, onImported }: C
                           {row.fullName || <span className="text-danger">missing</span>}
                         </td>
                         <td className="px-2 py-1.5">
-                          {row.tableName || <span className="text-danger">missing</span>}
+                          {row.tableName ?? "—"}
                         </td>
                         <td className="px-2 py-1.5">{row.seatNumber ?? "—"}</td>
                         <td className="px-2 py-1.5">{row.numberOfAllowedGuests}</td>
