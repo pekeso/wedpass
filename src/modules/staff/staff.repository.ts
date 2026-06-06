@@ -10,6 +10,13 @@ export async function findStaffDevicesByWedding(weddingId: string) {
   return prisma.staffDevice.findMany({
     where: { weddingId },
     orderBy: { createdAt: "desc" },
+    include: {
+      _count: {
+        select: {
+          checkIns: { where: { syncStatus: "ACCEPTED", isDuplicate: false } },
+        },
+      },
+    },
   })
 }
 
