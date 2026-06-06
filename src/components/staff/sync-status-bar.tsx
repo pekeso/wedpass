@@ -86,7 +86,14 @@ export function SyncStatusBar({
       {cfg.icon}
       <span className="text-[13.5px] font-semibold tracking-[0.01em]">{statusText}</span>
       {lastSyncedAt && syncState === "idle" && (
-        <span className="ml-auto text-[12px] opacity-70">{t("syncBar.syncedAt", { time: lastSyncedAt })}</span>
+        <span className="ml-auto text-[12px] opacity-70">
+          {t("syncBar.syncedAt", {
+            time: new Date(lastSyncedAt).toLocaleString(undefined, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            }),
+          })}
+        </span>
       )}
       {cfg.savedLocally && (
         <span className="ml-auto text-[12px] font-semibold" style={{ color: cfg.dot }}>
