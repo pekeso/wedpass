@@ -63,7 +63,7 @@ function toGuestDTO(guest: {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
-  tableName: string
+  tableName: string | null
   seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean
@@ -94,7 +94,7 @@ function toGuestListItemDTO(guest: {
   phoneNumber: string | null
   email: string | null
   numberOfAllowedGuests: number
-  tableName: string
+  tableName: string | null
   seatNumber: string | null
   qrToken: string
   isCheckedIn: boolean

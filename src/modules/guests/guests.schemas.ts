@@ -5,7 +5,7 @@ export const createGuestSchema = z.object({
   phoneNumber: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   numberOfAllowedGuests: z.number().int().min(1).max(20).default(1),
-  tableName: z.string().min(1),
+  tableName: z.string().min(1).optional(),
   seatNumber: z.string().optional(),
 })
 
