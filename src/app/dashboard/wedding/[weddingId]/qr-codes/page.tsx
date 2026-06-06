@@ -249,8 +249,8 @@ function GuestPassCard({
             bgColor="#ffffff"
             imageSettings={{
               src: wMarkDataUrl,
-              width: 22,
-              height: 21,
+              width: 8,
+              height: 8,
               excavate: true,
             }}
           />
