@@ -227,8 +227,8 @@ function GuestPassCard({
         >
           <QRCodeSVG
             value={qrValue}
-            size={92}
-            level="M"
+            size={120}
+            level="L"
             fgColor={colors.qrColor}
             bgColor="#ffffff"
           />
