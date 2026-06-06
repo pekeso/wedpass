@@ -8,7 +8,7 @@ interface PublicLayoutProps {
 
 export function PublicLayout({ children }: PublicLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-ivory">
       <header className="sticky top-0 z-40 border-b border-[#e7e1d6] bg-[rgba(250,247,241,0.92)] backdrop-blur-sm">
         <div className="mx-auto flex h-[62px] max-w-[1180px] items-center justify-between px-8">
           <Link href="/" className="transition-opacity hover:opacity-85">
