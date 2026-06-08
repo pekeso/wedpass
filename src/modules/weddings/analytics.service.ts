@@ -41,7 +41,7 @@ export async function getWeddingStats(weddingId: string, organizerId: string) {
       }),
       prisma.$queryRaw<{ hour: Date; count: bigint }[]>`
         SELECT date_trunc('hour', "checkedInAt") AS hour, COUNT(*) AS count
-        FROM "CheckIn"
+        FROM "check_ins"
         WHERE "weddingId" = ${weddingId} AND "isDuplicate" = false
         GROUP BY hour
         ORDER BY hour ASC
