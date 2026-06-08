@@ -57,6 +57,19 @@ export async function getActiveSnapshot(
   return (json.data as { snapshot: SnapshotDTO }).snapshot
 }
 
+export async function closeWedding(
+  weddingId: string,
+  accessToken: string
+): Promise<{ weddingId: string; status: "COMPLETED" }> {
+  const res = await fetch(`${BASE}/weddings/${weddingId}/close`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  const json = await res.json()
+  if (!json.success) throw new Error(json.error?.message ?? "Failed to close wedding")
+  return json.data as { weddingId: string; status: "COMPLETED" }
+}
+
 export async function getEventDayStatus(
   weddingId: string,
   accessToken: string

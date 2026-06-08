@@ -1,6 +1,6 @@
 "use client"
 
-import { use } from "react"
+import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -10,6 +10,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Users,
+  X,
 } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
@@ -17,6 +18,7 @@ import { ErrorState } from "@/components/shared/error-state"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/stores/auth-store"
 import { listStaffDevices } from "@/lib/api/staff-client"
+import { closeWedding } from "@/lib/api/event-mode-client"
 import type { StaffDeviceListItemDTO } from "@/modules/staff/staff.dto"
 
 type SyncStatus = "synced" | "pending" | "lost"
@@ -147,6 +149,22 @@ export default function SyncCloseoutPage({
   const router = useRouter()
   const { accessToken } = useAuthStore()
   const queryClient = useQueryClient()
+  const [showCloseDialog, setShowCloseDialog] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const [closeError, setCloseError] = useState<string | null>(null)
+
+  async function handleConfirmClose() {
+    if (!accessToken) return
+    setIsClosing(true)
+    setCloseError(null)
+    try {
+      await closeWedding(weddingId, accessToken)
+      router.push(`/dashboard/wedding/${weddingId}`)
+    } catch (err) {
+      setCloseError(err instanceof Error ? err.message : "Something went wrong")
+      setIsClosing(false)
+    }
+  }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["staff-devices", weddingId],
@@ -222,7 +240,15 @@ export default function SyncCloseoutPage({
         )}
 
         {/* Action row */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            className="border-danger/40 text-danger hover:bg-danger-light hover:text-danger"
+            onClick={() => setShowCloseDialog(true)}
+          >
+            <X className="size-4" />
+            Close Event (Override)
+          </Button>
           <Button
             className="bg-navy text-white hover:bg-navy/90"
             disabled={!allSynced}
@@ -242,6 +268,58 @@ export default function SyncCloseoutPage({
           </p>
         )}
       </div>
+
+      {/* Close Event confirmation dialog */}
+      {showCloseDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-danger-light">
+                <AlertTriangle size={18} className="text-danger" />
+              </div>
+              <div>
+                <h2 className="text-[15px] font-bold text-navy">Close event without full sync?</h2>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                  This marks the wedding as complete. Any check-ins that have not yet synced from staff
+                  devices will be permanently lost.
+                </p>
+              </div>
+            </div>
+
+            {needsAttentionCount > 0 && (
+              <div className="mb-4 rounded-xl bg-danger-light px-4 py-3">
+                <p className="text-[13px] font-medium text-red-800">
+                  {needsAttentionCount}{" "}
+                  {needsAttentionCount === 1 ? "device still needs" : "devices still need"} attention.
+                  Only proceed if you have manually confirmed those check-ins are accounted for.
+                </p>
+              </div>
+            )}
+
+            {closeError && (
+              <p className="mb-3 text-[13px] text-danger">{closeError}</p>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <Button
+                className="w-full bg-danger text-white hover:bg-danger/90"
+                disabled={isClosing}
+                onClick={() => void handleConfirmClose()}
+              >
+                {isClosing ? "Closing…" : "Yes, close the event"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={isClosing}
+                onClick={() => { setShowCloseDialog(false); setCloseError(null) }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
