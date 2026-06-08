@@ -177,10 +177,15 @@ export class GalleryDisabledError extends Error {
   }
 }
 
-function buildFileUrl(fileKey: string, storedUrl: string | null): string {
-  if (storedUrl) return storedUrl
-  const base = process.env.CLOUDFLARE_R2_PUBLIC_URL ?? ""
-  return `${base}/${fileKey}`
+async function buildSignedUrls(
+  fileKey: string,
+  thumbnailKey: string | null
+): Promise<{ fileUrl: string; thumbnailUrl: string | null }> {
+  const [fileUrl, thumbnailUrl] = await Promise.all([
+    getReadSignedUrl(fileKey),
+    thumbnailKey ? getReadSignedUrl(thumbnailKey) : Promise.resolve(null),
+  ])
+  return { fileUrl, thumbnailUrl }
 }
 
 export async function getPublicGalleryMedia(
@@ -200,21 +205,24 @@ export async function getPublicGalleryMedia(
     pageSize: query.pageSize,
   })
 
+  const signedItems = await Promise.all(
+    items.map(async (item) => {
+      const { fileUrl, thumbnailUrl } = await buildSignedUrls(item.fileKey, item.thumbnailKey ?? null)
+      return {
+        id: item.id,
+        mediaType: item.mediaType,
+        fileUrl,
+        thumbnailUrl,
+        uploadedByName: item.uploadedByName,
+        createdAt: item.createdAt.toISOString(),
+      }
+    })
+  )
+
   return {
     galleryEnabled: true,
     data: {
-      items: items.map((item) => ({
-        id: item.id,
-        mediaType: item.mediaType,
-        fileUrl: buildFileUrl(item.fileKey, item.fileUrl),
-        thumbnailUrl: item.thumbnailUrl
-          ? item.thumbnailUrl
-          : item.thumbnailKey
-            ? buildFileUrl(item.thumbnailKey, null)
-            : null,
-        uploadedByName: item.uploadedByName,
-        createdAt: item.createdAt.toISOString(),
-      })),
+      items: signedItems,
       pagination: {
         page: query.page,
         pageSize: query.pageSize,
@@ -244,24 +252,25 @@ export async function getOrganizerGalleryMedia(
     pageSize: query.pageSize,
   })
 
-  return {
-    items: items.map(
-      (item): OrganizerMediaItemDTO => ({
+  const signedItems = await Promise.all(
+    items.map(async (item): Promise<OrganizerMediaItemDTO> => {
+      const { fileUrl, thumbnailUrl } = await buildSignedUrls(item.fileKey, item.thumbnailKey ?? null)
+      return {
         id: item.id,
         mediaType: item.mediaType,
         status: item.status as OrganizerMediaItemDTO["status"],
-        fileUrl: buildFileUrl(item.fileKey, item.fileUrl),
-        thumbnailUrl: item.thumbnailUrl
-          ? item.thumbnailUrl
-          : item.thumbnailKey
-            ? buildFileUrl(item.thumbnailKey, null)
-            : null,
+        fileUrl,
+        thumbnailUrl,
         uploadedByName: item.uploadedByName,
         createdAt: item.createdAt.toISOString(),
         hiddenAt: item.hiddenAt?.toISOString() ?? null,
         deletedAt: item.deletedAt?.toISOString() ?? null,
-      })
-    ),
+      }
+    })
+  )
+
+  return {
+    items: signedItems,
     pagination: { page: query.page, pageSize: query.pageSize, total },
   }
 }
