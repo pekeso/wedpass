@@ -23,6 +23,7 @@ vi.mock("@/lib/db/prisma", () => ({
 vi.mock("@/modules/weddings/snapshot.repository")
 vi.mock("@/modules/checkins/checkins.repository")
 vi.mock("@/modules/sync/sync.repository")
+vi.mock("@/modules/staff/staff.repository")
 
 const mockedFindActiveSnapshot = vi.mocked(findActiveSnapshot)
 const mockedFindProcessedQueueItem = vi.mocked(findProcessedQueueItem)
@@ -74,6 +75,7 @@ function makePayload(checkedInAt: string, queueId = "q-001") {
         checkedInAt,
       },
     ],
+    pendingCheckinCount: 0,
   }
 }
 
@@ -377,6 +379,7 @@ describe("processSyncBatch — batch summary", () => {
         { queueId: "q-2", guestId: GUEST_ID_2, checkedInAt: "2026-08-14T14:03:00.000Z" },
         { queueId: "q-3", guestId: GUEST_ID_3, checkedInAt: "2026-08-14T14:05:00.000Z" },
       ],
+      pendingCheckinCount: 0,
     }
 
     const snapshotGuestFor = (guestId: string) => ({ ...SNAPSHOT_GUEST, guestId })

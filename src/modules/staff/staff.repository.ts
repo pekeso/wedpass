@@ -39,3 +39,13 @@ export async function updateLastSeen(deviceId: string) {
     data: { lastSeenAt: new Date() },
   })
 }
+
+export async function updateDeviceSyncState(
+  deviceId: string,
+  pendingCheckinCount: number
+) {
+  return prisma.staffDevice.update({
+    where: { id: deviceId },
+    data: { lastSeenAt: new Date(), pendingCheckinCount },
+  })
+}

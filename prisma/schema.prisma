@@ -177,9 +177,10 @@ model StaffDevice {
   wedding         Wedding           @relation(fields: [weddingId], references: [id])
   label           String?
   deviceTokenHash String?
-  status          StaffDeviceStatus @default(ACTIVE)
-  lastSeenAt      DateTime?
-  createdAt       DateTime          @default(now())
+  status                StaffDeviceStatus @default(ACTIVE)
+  lastSeenAt            DateTime?
+  pendingCheckinCount   Int?
+  createdAt             DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   revokedAt       DateTime?
 

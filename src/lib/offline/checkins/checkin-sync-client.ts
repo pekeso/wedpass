@@ -31,6 +31,12 @@ export async function syncCheckins(weddingId: string): Promise<void> {
 
   const snapshotVersion = Number(snapshotVersionStr)
 
+  const allUnsyncedCount = await offlineDb.checkinQueue
+    .where("weddingId")
+    .equals(weddingId)
+    .filter((item) => !item.synced && item.syncError !== "INVALID_GUEST")
+    .count()
+
   const unsyncedItems = await offlineDb.checkinQueue
     .where("weddingId")
     .equals(weddingId)
@@ -59,6 +65,7 @@ export async function syncCheckins(weddingId: string): Promise<void> {
       guestId: item.guestId,
       checkedInAt: item.checkedInAt,
     })),
+    pendingCheckinCount: Math.max(0, allUnsyncedCount - unsyncedItems.length),
   }
 
   let response: Response
