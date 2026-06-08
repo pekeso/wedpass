@@ -29,23 +29,23 @@ export function useSyncStatus(weddingId: string): SyncStatus {
 
   useEffect(() => {
     function load() {
-      const queue = offlineDb.checkinQueue.where("weddingId").equals(weddingId)
+      const byWedding = () => offlineDb.checkinQueue.where("weddingId").equals(weddingId)
 
-      queue.count().then(setSavedLocally).catch(() => setSavedLocally(0))
+      byWedding().count().then(setSavedLocally).catch(() => setSavedLocally(0))
 
-      queue
+      byWedding()
         .filter((item) => !item.synced)
         .count()
         .then(setPendingCount)
         .catch(() => setPendingCount(0))
 
-      queue
+      byWedding()
         .filter((item) => item.synced)
         .count()
         .then(setSyncedCount)
         .catch(() => setSyncedCount(0))
 
-      queue
+      byWedding()
         .filter((item) => !item.synced && item.syncAttempts >= 3)
         .count()
         .then(setFailedCount)

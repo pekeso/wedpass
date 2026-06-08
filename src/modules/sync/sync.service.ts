@@ -7,6 +7,7 @@ import {
   updateGuestCheckedIn,
 } from "@/modules/checkins/checkins.repository"
 import { findProcessedQueueItem, createSyncLog } from "./sync.repository"
+import { updateDeviceSyncState } from "@/modules/staff/staff.repository"
 import { logEvent } from "@/lib/utils/logger"
 import type { SyncPayloadInput } from "./sync.schemas"
 import type { SyncBatchResult, SyncItemResult } from "./sync.types"
@@ -198,6 +199,8 @@ export async function processSyncBatch(
   })
 
   const syncCompletedAt = new Date()
+
+  await updateDeviceSyncState(staffDeviceId, payload.pendingCheckinCount)
 
   // Sync log is always written, even after partial failures, outside the main transaction
   await createSyncLog({

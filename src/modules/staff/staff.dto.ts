@@ -17,6 +17,7 @@ export interface StaffDeviceListItemDTO {
   snapshotVersion: number | null
   guestCount: number | null
   checkinCount: number
+  pendingCheckinCount: number | null
 }
 
 export interface CreateStaffDeviceResponseDTO {

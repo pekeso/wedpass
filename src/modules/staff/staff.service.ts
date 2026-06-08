@@ -67,6 +67,7 @@ function toStaffDeviceListItemDTO(
     status: "ACTIVE" | "REVOKED"
     lastSeenAt: Date | null
     createdAt: Date
+    pendingCheckinCount: number | null
     _count: { checkIns: number }
   },
   activeSnapshot: { version: number; guestCount: number } | null
@@ -80,6 +81,7 @@ function toStaffDeviceListItemDTO(
     snapshotVersion: activeSnapshot?.version ?? null,
     guestCount: activeSnapshot?.guestCount ?? null,
     checkinCount: device._count.checkIns,
+    pendingCheckinCount: device.pendingCheckinCount,
   }
 }
 

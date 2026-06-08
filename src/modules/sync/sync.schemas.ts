@@ -11,6 +11,7 @@ export const syncPayloadSchema = z.object({
   snapshotVersion: z.number().int(),
   deviceId: z.string().uuid(),
   checkins: z.array(syncCheckinItemSchema).max(100),
+  pendingCheckinCount: z.number().int().min(0),
 })
 
 export type SyncCheckinItemInput = z.infer<typeof syncCheckinItemSchema>

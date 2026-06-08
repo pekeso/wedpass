@@ -22,11 +22,9 @@ import type { StaffDeviceListItemDTO } from "@/modules/staff/staff.dto"
 type SyncStatus = "synced" | "pending" | "lost"
 
 function getSyncStatus(device: StaffDeviceListItemDTO): SyncStatus {
-  if (!device.lastSeenAt) return "lost"
-  const minsAgo = (Date.now() - new Date(device.lastSeenAt).getTime()) / 60000
-  if (minsAgo < 15) return "synced"
-  if (minsAgo < 90) return "pending"
-  return "lost"
+  if (device.pendingCheckinCount === null) return "lost"
+  if (device.pendingCheckinCount === 0) return "synced"
+  return "pending"
 }
 
 function formatRelativeTime(dateStr: string | null): string {
@@ -71,7 +69,7 @@ const STATUS_META: Record<
     Icon: AlertTriangle,
     iconColor: "#DC2626",
     bgColor: "#FEE2E2",
-    label: "Last seen long ago",
+    label: "Not synced",
     badgeClass: "bg-danger-light text-danger",
     dotClass: "bg-danger",
   },
