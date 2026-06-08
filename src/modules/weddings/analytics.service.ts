@@ -24,19 +24,29 @@ async function ensureWeddingAccess(weddingId: string, organizerId: string) {
   return wedding
 }
 
+export type ArrivalBucket = { hour: string; count: number }
+
 export async function getWeddingStats(weddingId: string, organizerId: string) {
   await ensureWeddingAccess(weddingId, organizerId)
 
-  const [totalGuests, checkedInGuests, totalMediaUploads, lastSync] = await Promise.all([
-    prisma.guest.count({ where: { weddingId, deletedAt: null } }),
-    prisma.guest.count({ where: { weddingId, deletedAt: null, isCheckedIn: true } }),
-    prisma.mediaUpload.count({ where: { weddingId, status: { not: "DELETED" } } }),
-    prisma.syncLog.findFirst({
-      where: { weddingId },
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    }),
-  ])
+  const [totalGuests, checkedInGuests, totalMediaUploads, lastSync, rawArrivals] =
+    await Promise.all([
+      prisma.guest.count({ where: { weddingId, deletedAt: null } }),
+      prisma.guest.count({ where: { weddingId, deletedAt: null, isCheckedIn: true } }),
+      prisma.mediaUpload.count({ where: { weddingId, status: { not: "DELETED" } } }),
+      prisma.syncLog.findFirst({
+        where: { weddingId },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      }),
+      prisma.$queryRaw<{ hour: Date; count: bigint }[]>`
+        SELECT date_trunc('hour', "checkedInAt") AS hour, COUNT(*) AS count
+        FROM "CheckIn"
+        WHERE "weddingId" = ${weddingId} AND "isDuplicate" = false
+        GROUP BY hour
+        ORDER BY hour ASC
+      `,
+    ])
 
   const pendingGuests = totalGuests - checkedInGuests
   const checkinPercentage =
@@ -49,6 +59,10 @@ export async function getWeddingStats(weddingId: string, organizerId: string) {
     checkinPercentage,
     totalMediaUploads,
     lastSyncAt: lastSync?.createdAt.toISOString() ?? null,
+    arrivalsByHour: rawArrivals.map((r) => ({
+      hour: r.hour.toISOString(),
+      count: Number(r.count),
+    })),
   }
 }
 
