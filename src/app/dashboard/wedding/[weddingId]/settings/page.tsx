@@ -1,11 +1,11 @@
 "use client"
 
-import { use, useEffect } from "react"
+import { use, useEffect, useState, useCallback } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Lock, Globe } from "lucide-react"
+import { Lock, Globe, Copy, Check, ExternalLink } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,6 +23,7 @@ import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
 import { ErrorState } from "@/components/shared/error-state"
 import { BetaFeedbackForm } from "@/components/shared/beta-feedback-form"
+import { GalleryTableCard } from "@/components/shared/gallery-table-card"
 import { useAuthStore } from "@/stores/auth-store"
 import { getWedding, updateWedding } from "@/lib/api/weddings-client"
 import { updateWeddingSchema, type UpdateWeddingInput } from "@/modules/weddings/weddings.schemas"
@@ -89,6 +90,18 @@ export default function WeddingSettingsPage({
       toast.error(err.message ?? "Failed to save settings")
     },
   })
+
+  const [copied, setCopied] = useState(false)
+
+  const galleryUrl = wedding ? `https://wedpass.net/w/${wedding.slug}/gallery` : ""
+
+  const handleCopyGalleryUrl = useCallback(() => {
+    if (!galleryUrl) return
+    void navigator.clipboard.writeText(galleryUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [galleryUrl])
 
   if (isLoading) return <LoadingState message="Loading settings..." />
   if (isError || !wedding) {
@@ -240,12 +253,39 @@ export default function WeddingSettingsPage({
                         Enable Guest Gallery
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        When enabled, guests can view the gallery at{" "}
-                        <span className="font-mono text-xs text-navy/70">
-                          /w/{wedding.slug}/gallery
-                        </span>
-                        . Guests can always upload photos regardless of this setting.
+                        When enabled, guests can view the gallery at the link below. Guests can always upload photos regardless of this setting.
                       </p>
+                      <div className="mt-2 flex items-center gap-1 rounded-lg border border-champagne-light bg-ivory px-3 py-2">
+                        <a
+                          href={galleryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-w-0 flex-1 truncate font-mono text-xs text-navy/70 transition-colors hover:text-navy"
+                        >
+                          {galleryUrl}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={handleCopyGalleryUrl}
+                          aria-label="Copy gallery link"
+                          className="shrink-0 rounded p-1 text-navy/40 transition-colors hover:bg-champagne-light/60 hover:text-navy"
+                        >
+                          {copied ? (
+                            <Check className="size-3.5 text-success" aria-hidden="true" />
+                          ) : (
+                            <Copy className="size-3.5" aria-hidden="true" />
+                          )}
+                        </button>
+                        <a
+                          href={galleryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open gallery link"
+                          className="shrink-0 rounded p-1 text-navy/40 transition-colors hover:bg-champagne-light/60 hover:text-navy"
+                        >
+                          <ExternalLink className="size-3.5" aria-hidden="true" />
+                        </a>
+                      </div>
                     </div>
                     <Switch
                       id="gallery-toggle"
@@ -271,6 +311,23 @@ export default function WeddingSettingsPage({
           </div>
         </form>
       </Form>
+
+      {/* Table Cards */}
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>Table Cards</CardTitle>
+          <CardDescription>
+            Print scannable cards to place on each guest table. Guests scan the QR code to view the gallery and upload their photos.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GalleryTableCard
+            galleryUrl={galleryUrl}
+            coupleNames={wedding.coupleNames ?? ""}
+            eventDate={wedding.eventDate ?? null}
+          />
+        </CardContent>
+      </Card>
 
       {/* Beta Feedback */}
       <div className="space-y-3">

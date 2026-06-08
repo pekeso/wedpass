@@ -72,6 +72,14 @@ export class EventModeSnapshotNotFoundError extends Error {
   }
 }
 
+export class EventModeNotActiveError extends Error {
+  readonly code = "VALIDATION_ERROR"
+  constructor() {
+    super("Wedding is not in Event Mode")
+    this.name = "EventModeNotActiveError"
+  }
+}
+
 export type ReadinessCheck = {
   key: string
   label: string
@@ -189,6 +197,21 @@ export async function enableEventMode(weddingId: string, organizerId: string) {
       createdAt: snapshot.createdAt.toISOString(),
     },
   }
+}
+
+export async function closeWedding(weddingId: string, organizerId: string) {
+  const wedding = await ensureWeddingAccess(weddingId, organizerId)
+
+  if (wedding.status !== "EVENT_MODE") {
+    throw new EventModeNotActiveError()
+  }
+
+  await prisma.wedding.update({
+    where: { id: weddingId },
+    data: { status: "COMPLETED" },
+  })
+
+  return { weddingId, status: "COMPLETED" as const }
 }
 
 export async function getActiveSnapshotForOrganizer(weddingId: string, organizerId: string) {
