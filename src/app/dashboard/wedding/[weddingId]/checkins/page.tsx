@@ -99,7 +99,7 @@ export default function CheckinsPage({
                 {arrivalBars.map((bar, i) => {
                   const isPeak = i === peakIndex
                   const heightPx = Math.round((bar.count / maxBar) * 170)
-                  const h = new Date(bar.hour).getUTCHours()
+                  const h = new Date(bar.hour).getHours()
                   const label = `${String(h).padStart(2, "0")}:00`
                   return (
                     <div key={bar.hour} className="flex flex-1 flex-col items-center gap-1.5">
