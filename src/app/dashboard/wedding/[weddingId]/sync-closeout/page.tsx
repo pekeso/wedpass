@@ -7,9 +7,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   Cloud,
-  Phone,
   RefreshCw,
   ShieldCheck,
+  Users,
 } from "lucide-react"
 import { PageHeader } from "@/components/shared/page-header"
 import { LoadingState } from "@/components/shared/loading-state"
@@ -128,16 +128,14 @@ function DeviceRow({
         </div>
       </div>
 
+      {/* Check-in count */}
+      <div className="hidden sm:flex items-center gap-1.5 shrink-0 text-[12.5px] text-muted-foreground">
+        <Users size={13} className="shrink-0" />
+        <span>{device.checkinCount} check-in{device.checkinCount !== 1 ? "s" : ""}</span>
+      </div>
+
       {/* Badge */}
       <SyncStatusBadge status={status} />
-
-      {/* Contact button for lost devices */}
-      {status === "lost" && (
-        <Button variant="outline" size="sm" className="shrink-0 text-xs">
-          <Phone className="size-3" />
-          Contact
-        </Button>
-      )}
     </div>
   )
 }
@@ -226,19 +224,14 @@ export default function SyncCloseoutPage({
         )}
 
         {/* Action row */}
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-white">
-            <Phone className="size-4" />
-            Contact Staff Device
-          </Button>
-
+        <div className="flex justify-end">
           <Button
-            className="ml-auto bg-navy text-white hover:bg-navy/90"
+            className="bg-navy text-white hover:bg-navy/90"
             disabled={!allSynced}
             onClick={() => router.push(`/dashboard/wedding/${weddingId}`)}
           >
             <ShieldCheck className="size-4" />
-            Confirm All Devices Synced
+            Return to Dashboard
           </Button>
         </div>
 

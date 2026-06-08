@@ -17,6 +17,7 @@ interface WeddingStats {
   checkinPercentage: number
   totalMediaUploads: number
   lastSyncAt: string | null
+  arrivalsByHour: { hour: string; count: number }[]
 }
 
 async function fetchWeddingStats(weddingId: string, accessToken: string): Promise<WeddingStats> {
@@ -28,9 +29,6 @@ async function fetchWeddingStats(weddingId: string, accessToken: string): Promis
   return json.data
 }
 
-// Simulated hourly arrival distribution — 14:00 through 01:00
-const ARRIVAL_BARS = [12, 28, 46, 70, 92, 78, 54, 40, 30, 22, 16, 10]
-const ARRIVAL_PEAK_INDEX = 4
 
 export default function CheckinsPage({
   params,
@@ -65,7 +63,9 @@ export default function CheckinsPage({
   const checkinRate = stats?.checkinPercentage ?? 0
   const checkedIn = stats?.checkedInGuests ?? 0
   const notArrived = stats?.pendingGuests ?? 0
-  const maxBar = Math.max(...ARRIVAL_BARS)
+  const arrivalBars = stats?.arrivalsByHour ?? []
+  const maxBar = arrivalBars.length > 0 ? Math.max(...arrivalBars.map((b) => b.count)) : 1
+  const peakIndex = arrivalBars.findIndex((b) => b.count === maxBar)
 
   return (
     <div className="space-y-6">
@@ -90,29 +90,35 @@ export default function CheckinsPage({
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Arrivals over time
             </p>
-            <div className="mt-5 flex h-44 items-end gap-[5px] px-1">
-              {ARRIVAL_BARS.map((h, i) => {
-                const isPeak = i === ARRIVAL_PEAK_INDEX
-                const heightPx = Math.round((h / maxBar) * 170)
-                const hour = 14 + i
-                const label = hour < 24 ? `${hour}:00` : `0${hour - 24}:00`
-                return (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-                    <div
-                      className="w-full rounded-t-[5px]"
-                      style={{
-                        height: `${heightPx}px`,
-                        backgroundColor: isPeak ? "#C8A45D" : "#172033",
-                        opacity: isPeak ? 1 : 0.82,
-                      }}
-                    />
-                    <span className="tabular-nums text-[10px] text-muted-foreground">
-                      {label}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
+            {arrivalBars.length === 0 ? (
+              <div className="mt-5 flex h-44 items-center justify-center text-sm text-muted-foreground">
+                No check-ins recorded yet
+              </div>
+            ) : (
+              <div className="mt-5 flex h-44 items-end gap-[5px] px-1">
+                {arrivalBars.map((bar, i) => {
+                  const isPeak = i === peakIndex
+                  const heightPx = Math.round((bar.count / maxBar) * 170)
+                  const h = new Date(bar.hour).getHours()
+                  const label = `${String(h).padStart(2, "0")}:00`
+                  return (
+                    <div key={bar.hour} className="flex flex-1 flex-col items-center gap-1.5">
+                      <div
+                        className="w-full rounded-t-[5px]"
+                        style={{
+                          height: `${heightPx}px`,
+                          backgroundColor: isPeak ? "#C8A45D" : "#172033",
+                          opacity: isPeak ? 1 : 0.82,
+                        }}
+                      />
+                      <span className="tabular-nums text-[10px] text-muted-foreground">
+                        {label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -141,8 +147,8 @@ export default function CheckinsPage({
                   <div className="mt-0.5 text-[11.5px] text-muted-foreground">Synced</div>
                 </div>
                 <div>
-                  <div className="tabular-nums text-xl font-bold text-warning">—</div>
-                  <div className="mt-0.5 text-[11.5px] text-muted-foreground">Pending</div>
+                  <div className="tabular-nums text-xl font-bold text-navy">{stats?.totalGuests ?? 0}</div>
+                  <div className="mt-0.5 text-[11.5px] text-muted-foreground">Total</div>
                 </div>
                 <div>
                   <div className="tabular-nums text-xl font-bold text-muted-foreground">

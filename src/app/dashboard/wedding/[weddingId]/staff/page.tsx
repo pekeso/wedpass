@@ -166,9 +166,8 @@ function DeviceCard({
         />
         <StatChip label="Guests" value={device.guestCount ?? "—"} />
         <StatChip
-          label="Pending"
+          label="Check-ins"
           value={device.checkinCount}
-          highlight={device.checkinCount > 0}
         />
       </div>
 
