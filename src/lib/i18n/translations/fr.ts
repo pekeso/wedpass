@@ -320,4 +320,65 @@ export const fr: Record<TranslationKey, string> = {
   // ── Common ────────────────────────────────────────────────────────────────
   "common.back": "Retour",
   "common.cancel": "Annuler",
+
+  // ── Public navigation ─────────────────────────────────────────────────────
+  "nav.howItWorks": "Comment ça marche",
+  "nav.forStaff": "Pour le personnel",
+  "nav.memories": "Souvenirs",
+  "nav.login": "Connexion",
+  "nav.tagline": "Deux moitiés, un seul pass.",
+
+  // ── Organizer auth (login / register pages) ───────────────────────────────
+  "auth.emailLabel": "E-mail",
+  "auth.passwordLabel": "Mot de passe",
+  "auth.fullNameLabel": "Nom complet",
+  "auth.fullNamePlaceholder": "Votre nom complet",
+  "auth.passwordMinPlaceholder": "8 caractères min.",
+  "auth.forgotPassword": "Mot de passe oublié ?",
+  "auth.loginButton": "Connexion",
+  "auth.signingIn": "Connexion en cours…",
+  "auth.createAccount": "Créer un compte",
+  "auth.creatingAccount": "Création du compte…",
+  "auth.newToWedPass": "Nouveau sur WedPass ?",
+  "auth.alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "auth.hidePassword": "Masquer le mot de passe",
+  "auth.showPassword": "Afficher le mot de passe",
+  "auth.trust": "Votre espace mariage privé",
+
+  // ── Home / landing page ───────────────────────────────────────────────────
+  "home.heroLine1": "Un enregistrement intelligent qui fonctionne",
+  "home.heroLine2": "même sans wifi.",
+  "home.heroDesc":
+    "WedPass enregistre les invités par QR ou par nom, continue à fonctionner hors ligne, et collecte chaque photo et vidéo de vos invités — dans un système calme et unique.",
+  "home.joinBeta": "Rejoindre la bêta gratuite",
+  "home.featureOffline": "Hors ligne d'abord",
+  "home.featureBilingual": "Bilingue FR/EN",
+  "home.featureNoAccounts": "Pas de compte requis",
+  "home.howItWorksEyebrow": "Comment ça marche",
+  "home.howItWorksHeading": "Trois étapes, un événement serein",
+  "home.step1Title": "1 — Préparez votre liste",
+  "home.step1Desc":
+    "Importez les invités, générez des passes QR et préparez les téléphones du personnel — tout avant le jour J.",
+  "home.step2Title": "2 — Enregistrez rapidement",
+  "home.step2Desc":
+    "Le personnel scanne le QR ou recherche par nom. Ça marche hors ligne et se synchronise au retour d'Internet.",
+  "home.step3Title": "3 — Gardez les souvenirs",
+  "home.step3Desc":
+    "Les invités partagent photos et vidéos dans une galerie que vous contrôlez entièrement.",
+  "home.benefit1Title": "Conçu pour les connexions instables",
+  "home.benefit1Desc":
+    "Les salles perdent le signal. WedPass ne perd pas les enregistrements — tout est sauvegardé sur l'appareil et synchronisé plus tard.",
+  "home.benefit2Title": "Calme sous pression",
+  "home.benefit2Desc":
+    "Grands boutons, recherche manuelle de secours et statut de synchronisation clair pour que le personnel ne soit jamais perdu à l'entrée.",
+  "home.benefit3Title": "Chaque souvenir, collecté",
+  "home.benefit3Desc":
+    "Les invités partagent sans compte. Vous modérez, masquez ou partagez — vous restez maître.",
+  "home.whoItsForEyebrow": "Pour qui",
+  "home.tagCouples": "Couples",
+  "home.tagPlanners": "Organisateurs de mariage",
+  "home.tagFamily": "Organisateurs familiaux",
+  "home.tagStaff": "Personnel d'événement",
+  "home.ctaHeading": "Soyez parmi nos premiers mariages",
+  "home.ctaDesc": "La bêta est gratuite. Anglais et français disponibles dès le premier jour.",
 }

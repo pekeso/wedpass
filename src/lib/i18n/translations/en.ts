@@ -308,6 +308,67 @@ export const en = {
   // ── Common ────────────────────────────────────────────────────────────────
   "common.back": "Back",
   "common.cancel": "Cancel",
+
+  // ── Public navigation ─────────────────────────────────────────────────────
+  "nav.howItWorks": "How it works",
+  "nav.forStaff": "For staff",
+  "nav.memories": "Memories",
+  "nav.login": "Login",
+  "nav.tagline": "Two halves, one pass.",
+
+  // ── Organizer auth (login / register pages) ───────────────────────────────
+  "auth.emailLabel": "Email",
+  "auth.passwordLabel": "Password",
+  "auth.fullNameLabel": "Full name",
+  "auth.fullNamePlaceholder": "Your full name",
+  "auth.passwordMinPlaceholder": "Min. 8 characters",
+  "auth.forgotPassword": "Forgot password?",
+  "auth.loginButton": "Login",
+  "auth.signingIn": "Signing in…",
+  "auth.createAccount": "Create account",
+  "auth.creatingAccount": "Creating account…",
+  "auth.newToWedPass": "New to WedPass?",
+  "auth.alreadyHaveAccount": "Already have an account?",
+  "auth.hidePassword": "Hide password",
+  "auth.showPassword": "Show password",
+  "auth.trust": "Your private wedding workspace",
+
+  // ── Home / landing page ───────────────────────────────────────────────────
+  "home.heroLine1": "Smart check-in that works",
+  "home.heroLine2": "even when the wifi doesn't.",
+  "home.heroDesc":
+    "WedPass checks guests in by QR or name, keeps working offline, and collects every photo and video your guests capture — all in one calm system.",
+  "home.joinBeta": "Join Free Beta",
+  "home.featureOffline": "Offline-first",
+  "home.featureBilingual": "Bilingual EN/FR",
+  "home.featureNoAccounts": "No guest accounts",
+  "home.howItWorksEyebrow": "How it works",
+  "home.howItWorksHeading": "Three steps, one calm event",
+  "home.step1Title": "1 — Build your list",
+  "home.step1Desc":
+    "Import guests, generate QR passes, and prepare staff phones — all before the day.",
+  "home.step2Title": "2 — Check in fast",
+  "home.step2Desc":
+    "Staff scan QR or search by name. It keeps working offline and syncs when internet returns.",
+  "home.step3Title": "3 — Keep the memories",
+  "home.step3Desc":
+    "Guests upload photos and videos to a beautiful gallery you fully control.",
+  "home.benefit1Title": "Built for unreliable internet",
+  "home.benefit1Desc":
+    "Venues lose signal. WedPass doesn't lose check-ins — everything is saved on the device and syncs later.",
+  "home.benefit2Title": "Calm under pressure",
+  "home.benefit2Desc":
+    "Big buttons, manual search fallback, and clear sync status so staff never feel lost at the door.",
+  "home.benefit3Title": "Every memory, collected",
+  "home.benefit3Desc":
+    "Guests upload without an account. You moderate, hide, or share — you stay in control.",
+  "home.whoItsForEyebrow": "Who it's for",
+  "home.tagCouples": "Couples",
+  "home.tagPlanners": "Wedding planners",
+  "home.tagFamily": "Family organizers",
+  "home.tagStaff": "Event staff",
+  "home.ctaHeading": "Be one of our first weddings",
+  "home.ctaDesc": "The beta is free. English and French supported from day one.",
 } as const
 
 export type TranslationKey = keyof typeof en
