@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
-import { LangToggle } from "@/components/layout/lang-toggle"
 
 interface PublicLayoutProps {
   children: React.ReactNode
@@ -30,7 +29,6 @@ export function PublicLayout({ children }: PublicLayoutProps) {
                 </Link>
               ))}
             </div>
-            <LangToggle />
             <Link
               href="/login"
               className="hidden rounded-lg border border-[#e7e1d6] bg-white px-3 py-1.5 text-sm font-medium text-navy transition-colors hover:bg-ivory sm:inline-flex"
