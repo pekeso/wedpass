@@ -2,10 +2,12 @@
 
 ## Current Phase
 
-Phase 30
+Phase 45
 
 ## Completed Phases
 
+- Phase 44 — Security: Media Upload Endpoint Hardening (2026-06-11)
+- Phase 43 — Security: Credential Rotation (2026-06-11)
 - Phase 42 — My Weddings Cards Polish (2026-06-02)
 - Phase 41 — Dashboard Header Sign-Out and User Context (2026-06-02)
 - Phase 40 — Public Layout and Auth Pages Polish (2026-06-02)
@@ -55,7 +57,31 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 42 complete — design gap phases 37–42 all done; returning to main roadmap at Phase 30)
+2026-06-11 (Phase 44 complete — media upload endpoint hardening; upload tokens, wedding-state gating, file key prefix validation)
+
+---
+
+### Phase 44 — Security: Media Upload Endpoint Hardening
+- **Completed:** 2026-06-11
+- **Files Created:**
+  - src/lib/auth/upload-token.ts (generateUploadToken, verifyUploadToken — JWT, 1h expiry, type: "upload")
+- **Files Modified:**
+  - src/modules/weddings/weddings.service.ts (getWeddingForUploadPage now returns weddingStatus separately)
+  - src/modules/media/media.service.ts (added MediaUploadNotAllowedError; requestUploadUrl now rejects DRAFT/COMPLETED weddings)
+  - src/app/api/v1/weddings/[weddingId]/media/upload-url/route.ts (validates Authorization Bearer upload token before processing)
+  - src/app/w/[slug]/upload/page.tsx (generates upload token server-side; shows "uploads not available" for non-ACTIVE/EVENT_MODE weddings)
+  - src/components/media/media-upload-form.tsx (accepts uploadToken prop; includes in upload-url request Authorization header)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — 2 pre-existing errors in unrelated files (staff login, language context), 2 pre-existing warnings.
+- **Security Gaps Fixed:**
+  - **[FIXED] No upload token** — Any client could request a signed upload URL for any weddingId. Added server-generated JWT upload token (1h expiry, wedding-scoped) on the upload page. Upload-url endpoint now rejects requests without a valid token matching the route's weddingId.
+  - **[FIXED] No wedding-state check** — Upload URL could be requested for DRAFT or COMPLETED weddings. requestUploadUrl now throws UPLOAD_NOT_ALLOWED if status is not ACTIVE or EVENT_MODE.
+  - **[ALREADY FIXED] File key prefix on confirm** — confirmUpload already validated fileKey prefix from Phase 28.
+  - **[ALREADY CORRECT] Organizer media routes** — All organizer media endpoints (GET, DELETE, hide, show, download) already had requireAuth() + ownership check.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** fix: harden media upload endpoints with upload tokens and wedding-state gating
 
 ---
 
