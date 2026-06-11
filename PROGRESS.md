@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 46
+Phase 30 (next pending after security hardening series)
 
 ## Completed Phases
 
+- Phase 46 — Security: Input Validation Cleanup and Error Handling (2026-06-11)
 - Phase 45 — Security: HTTP Security Headers and Mandatory Rate Limiting (2026-06-11)
 - Phase 44 — Security: Media Upload Endpoint Hardening (2026-06-11)
 - Phase 43 — Security: Credential Rotation (2026-06-11)
@@ -58,7 +59,7 @@ None.
 
 ## Last Updated
 
-2026-06-11 (Phase 45 complete — HTTP security headers added to all routes; mandatory rate limiting in production; public wedding slug route added to rate limit coverage)
+2026-06-11 (Phase 46 complete — guest import tightened to importGuestRowSchema; listGuestsQuerySchema pageSize max capped at 100; all other POST/PATCH routes and catch blocks audited and confirmed correct)
 
 ---
 
