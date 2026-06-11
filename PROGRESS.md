@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 45
+Phase 46
 
 ## Completed Phases
 
+- Phase 45 — Security: HTTP Security Headers and Mandatory Rate Limiting (2026-06-11)
 - Phase 44 — Security: Media Upload Endpoint Hardening (2026-06-11)
 - Phase 43 — Security: Credential Rotation (2026-06-11)
 - Phase 42 — My Weddings Cards Polish (2026-06-02)
@@ -57,7 +58,36 @@ None.
 
 ## Last Updated
 
-2026-06-11 (Phase 44 complete — media upload endpoint hardening; upload tokens, wedding-state gating, file key prefix validation)
+2026-06-11 (Phase 45 complete — HTTP security headers added to all routes; mandatory rate limiting in production; public wedding slug route added to rate limit coverage)
+
+---
+
+### Phase 45 — Security: HTTP Security Headers and Mandatory Rate Limiting
+- **Completed:** 2026-06-11
+- **Files Created:** None
+- **Files Modified:**
+  - next.config.mjs (added `headers()` export with 7 security headers applied to all routes)
+  - middleware.ts (createLimiter throws in production when Redis env vars are missing; added publicWedding limiter 60/min; added rate limit coverage for GET /api/v1/public/weddings/:slug; added slug route to matcher)
+  - .env.example (updated Upstash comment to "Required in production for rate limiting. Get from upstash.com.")
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — 2 pre-existing errors in unrelated files (staff login setState-in-effect, language-context setState-in-effect), 2 pre-existing warnings. No new errors introduced.
+- **Headers Added:**
+  - X-Frame-Options: DENY
+  - X-Content-Type-Options: nosniff
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: camera=(), microphone=(), geolocation=()
+  - Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  - Content-Security-Policy: self + unsafe-inline/eval (Next.js requirement); R2 cloudflarestorage.com + supabase.co + sentry.io in connect-src; frame-ancestors none
+- **Rate Limiting Changes:**
+  - createLimiter now throws Error in production if UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN are unset
+  - Development: continues to warn and return null (unchanged behavior)
+  - Added publicWedding limiter (60 req/min) for GET /api/v1/public/weddings/:slug — previously uncovered
+  - 6 routes now fully covered: auth login/register, media upload-url/confirm, public wedding slug, public gallery media, checkins sync
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** chore: add http security headers and enforce rate limiting in production
 
 ---
 

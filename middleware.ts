@@ -3,9 +3,19 @@ import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
 function createLimiter(requests: number, window: `${number} ${"s" | "m" | "h" | "d"}`) {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (!url || !token) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set in production for rate limiting"
+      )
+    }
+    console.warn("[RateLimit] Redis not configured — rate limiting disabled (dev only)")
     return null
   }
+
   return new Ratelimit({
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(requests, window),
@@ -16,6 +26,7 @@ function createLimiter(requests: number, window: `${number} ${"s" | "m" | "h" | 
 const limiters = {
   auth: createLimiter(5, "1 m"),
   uploadUrl: createLimiter(30, "1 m"),
+  publicWedding: createLimiter(60, "1 m"),
   publicGallery: createLimiter(120, "1 m"),
   sync: createLimiter(20, "1 m"),
 }
@@ -64,6 +75,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname.match(/^\/api\/v1\/public\/weddings\/[^/]+$/)) {
+    const allowed = await applyLimit(limiters.publicWedding, `wedding:${ip}`)
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: { code: "RATE_LIMITED", message: "Too many requests. Please try again later." } },
+        { status: 429 }
+      )
+    }
+  }
+
   if (pathname.match(/^\/api\/v1\/public\/weddings\/[^/]+\/media$/)) {
     const allowed = await applyLimit(limiters.publicGallery, `gallery:${ip}`)
     if (!allowed) {
@@ -92,6 +113,7 @@ export const config = {
     "/api/v1/auth/:path*",
     "/api/v1/weddings/:weddingId/media/upload-url",
     "/api/v1/weddings/:weddingId/media/confirm",
+    "/api/v1/public/weddings/:slug",
     "/api/v1/public/weddings/:slug/media",
     "/api/v1/staff/weddings/:weddingId/checkins/sync",
   ],
