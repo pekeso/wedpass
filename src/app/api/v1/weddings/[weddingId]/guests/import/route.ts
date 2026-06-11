@@ -7,9 +7,10 @@ import {
   EventModeLockedError,
   WeddingNotFoundError,
 } from "@/modules/guests/guests.service"
+import { importGuestRowSchema } from "@/modules/guests/guests.schemas"
 
 const importBodySchema = z.object({
-  guests: z.array(z.unknown()).min(1).max(1000),
+  guests: z.array(importGuestRowSchema).min(1).max(1000),
 })
 
 export async function POST(

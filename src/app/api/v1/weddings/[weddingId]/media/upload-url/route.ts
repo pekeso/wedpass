@@ -3,9 +3,11 @@ import { requestUploadUrlSchema } from "@/modules/media/media.schemas"
 import {
   requestUploadUrl,
   MediaWeddingNotFoundError,
+  MediaUploadNotAllowedError,
   FileTooLargeError,
   UnsupportedFileTypeError,
 } from "@/modules/media/media.service"
+import { verifyUploadToken } from "@/lib/auth/upload-token"
 
 export async function POST(
   request: NextRequest,
@@ -13,6 +15,34 @@ export async function POST(
 ) {
   try {
     const { weddingId } = await params
+
+    const authHeader = request.headers.get("authorization")
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Upload token required" } },
+        { status: 401 }
+      )
+    }
+
+    let uploadWeddingId: string
+    try {
+      const payload = verifyUploadToken(token)
+      uploadWeddingId = payload.weddingId
+    } catch {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Invalid or expired upload token" } },
+        { status: 401 }
+      )
+    }
+
+    if (uploadWeddingId !== weddingId) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Upload token does not match wedding" } },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
 
     const result = requestUploadUrlSchema.safeParse(body)
@@ -37,6 +67,12 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Wedding not found" } },
         { status: 404 }
+      )
+    }
+    if (error instanceof MediaUploadNotAllowedError) {
+      return NextResponse.json(
+        { success: false, error: { code: "UPLOAD_NOT_ALLOWED", message: error.message } },
+        { status: 403 }
       )
     }
     if (error instanceof FileTooLargeError) {

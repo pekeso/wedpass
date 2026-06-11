@@ -2,10 +2,14 @@
 
 ## Current Phase
 
-Phase 30
+Phase 30 (next pending after security hardening series)
 
 ## Completed Phases
 
+- Phase 46 — Security: Input Validation Cleanup and Error Handling (2026-06-11)
+- Phase 45 — Security: HTTP Security Headers and Mandatory Rate Limiting (2026-06-11)
+- Phase 44 — Security: Media Upload Endpoint Hardening (2026-06-11)
+- Phase 43 — Security: Credential Rotation (2026-06-11)
 - Phase 42 — My Weddings Cards Polish (2026-06-02)
 - Phase 41 — Dashboard Header Sign-Out and User Context (2026-06-02)
 - Phase 40 — Public Layout and Auth Pages Polish (2026-06-02)
@@ -55,7 +59,60 @@ None.
 
 ## Last Updated
 
-2026-06-02 (Phase 42 complete — design gap phases 37–42 all done; returning to main roadmap at Phase 30)
+2026-06-11 (Phase 46 complete — guest import tightened to importGuestRowSchema; listGuestsQuerySchema pageSize max capped at 100; all other POST/PATCH routes and catch blocks audited and confirmed correct)
+
+---
+
+### Phase 45 — Security: HTTP Security Headers and Mandatory Rate Limiting
+- **Completed:** 2026-06-11
+- **Files Created:** None
+- **Files Modified:**
+  - next.config.mjs (added `headers()` export with 7 security headers applied to all routes)
+  - middleware.ts (createLimiter throws in production when Redis env vars are missing; added publicWedding limiter 60/min; added rate limit coverage for GET /api/v1/public/weddings/:slug; added slug route to matcher)
+  - .env.example (updated Upstash comment to "Required in production for rate limiting. Get from upstash.com.")
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — 2 pre-existing errors in unrelated files (staff login setState-in-effect, language-context setState-in-effect), 2 pre-existing warnings. No new errors introduced.
+- **Headers Added:**
+  - X-Frame-Options: DENY
+  - X-Content-Type-Options: nosniff
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: camera=(), microphone=(), geolocation=()
+  - Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  - Content-Security-Policy: self + unsafe-inline/eval (Next.js requirement); R2 cloudflarestorage.com + supabase.co + sentry.io in connect-src; frame-ancestors none
+- **Rate Limiting Changes:**
+  - createLimiter now throws Error in production if UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN are unset
+  - Development: continues to warn and return null (unchanged behavior)
+  - Added publicWedding limiter (60 req/min) for GET /api/v1/public/weddings/:slug — previously uncovered
+  - 6 routes now fully covered: auth login/register, media upload-url/confirm, public wedding slug, public gallery media, checkins sync
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** chore: add http security headers and enforce rate limiting in production
+
+---
+
+### Phase 44 — Security: Media Upload Endpoint Hardening
+- **Completed:** 2026-06-11
+- **Files Created:**
+  - src/lib/auth/upload-token.ts (generateUploadToken, verifyUploadToken — JWT, 1h expiry, type: "upload")
+- **Files Modified:**
+  - src/modules/weddings/weddings.service.ts (getWeddingForUploadPage now returns weddingStatus separately)
+  - src/modules/media/media.service.ts (added MediaUploadNotAllowedError; requestUploadUrl now rejects DRAFT/COMPLETED weddings)
+  - src/app/api/v1/weddings/[weddingId]/media/upload-url/route.ts (validates Authorization Bearer upload token before processing)
+  - src/app/w/[slug]/upload/page.tsx (generates upload token server-side; shows "uploads not available" for non-ACTIVE/EVENT_MODE weddings)
+  - src/components/media/media-upload-form.tsx (accepts uploadToken prop; includes in upload-url request Authorization header)
+  - PROGRESS.md
+- **Tests Run:** npx tsc --noEmit, npm run lint
+- **Test Results:** tsc — zero errors. lint — 2 pre-existing errors in unrelated files (staff login, language context), 2 pre-existing warnings.
+- **Security Gaps Fixed:**
+  - **[FIXED] No upload token** — Any client could request a signed upload URL for any weddingId. Added server-generated JWT upload token (1h expiry, wedding-scoped) on the upload page. Upload-url endpoint now rejects requests without a valid token matching the route's weddingId.
+  - **[FIXED] No wedding-state check** — Upload URL could be requested for DRAFT or COMPLETED weddings. requestUploadUrl now throws UPLOAD_NOT_ALLOWED if status is not ACTIVE or EVENT_MODE.
+  - **[ALREADY FIXED] File key prefix on confirm** — confirmUpload already validated fileKey prefix from Phase 28.
+  - **[ALREADY CORRECT] Organizer media routes** — All organizer media endpoints (GET, DELETE, hide, show, download) already had requireAuth() + ownership check.
+- **Known Issues:** None.
+- **Blocked Items:** None.
+- **Git Commit Message:** fix: harden media upload endpoints with upload tokens and wedding-state gating
 
 ---
 

@@ -70,6 +70,14 @@ export class InvalidFileKeyError extends Error {
   }
 }
 
+export class MediaUploadNotAllowedError extends Error {
+  readonly code = "UPLOAD_NOT_ALLOWED"
+  constructor() {
+    super("Wedding is not accepting uploads")
+    this.name = "MediaUploadNotAllowedError"
+  }
+}
+
 function validateFileSize(mediaType: string, fileSizeBytes: number): void {
   if (mediaType === "IMAGE" && fileSizeBytes > MAX_IMAGE_BYTES) {
     throw new FileTooLargeError(10)
@@ -85,6 +93,10 @@ export async function requestUploadUrl(
 ): Promise<UploadUrlResponseDTO> {
   const wedding = await findWeddingById(weddingId)
   if (!wedding) throw new MediaWeddingNotFoundError()
+
+  if (wedding.status !== "ACTIVE" && wedding.status !== "EVENT_MODE") {
+    throw new MediaUploadNotAllowedError()
+  }
 
   validateFileSize(input.mediaType, input.fileSizeBytes)
 

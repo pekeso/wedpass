@@ -9,6 +9,15 @@ export const createGuestSchema = z.object({
   seatNumber: z.string().optional(),
 })
 
+export const importGuestRowSchema = z.object({
+  fullName: z.string().min(1),
+  phoneNumber: z.string().optional(),
+  email: z.string().email().optional().or(z.literal("")),
+  numberOfAllowedGuests: z.coerce.number().int().min(1).max(20).optional().default(1),
+  tableName: z.string().optional(),
+  seatNumber: z.string().optional(),
+})
+
 export const updateGuestSchema = createGuestSchema.partial()
 
 export const listGuestsQuerySchema = z.object({
@@ -18,9 +27,10 @@ export const listGuestsQuerySchema = z.object({
     .transform((v) => v === "true")
     .optional(),
   page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(500).default(50),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
 })
 
 export type CreateGuestInput = z.infer<typeof createGuestSchema>
+export type ImportGuestRowInput = z.infer<typeof importGuestRowSchema>
 export type UpdateGuestInput = z.infer<typeof updateGuestSchema>
 export type ListGuestsQuery = z.infer<typeof listGuestsQuerySchema>

@@ -44,6 +44,7 @@ interface UploadItem {
 interface MediaUploadFormProps {
   weddingId: string
   weddingSlug: string
+  uploadToken: string
 }
 
 function UploadItemRow({
@@ -144,7 +145,7 @@ function UploadItemRow({
   )
 }
 
-export function MediaUploadForm({ weddingId, weddingSlug }: MediaUploadFormProps) {
+export function MediaUploadForm({ weddingId, weddingSlug, uploadToken }: MediaUploadFormProps) {
   const { isOnline } = useNetworkStatus()
   const { t } = useTranslations()
   const [items, setItems] = useState<UploadItem[]>([])
@@ -197,7 +198,7 @@ export function MediaUploadForm({ weddingId, weddingSlug }: MediaUploadFormProps
       try {
         const urlRes = await fetch(`/api/v1/weddings/${weddingId}/media/upload-url`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${uploadToken}` },
           body: JSON.stringify({
             mediaType,
             mimeType: file.type,
@@ -264,7 +265,7 @@ export function MediaUploadForm({ weddingId, weddingSlug }: MediaUploadFormProps
         updateStatus({ kind: "failed", message })
       }
     },
-    [weddingId, weddingSlug, uploaderName, isOnline, t]
+    [weddingId, weddingSlug, uploadToken, uploaderName, isOnline, t]
   )
 
   async function handleFilesSelected(files: FileList | null) {

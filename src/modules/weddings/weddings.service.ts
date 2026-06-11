@@ -151,11 +151,12 @@ export async function getPublicWedding(slug: string): Promise<PublicWeddingRespo
 
 export async function getWeddingForUploadPage(slug: string): Promise<{
   weddingId: string
+  weddingStatus: string
   wedding: PublicWeddingDTO
 }> {
   const wedding = await findWeddingBySlug(slug)
   if (!wedding) throw new WeddingNotFoundError()
-  return { weddingId: wedding.id, wedding: toPublicWeddingDTO(wedding) }
+  return { weddingId: wedding.id, weddingStatus: wedding.status, wedding: toPublicWeddingDTO(wedding) }
 }
 
 export async function updateWedding(
