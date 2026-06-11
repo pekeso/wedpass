@@ -20,10 +20,12 @@ import { WedPassWordmark } from "@/components/shared/wedpass-wordmark"
 import { loginOrganizer } from "@/lib/api/auth-client"
 import { useAuthStore } from "@/stores/auth-store"
 import { loginSchema, type LoginInput } from "@/modules/auth/auth.schemas"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 export default function LoginPage() {
   const router = useRouter()
   const { setAuth } = useAuthStore()
+  const { t } = useTranslations()
   const [serverError, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -68,7 +70,7 @@ export default function LoginPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[14px] font-semibold text-navy">Email</FormLabel>
+                  <FormLabel className="text-[14px] font-semibold text-navy">{t("auth.emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -88,7 +90,7 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[14px] font-semibold text-navy">Password</FormLabel>
+                  <FormLabel className="text-[14px] font-semibold text-navy">{t("auth.passwordLabel")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -103,7 +105,7 @@ export default function LoginPage() {
                         onClick={() => setShowPassword((v) => !v)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[#97a0b2] transition-colors hover:text-[#6b7589]"
                         tabIndex={-1}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -120,7 +122,7 @@ export default function LoginPage() {
                 className="text-[13px] font-semibold"
                 style={{ color: "var(--color-champagne-deep)" }}
               >
-                Forgot password?
+                {t("auth.forgotPassword")}
               </button>
             </div>
 
@@ -134,20 +136,20 @@ export default function LoginPage() {
               className="mt-1 h-[60px] w-full rounded-2xl text-[18px] font-semibold"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting ? "Signing in…" : "Login"}
+              {form.formState.isSubmitting ? t("auth.signingIn") : t("auth.loginButton")}
             </Button>
           </form>
         </Form>
 
         {/* Create account */}
         <p className="mt-[18px] text-center text-[14px] text-[#6b7589] w-full max-w-sm mx-auto">
-          New to WedPass?{" "}
+          {t("auth.newToWedPass")}{" "}
           <Link
             href="/register"
             className="font-bold"
             style={{ color: "var(--color-champagne-deep)" }}
           >
-            Create account
+            {t("auth.createAccount")}
           </Link>
         </p>
       </div>
@@ -155,7 +157,7 @@ export default function LoginPage() {
       {/* Trust anchor */}
       <div className="flex items-center justify-center gap-[7px] pb-[22px] pt-6 text-[11.5px] text-[#97a0b2]">
         <ShieldCheck size={14} style={{ color: "var(--color-champagne-deep)" }} />
-        Your private wedding workspace
+        {t("auth.trust")}
       </div>
     </div>
   )
