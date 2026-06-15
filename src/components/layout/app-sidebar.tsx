@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/auth-store"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 interface NavItem {
   label: string
@@ -33,59 +34,20 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-function getNavItems(weddingId?: string): NavItem[] {
+function useNavItems(weddingId?: string): NavItem[] {
+  const { t } = useTranslations()
   const base = weddingId ? `/dashboard/wedding/${weddingId}` : "/dashboard"
   return [
-    {
-      label: "Dashboard",
-      href: base,
-      icon: <LayoutDashboard className="size-4" />,
-    },
-    {
-      label: "Readiness",
-      href: `${base}/readiness`,
-      icon: <ShieldCheck className="size-4" />,
-    },
-    {
-      label: "Guests",
-      href: `${base}/guests`,
-      icon: <Users className="size-4" />,
-    },
-    {
-      label: "QR Codes",
-      href: `${base}/qr-codes`,
-      icon: <QrCode className="size-4" />,
-    },
-    {
-      label: "Event Mode",
-      href: `${base}/event-mode`,
-      icon: <Radio className="size-4" />,
-    },
-    {
-      label: "Staff Devices",
-      href: `${base}/staff`,
-      icon: <Shield className="size-4" />,
-    },
-    {
-      label: "Check-Ins",
-      href: `${base}/checkins`,
-      icon: <BarChart2 className="size-4" />,
-    },
-    {
-      label: "Sync Closeout",
-      href: `${base}/sync-closeout`,
-      icon: <RefreshCw className="size-4" />,
-    },
-    {
-      label: "Memories",
-      href: `${base}/gallery`,
-      icon: <ImageIcon className="size-4" />,
-    },
-    {
-      label: "Settings",
-      href: `${base}/settings`,
-      icon: <Settings className="size-4" />,
-    },
+    { label: t("sidebar.dashboard"), href: base, icon: <LayoutDashboard className="size-4" /> },
+    { label: t("sidebar.readiness"), href: `${base}/readiness`, icon: <ShieldCheck className="size-4" /> },
+    { label: t("sidebar.guests"), href: `${base}/guests`, icon: <Users className="size-4" /> },
+    { label: t("sidebar.qrCodes"), href: `${base}/qr-codes`, icon: <QrCode className="size-4" /> },
+    { label: t("sidebar.eventMode"), href: `${base}/event-mode`, icon: <Radio className="size-4" /> },
+    { label: t("sidebar.staffDevices"), href: `${base}/staff`, icon: <Shield className="size-4" /> },
+    { label: t("sidebar.checkIns"), href: `${base}/checkins`, icon: <BarChart2 className="size-4" /> },
+    { label: t("sidebar.syncCloseout"), href: `${base}/sync-closeout`, icon: <RefreshCw className="size-4" /> },
+    { label: t("sidebar.memories"), href: `${base}/gallery`, icon: <ImageIcon className="size-4" /> },
+    { label: t("sidebar.settings"), href: `${base}/settings`, icon: <Settings className="size-4" /> },
   ]
 }
 
@@ -96,9 +58,10 @@ export interface AppSidebarProps {
 export function AppSidebar({ weddingId }: AppSidebarProps) {
   const pathname = usePathname()
   const { user } = useAuthStore()
+  const { t } = useTranslations()
   const effectiveWeddingId =
     weddingId ?? pathname.match(/\/dashboard\/wedding\/([^/]+)/)?.[1]
-  const navItems = getNavItems(effectiveWeddingId)
+  const navItems = useNavItems(effectiveWeddingId)
 
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col bg-navy text-white">
@@ -149,7 +112,7 @@ export function AppSidebar({ weddingId }: AppSidebarProps) {
               <div className="truncate text-[13px] font-semibold leading-tight text-white">
                 {user.fullName}
               </div>
-              <div className="text-[11px] leading-tight text-white/55">Organizer</div>
+              <div className="text-[11px] leading-tight text-white/55">{t("sidebar.organizerRole")}</div>
             </div>
           </div>
           <p className="mt-2 text-center text-[10px] text-white/25">

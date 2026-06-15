@@ -317,6 +317,43 @@ export const fr: Record<TranslationKey, string> = {
   "gallery.next": "Suivant",
   "gallery.sharedBy": "Partagé par {name}",
 
+  // ── Dashboard sidebar ─────────────────────────────────────────────────────
+  "sidebar.dashboard": "Tableau de bord",
+  "sidebar.readiness": "Préparation",
+  "sidebar.guests": "Invités",
+  "sidebar.qrCodes": "Codes QR",
+  "sidebar.eventMode": "Mode Événement",
+  "sidebar.staffDevices": "Appareils du personnel",
+  "sidebar.checkIns": "Enregistrements",
+  "sidebar.syncCloseout": "Clôture de synchro",
+  "sidebar.memories": "Souvenirs",
+  "sidebar.settings": "Paramètres",
+  "sidebar.organizerRole": "Organisateur",
+
+  // ── Dashboard header ──────────────────────────────────────────────────────
+  "header.signOut": "Se déconnecter",
+
+  // ── QR pass card (printed artifact) ──────────────────────────────────────
+  "pass.guestLabel": "Invité",
+  "pass.seat": "Place",
+  "pass.allowedCount": "{count} autorisés",
+  "pass.scanAtEntrance": "Scanner à l'entrée",
+
+  // ── QR codes page ─────────────────────────────────────────────────────────
+  "qrPage.title": "Passes & Codes QR",
+  "qrPage.description": "Téléchargez, imprimez et distribuez les passes aux invités",
+  "qrPage.passPreview": "Aperçu du pass",
+  "qrPage.customizeStyle": "Personnaliser le style du pass",
+  "qrPage.qrInfo": "Les codes QR sont des passes, pas des pièces d'identité. Ils affichent le nom de l'invité et le nombre de personnes autorisées — rien de plus.",
+  "qrPage.print": "Imprimer",
+  "qrPage.downloadThisPass": "Télécharger ce pass",
+  "qrPage.allGuests": "Tous les invités",
+  "qrPage.downloadAll": "Télécharger tous les codes QR",
+  "qrPage.downloadGuestPasses": "Télécharger les passes",
+  "qrPage.noGuestsTitle": "Aucun invité",
+  "qrPage.noGuestsDesc": "Ajoutez des invités à votre mariage pour générer des codes QR et des passes.",
+  "qrPage.allowedCount": "{count} autorisés",
+
   // ── Common ────────────────────────────────────────────────────────────────
   "common.back": "Retour",
   "common.cancel": "Annuler",

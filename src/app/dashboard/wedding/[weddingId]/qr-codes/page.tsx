@@ -13,12 +13,21 @@ import { useAuthStore } from "@/stores/auth-store"
 import { listGuests } from "@/lib/api/guests-client"
 import { getWedding } from "@/lib/api/weddings-client"
 import type { GuestListItemDTO } from "@/modules/guests/guests.dto"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 interface PassColors {
   cardBg: string
   accentColor: string
   textColor: string
   qrColor: string
+}
+
+interface PassLabels {
+  guestLabel: string
+  seat: string
+  allowedCount: (count: number) => string
+  scanAtEntrance: string
+  dateLocale: string
 }
 
 const PASS_PRESETS: Array<{ label: string } & PassColors> = [
@@ -66,6 +75,7 @@ interface PassCardProps {
   eventDate?: string | null
   qrValue: string
   colors: PassColors
+  labels: PassLabels
 }
 
 function GuestPassCard({
@@ -78,9 +88,10 @@ function GuestPassCard({
   eventDate,
   qrValue,
   colors,
+  labels,
 }: PassCardProps) {
   const formattedDate = eventDate
-    ? new Date(eventDate).toLocaleDateString("en-US", {
+    ? new Date(eventDate).toLocaleDateString(labels.dateLocale, {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -181,7 +192,7 @@ function GuestPassCard({
               fontWeight: 600,
             }}
           >
-            Guest
+            {labels.guestLabel}
           </div>
           <div
             style={{
@@ -197,7 +208,7 @@ function GuestPassCard({
           </div>
           {tableName && (
             <div style={{ fontSize: 12.5, color: hexToRgba(colors.textColor, 0.6) }}>
-              {tableName}{seatNumber ? ` · Seat ${seatNumber}` : ""}
+              {tableName}{seatNumber ? ` · ${labels.seat} ${seatNumber}` : ""}
             </div>
           )}
           <div
@@ -228,7 +239,7 @@ function GuestPassCard({
               <path d="M16 3.1a4 4 0 0 1 0 7.8" />
             </svg>
             <span style={{ fontSize: 12, fontWeight: 600, color: colors.textColor }}>
-              {allowedCount} allowed
+              {labels.allowedCount(allowedCount)}
             </span>
           </div>
         </div>
@@ -272,7 +283,7 @@ function GuestPassCard({
           {coupleNames ?? "Wedding"}
           {formattedDate ? ` · ${formattedDate}` : ""}
         </span>
-        <span>Scan at entrance</span>
+        <span>{labels.scanAtEntrance}</span>
       </div>
     </div>
   )
@@ -284,12 +295,14 @@ function GuestQrRow({
   coupleNames,
   eventDate,
   passColors,
+  passLabels,
 }: {
   guest: GuestListItemDTO
   isLast: boolean
   coupleNames?: string | null
   eventDate?: string | null
   passColors: PassColors
+  passLabels: PassLabels
 }) {
   async function handleDownload() {
     const { toPng } = await import("html-to-image")
@@ -312,6 +325,7 @@ function GuestQrRow({
           eventDate={eventDate ?? null}
           qrValue={`wedpass://checkin/${guest.qrToken}`}
           colors={passColors}
+          labels={passLabels}
         />,
       )
     })
@@ -341,7 +355,7 @@ function GuestQrRow({
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold text-navy">{guest.fullName}</div>
         <div className="text-xs text-muted-foreground">
-          {guest.numberOfAllowedGuests} allowed
+          {passLabels.allowedCount(guest.numberOfAllowedGuests)}
         </div>
       </div>
       <button
@@ -362,8 +376,17 @@ export default function QrCodesPage({
 }) {
   const { weddingId } = use(params)
   const { accessToken } = useAuthStore()
+  const { t, language } = useTranslations()
   const previewPassCardRef = useRef<HTMLDivElement>(null)
   const [passColors, setPassColors] = useState<PassColors>(PASS_PRESETS[0])
+
+  const passLabels: PassLabels = {
+    guestLabel: t("pass.guestLabel"),
+    seat: t("pass.seat"),
+    allowedCount: (count: number) => t("pass.allowedCount", { count }),
+    scanAtEntrance: t("pass.scanAtEntrance"),
+    dateLocale: language === "fr" ? "fr-FR" : "en-US",
+  }
 
   const { data: weddingData } = useQuery({
     queryKey: ["wedding", weddingId],
@@ -415,17 +438,17 @@ export default function QrCodesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Passes & QR Codes"
-        description="Download, print, and hand out guest passes"
+        title={t("qrPage.title")}
+        description={t("qrPage.description")}
         primaryAction={
           <div className="flex gap-2">
             <Button variant="outline" className="bg-white" onClick={() => window.print()}>
               <Download className="mr-2 size-4" />
-              Download Guest Passes
+              {t("qrPage.downloadGuestPasses")}
             </Button>
             <Button variant="navy" onClick={() => window.print()}>
               <Download className="mr-2 size-4" style={{ color: "#C8A45D" }} />
-              Download All QR Codes
+              {t("qrPage.downloadAll")}
             </Button>
           </div>
         }
@@ -433,8 +456,8 @@ export default function QrCodesPage({
 
       {guests.length === 0 ? (
         <EmptyState
-          title="No guests yet"
-          description="Add guests to your wedding to generate QR codes and passes."
+          title={t("qrPage.noGuestsTitle")}
+          description={t("qrPage.noGuestsDesc")}
           icon={<QrCode className="size-6" />}
         />
       ) : (
@@ -442,11 +465,11 @@ export default function QrCodesPage({
           {/* Left — Pass preview + customization */}
           <div>
             <p className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Pass preview
+              {t("qrPage.passPreview")}
             </p>
             <div ref={previewPassCardRef} className="mb-4 inline-block">
               <GuestPassCard
-                guestName={previewGuest?.fullName ?? "Guest Name"}
+                guestName={previewGuest?.fullName ?? t("pass.guestLabel")}
                 allowedCount={previewGuest?.numberOfAllowedGuests ?? 2}
                 tableName={previewGuest?.tableName}
                 seatNumber={previewGuest?.seatNumber}
@@ -454,6 +477,7 @@ export default function QrCodesPage({
                 eventDate={wedding?.eventDate ?? null}
                 qrValue={previewGuest ? `wedpass://checkin/${previewGuest.qrToken}` : "wedpass-preview"}
                 colors={passColors}
+                labels={passLabels}
               />
             </div>
             <div className="flex gap-2.5">
@@ -464,7 +488,7 @@ export default function QrCodesPage({
                 onClick={() => window.print()}
               >
                 <Printer className="mr-1.5 size-[15px]" />
-                Print
+                {t("qrPage.print")}
               </Button>
               <Button
                 variant="outline"
@@ -473,14 +497,14 @@ export default function QrCodesPage({
                 onClick={handleDownloadPreviewPass}
               >
                 <Download className="mr-1.5 size-[15px]" />
-                Download this pass
+                {t("qrPage.downloadThisPass")}
               </Button>
             </div>
 
             {/* Color customization */}
             <div className="mt-4 rounded-xl border border-border bg-card p-4 space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Customize pass style
+                {t("qrPage.customizeStyle")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {PASS_PRESETS.map((preset) => {
@@ -544,8 +568,7 @@ export default function QrCodesPage({
             <div className="mt-3 flex gap-2.5 rounded-xl bg-sync-light p-3.5">
               <QrCode className="mt-0.5 size-[18px] shrink-0" style={{ color: "#1d4ed8" }} />
               <p className="text-[13px] leading-[1.45]" style={{ color: "#1e40af" }}>
-                QR codes are passes, not ID. They show the guest name and how many
-                people are allowed — nothing more.
+                {t("qrPage.qrInfo")}
               </p>
             </div>
           </div>
@@ -553,7 +576,7 @@ export default function QrCodesPage({
           {/* Right — All guests */}
           <div>
             <p className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              All guests
+              {t("qrPage.allGuests")}
             </p>
             <div className="overflow-hidden rounded-lg border bg-card">
               {guests.map((guest, i) => (
@@ -564,6 +587,7 @@ export default function QrCodesPage({
                   coupleNames={wedding?.coupleNames}
                   eventDate={wedding?.eventDate ?? null}
                   passColors={passColors}
+                  passLabels={passLabels}
                 />
               ))}
             </div>
