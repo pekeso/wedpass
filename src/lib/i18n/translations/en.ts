@@ -305,6 +305,43 @@ export const en = {
   "gallery.next": "Next",
   "gallery.sharedBy": "Shared by {name}",
 
+  // ── Dashboard sidebar ─────────────────────────────────────────────────────
+  "sidebar.dashboard": "Dashboard",
+  "sidebar.readiness": "Readiness",
+  "sidebar.guests": "Guests",
+  "sidebar.qrCodes": "QR Codes",
+  "sidebar.eventMode": "Event Mode",
+  "sidebar.staffDevices": "Staff Devices",
+  "sidebar.checkIns": "Check-Ins",
+  "sidebar.syncCloseout": "Sync Closeout",
+  "sidebar.memories": "Memories",
+  "sidebar.settings": "Settings",
+  "sidebar.organizerRole": "Organizer",
+
+  // ── Dashboard header ──────────────────────────────────────────────────────
+  "header.signOut": "Sign out",
+
+  // ── QR pass card (printed artifact) ──────────────────────────────────────
+  "pass.guestLabel": "Guest",
+  "pass.seat": "Seat",
+  "pass.allowedCount": "{count} allowed",
+  "pass.scanAtEntrance": "Scan at entrance",
+
+  // ── QR codes page ─────────────────────────────────────────────────────────
+  "qrPage.title": "Passes & QR Codes",
+  "qrPage.description": "Download, print, and hand out guest passes",
+  "qrPage.passPreview": "Pass preview",
+  "qrPage.customizeStyle": "Customize pass style",
+  "qrPage.qrInfo": "QR codes are passes, not ID. They show the guest name and how many people are allowed — nothing more.",
+  "qrPage.print": "Print",
+  "qrPage.downloadThisPass": "Download this pass",
+  "qrPage.allGuests": "All guests",
+  "qrPage.downloadAll": "Download All QR Codes",
+  "qrPage.downloadGuestPasses": "Download Guest Passes",
+  "qrPage.noGuestsTitle": "No guests yet",
+  "qrPage.noGuestsDesc": "Add guests to your wedding to generate QR codes and passes.",
+  "qrPage.allowedCount": "{count} allowed",
+
   // ── Common ────────────────────────────────────────────────────────────────
   "common.back": "Back",
   "common.cancel": "Cancel",

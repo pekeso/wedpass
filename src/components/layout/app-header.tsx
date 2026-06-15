@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/sheet"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { useAuthStore } from "@/stores/auth-store"
+import { LanguageToggle } from "@/components/shared/language-toggle"
+import { useTranslations } from "@/lib/i18n/use-translations"
 
 export interface AppHeaderProps {
   weddingId?: string
@@ -21,6 +23,7 @@ export function AppHeader({ weddingId }: AppHeaderProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const { user, clearAuth } = useAuthStore()
   const router = useRouter()
+  const { t } = useTranslations()
 
   function handleSignOut() {
     fetch("/api/v1/auth/logout", { method: "POST" }).catch(() => {})
@@ -50,14 +53,15 @@ export function AppHeader({ weddingId }: AppHeaderProps) {
 
       <div className="flex-1" />
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-3">
+        <LanguageToggle />
         {user?.fullName && (
           <span className="hidden text-sm text-muted-foreground sm:inline truncate max-w-[160px]">
             {user.fullName}
           </span>
         )}
         <Button variant="ghost" size="sm" onClick={handleSignOut}>
-          Sign out
+          {t("header.signOut")}
         </Button>
       </div>
     </header>
